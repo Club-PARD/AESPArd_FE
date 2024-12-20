@@ -22,6 +22,9 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     //실시간 타이머
     private var recordingTimer: Timer?
     
+    private var isRecording = false
+    private var isScreenCovered = false // 화면 가리기 상태 변수
+    
     
     private let shutterButton: UIButton = {
         let button = UIButton(type: .system)
@@ -36,14 +39,32 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     private let recordingTimeLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
-        label.textColor = .red
+        label.textColor = .white
         label.font = UIFont.boldSystemFont(ofSize: 18)
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isHidden = true // 기본적으로 숨김
         return label
     }()
     
-    private var isRecording = false
+    //화면 가리기 파란색 UIView
+    private let fullScreenBlueView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .blue // 배경색을 파란색으로 설정
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true // 기본적으로 숨김
+        return view
+    }()
+    
+    // 화면 가리기 버튼
+    private let toggleScreenCoverButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Cover Screen", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20)
+        button.setTitleColor(.white, for: .normal)
+        button.addTarget(self, action: #selector(toggleScreenCover), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -106,13 +127,13 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         }
         
         // 오디오 입력 장치 설정
-            guard let audioDevice = AVCaptureDevice.default(for: .audio),
-                  let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
-                  captureSession.canAddInput(audioInput) else {
-                print("Cannot add audio input")
-                return
-            }
-            captureSession.addInput(audioInput)
+        guard let audioDevice = AVCaptureDevice.default(for: .audio),
+              let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
+              captureSession.canAddInput(audioInput) else {
+            print("Cannot add audio input")
+            return
+        }
+        captureSession.addInput(audioInput)
         
         let movieOutput = AVCaptureMovieFileOutput()
         if captureSession.canAddOutput(movieOutput) {
@@ -126,20 +147,28 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         previewLayer.videoGravity = .resizeAspectFill
         previewLayer.frame = view.bounds
         view.layer.addSublayer(previewLayer)
-        
+        view.addSubview(fullScreenBlueView)
         
         // Bring shutter button to front
         view.addSubview(shutterButton)
         view.addSubview(recordingTimeLabel)
+        view.addSubview(toggleScreenCoverButton)
         
         NSLayoutConstraint.activate([
+            fullScreenBlueView.topAnchor.constraint(equalTo: view.topAnchor),
+            fullScreenBlueView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            fullScreenBlueView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            fullScreenBlueView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
             shutterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             shutterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
             shutterButton.widthAnchor.constraint(equalToConstant: 80),
             shutterButton.heightAnchor.constraint(equalToConstant: 80),
             
             recordingTimeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            recordingTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            recordingTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            toggleScreenCoverButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            toggleScreenCoverButton.bottomAnchor.constraint(equalTo: shutterButton.topAnchor, constant: -20)
             
         ])
         
@@ -169,6 +198,9 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                 self.shutterButton.setTitle("■", for: .normal)
                 self.shutterButton.setTitleColor(.red, for: .normal)
                 self.recordingTimeLabel.isHidden = false // 라벨 표시
+                if self.isScreenCovered {
+                    self.fullScreenBlueView.isHidden = false // 파란색 화면(화면 가리기) 표시
+                }
             }
         } else {
             // Stop recording
@@ -180,9 +212,17 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                 self.shutterButton.setTitle("●", for: .normal)
                 self.shutterButton.setTitleColor(.red, for: .normal)
                 self.recordingTimeLabel.isHidden = true // 라벨 숨김
-                                self.recordingTimeLabel.text = "00:00" // 초기화
+                self.recordingTimeLabel.text = "00:00" // 초기화
+                self.fullScreenBlueView.isHidden = true // 파란색 화면 숨김
             }
         }
+    }
+    
+    @objc private func toggleScreenCover() {
+        isScreenCovered.toggle() // 화면 가리기 상태 변경
+        
+        // 화면 가리기 여부에 따라 파란색 화면을 보이거나 숨김
+        fullScreenBlueView.isHidden = !isScreenCovered
     }
     
     private func startRecordingTimer() {
@@ -193,6 +233,13 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
             let minutes = Int(elapsed) / 60
             let seconds = Int(elapsed) % 60
             self.recordingTimeLabel.text = String(format: "%02d:%02d", minutes, seconds)
+            
+            // 20초이 넘으면 색상을 빨간색으로 변경
+            if elapsed >= 20 {
+                self.recordingTimeLabel.textColor = .red
+            } else {
+                self.recordingTimeLabel.textColor = .white
+            }
         }
     }
     
