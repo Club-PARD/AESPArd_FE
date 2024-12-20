@@ -184,6 +184,8 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         captureSession.startRunning() // 카메라 세션 시작
     }
     
+    //MARK: 녹화 시작~중
+    
     // 셔터 버튼 클릭시 녹화 시작 / 종료
     @objc private func shutterButtonTapped() {
         guard let movieFileOutput = self.movieFileOutput else { return }
@@ -259,7 +261,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         recordingTimer = nil
     }
     
-    // MARK: - AVCaptureFileOutputRecordingDelegate
+    // MARK: - 녹화 끝: AVCaptureFileOutputRecordingDelegate
     
     // 녹화가 끝났을 때 호출되는 메서드
     func fileOutput(_ output: AVCaptureFileOutput,
@@ -309,9 +311,19 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                 let alert = UIAlertController(title: "Saved",
                                               message: "Your video (\(recordingDuration)) has been saved to Photos.",
                                               preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+//                    // 비디오 플레이어 모달로 이동
+                    self.moveVideoPlayerModal(with: URL(fileURLWithPath: videoPath))
+                }))
                 self.present(alert, animated: true)
             }
         }
+    }
+    
+    @objc func moveVideoPlayerModal(with videoURL: URL) {
+        let videoPlayerController = VideoPlayerController()
+        videoPlayerController.videoURL = videoURL
+        videoPlayerController.modalPresentationStyle = .fullScreen
+        self.present(videoPlayerController, animated: true)
     }
 }
