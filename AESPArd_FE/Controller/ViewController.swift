@@ -39,11 +39,14 @@ class ViewController: UITabBarController {
         guard let tabBarItems = self.tabBar.items else { return }
         
         tabBarItems[0].image = UIImage(named: "home-05")
+        tabBarItems[0].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
+            
         
         tabBarItems[1].image = nil // 중앙 버튼으로 대체
         
         tabBarItems[2].image = UIImage(named: "user-02")
-    }
+        tabBarItems[2].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
+                }
     
     // MARK: - 중앙 버튼 설정
     private func setupCentralButton() {
@@ -53,10 +56,10 @@ class ViewController: UITabBarController {
         centralButton.adjustsImageWhenHighlighted = false // 클릭 시 어두워지지 않도록 설정
         
         // 버튼 크기와 위치
-        let buttonSize: CGFloat = 100
+        let buttonSize: CGFloat = 90
         centralButton.frame = CGRect(
             x: (view.bounds.width / 2) - (buttonSize / 2), // 화면 중앙에 배치
-            y: view.bounds.height - buttonSize - 10 - view.safeAreaInsets.bottom, // 탭 바 위로 튀어나오게 배치
+            y: view.bounds.height - buttonSize - 23 - view.safeAreaInsets.bottom, // 탭 바 위로 튀어나오게 배치
             width: buttonSize,
             height: buttonSize
         )
@@ -65,8 +68,8 @@ class ViewController: UITabBarController {
         let centralIcon = UIImageView(image: UIImage(named: "plus")) // + 아이콘
         centralIcon.contentMode = .scaleAspectFit // 이미지 크기 조정
         centralIcon.frame = CGRect(
-            x: (buttonSize / 2) - 20, // 버튼 내부 중앙에 위치
-            y: (buttonSize / 2) - 20,
+            x: (buttonSize / 2) - 15, // 버튼 내부 중앙에 위치
+            y: (buttonSize / 2) - 15,
             width: 40,
             height: 40
         )
@@ -82,14 +85,14 @@ class ViewController: UITabBarController {
     // MARK: - 중앙 버튼 뒤 그림자 추가
     private func addShadowedCircleBehindButton() {
         // 원 크기 설정
-        let circleSize: CGFloat = 100
+        let circleSize: CGFloat = 99
         let circleRadius: CGFloat = circleSize / 2
         
         // 원을 감싸는 뷰 생성
         let circleWrapperView = UIView()
         circleWrapperView.frame = CGRect(
             x: (view.bounds.width / 2) - circleRadius, // 중앙에 배치
-            y: view.bounds.height - circleSize - 20 - view.safeAreaInsets.bottom,
+            y: view.bounds.height - circleSize - 11 - view.safeAreaInsets.bottom,
             width: circleSize,
             height: circleSize
         )
@@ -98,7 +101,7 @@ class ViewController: UITabBarController {
         let rectangleView = UIView()
         rectangleView.frame = CGRect(
             x: -20,
-            y: 24,
+            y: 30,
             width: circleSize + 40, // 원과 동일한 너비
             height: circleSize // 원과 동일한 높이
         )
@@ -155,7 +158,7 @@ class ViewController: UITabBarController {
         super.viewDidLayoutSubviews()
         
         // 탭 바의 위치 및 크기 조정
-        let tabBarHeight: CGFloat = 96
+        let tabBarHeight: CGFloat = 80
         tabBar.frame = CGRect(
             x: 0,
             y: view.bounds.height - tabBarHeight,
@@ -167,7 +170,7 @@ class ViewController: UITabBarController {
         let buttonSize: CGFloat = 100
         centralButton.frame = CGRect(
             x: (view.bounds.width / 2) - (buttonSize / 2),
-            y: view.bounds.height - buttonSize - view.safeAreaInsets.bottom + 10,
+            y: view.bounds.height - buttonSize - view.safeAreaInsets.bottom + 23,
             width: buttonSize,
             height: buttonSize
         )
@@ -178,7 +181,7 @@ class ViewController: UITabBarController {
         // 탭 바의 둥근 모양을 설정
         let shapeLayer = CAShapeLayer()
         let cornerRadius: CGFloat = 20
-        let tabBarHeight: CGFloat = 96 // 높이
+        let tabBarHeight: CGFloat = 80 // 높이
         
         // 탭 바 경로 설정 (왼쪽, 오른쪽 상단만 둥글게)
         let path = UIBezierPath(
@@ -204,7 +207,7 @@ class ViewController: UITabBarController {
         
         // 탭 바 아이템 간 간격 및 정렬 설정
         tabBar.itemPositioning = .centered // 아이템 중앙 정렬
-        tabBar.itemSpacing = 41 // 아이템 간 간격
+        tabBar.itemSpacing = 50 // 아이템 간 간격
         
     }
     
