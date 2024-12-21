@@ -144,7 +144,10 @@ class ViewController: UITabBarController {
     // MARK: - 중앙 버튼 동작
     @objc private func centralButtonTapped() {
         // 중앙 버튼 탭 시 두 번째 탭으로 이동
-        self.selectedIndex = 1
+//        self.selectedIndex = 1
+        let modalVC = CameraViewController()
+            modalVC.modalPresentationStyle = .fullScreen // 전체 화면 모달로 설정
+            present(modalVC, animated: true, completion: nil)
     }
     
     // MARK: - 탭 바 레이아웃 조정
