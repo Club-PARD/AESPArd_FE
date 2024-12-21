@@ -59,7 +59,7 @@ class ViewController: UITabBarController {
         let buttonSize: CGFloat = 90
         centralButton.frame = CGRect(
             x: (view.bounds.width / 2) - (buttonSize / 2), // 화면 중앙에 배치
-            y: view.bounds.height - buttonSize - 23 - view.safeAreaInsets.bottom, // 탭 바 위로 튀어나오게 배치
+            y: view.bounds.height - buttonSize - 15 - view.safeAreaInsets.bottom, // 탭 바 위로 튀어나오게 배치
             width: buttonSize,
             height: buttonSize
         )
@@ -92,7 +92,7 @@ class ViewController: UITabBarController {
         let circleWrapperView = UIView()
         circleWrapperView.frame = CGRect(
             x: (view.bounds.width / 2) - circleRadius, // 중앙에 배치
-            y: view.bounds.height - circleSize - 11 - view.safeAreaInsets.bottom,
+            y: view.bounds.height - circleSize - 19 - view.safeAreaInsets.bottom,
             width: circleSize,
             height: circleSize
         )
@@ -121,7 +121,7 @@ class ViewController: UITabBarController {
         
         // 원 모양으로 설정
         circleView.layer.cornerRadius = circleRadius
-        circleView.backgroundColor = UIColor.white // 원의 배경색
+        circleView.backgroundColor = UIColor.green // 원의 배경색
         
         // 원을 감싸는 뷰에 원 추가
         circleWrapperView.addSubview(circleView)
@@ -158,7 +158,7 @@ class ViewController: UITabBarController {
         super.viewDidLayoutSubviews()
         
         // 탭 바의 위치 및 크기 조정
-        let tabBarHeight: CGFloat = 80
+        let tabBarHeight: CGFloat = 88
         tabBar.frame = CGRect(
             x: 0,
             y: view.bounds.height - tabBarHeight,
@@ -170,7 +170,7 @@ class ViewController: UITabBarController {
         let buttonSize: CGFloat = 100
         centralButton.frame = CGRect(
             x: (view.bounds.width / 2) - (buttonSize / 2),
-            y: view.bounds.height - buttonSize - view.safeAreaInsets.bottom + 23,
+            y: view.bounds.height - buttonSize - view.safeAreaInsets.bottom + 15,
             width: buttonSize,
             height: buttonSize
         )
@@ -181,7 +181,7 @@ class ViewController: UITabBarController {
         // 탭 바의 둥근 모양을 설정
         let shapeLayer = CAShapeLayer()
         let cornerRadius: CGFloat = 20
-        let tabBarHeight: CGFloat = 80 // 높이
+        let tabBarHeight: CGFloat = 88 // 높이
         
         // 탭 바 경로 설정 (왼쪽, 오른쪽 상단만 둥글게)
         let path = UIBezierPath(
