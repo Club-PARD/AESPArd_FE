@@ -6,39 +6,36 @@
 //
 
 import UIKit
-import AVFoundation
 
-class ViewController: UIViewController {
-    
-    private let startButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Record Video", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-        button.backgroundColor = .systemBlue
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 8
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+class ViewController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        
-        view.addSubview(startButton)
-        
-        NSLayoutConstraint.activate([
-            startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            startButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            startButton.heightAnchor.constraint(equalToConstant: 50),
-            startButton.widthAnchor.constraint(equalToConstant: 160)
-        ])
-        
-        startButton.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
+        // Do any additional setup after loading the view.
+        setTabBar();
     }
     
-    @objc private func startButtonTapped() {
-        let cameraVC = CameraViewController()
-        navigationController?.pushViewController(cameraVC, animated: true)
+    func setTabBar() {
+        let vc1 = UINavigationController(rootViewController: HomeViewController())
+        
+        // 서치바 쓰려면 따로 또 루트 등록해줘야 하는 듯
+//        let vc2 = UINavigationController(rootViewController: SearchViewController())
+//        let vc3 = ComingSoonViewController()
+        
+        self.viewControllers = [vc1]
+        self.tabBar.tintColor = .white
+        self.tabBar.backgroundColor = .black
+        
+        guard let tabBarItems = self.tabBar.items else {return}
+        tabBarItems[0].image = UIImage(systemName: "star.fill")
+//        tabBarItems[1].image = UIImage(named: "search.png")
+//        tabBarItems[2].image = UIImage(named: "coming.png")
+
+        
+        tabBarItems[0].title = "Home"
+//        tabBarItems[1].title = "Search"
+//        tabBarItems[2].title = "Coming Soon"
+
+        
     }
 }
