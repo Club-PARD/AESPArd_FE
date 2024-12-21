@@ -88,6 +88,7 @@ class ViewController: UITabBarController {
     
     // MARK: - 중앙 버튼 뒤 그림자 추가
     private func addShadowedCircleBehindButton() {
+        
         // 원 크기 설정
         let circleSize: CGFloat = 99
         let circleRadius: CGFloat = circleSize / 2
@@ -103,13 +104,24 @@ class ViewController: UITabBarController {
         
         // 직사각형 뷰 생성 (원 앞에 추가 - 그림자 가리기 위해서 만듦)
         let rectangleView = UIView()
-        rectangleView.frame = CGRect(
-            x: -20,
-            y: 36,
-            width: circleSize + 40, // 원과 동일한 너비
-            height: circleSize // 원과 동일한 높이
-        )
-        rectangleView.backgroundColor = UIColor.white // 직사각형 배경색 설정
+        if UIDevice.current.orientation.isLandscape {
+            // 가로모드일 때
+            rectangleView.frame = CGRect(
+                x: (view.bounds.width / 2) - (circleSize / 2), // 탭 바의 중앙에 배치
+                y: 36,
+                width: circleSize + 60,
+                height: circleSize
+            )
+        } else {
+            // 세로모드일 때
+            rectangleView.frame = CGRect(
+                x: -20,
+                y: 36,
+                width: circleSize + 40,
+                height: circleSize
+            )
+        }
+        rectangleView.backgroundColor = UIColor.white
         
         // 직사각형을 원 앞에 추가
         circleWrapperView.addSubview(rectangleView)
@@ -125,7 +137,7 @@ class ViewController: UITabBarController {
         
         // 원 모양으로 설정
         circleView.layer.cornerRadius = circleRadius
-        circleView.backgroundColor = UIColor.green // 원의 배경색
+        circleView.backgroundColor = UIColor.white // 원의 배경색
         
         // 원을 감싸는 뷰에 원 추가
         circleWrapperView.addSubview(circleView)
@@ -170,6 +182,9 @@ class ViewController: UITabBarController {
             height: tabBarHeight
         )
         
+        customizeTabBarAppearance()
+        addShadowToTabBar()
+        
         // 중앙 버튼 위치 재조정
         let buttonSize: CGFloat = 100
         centralButton.frame = CGRect(
@@ -182,8 +197,6 @@ class ViewController: UITabBarController {
     
     // MARK: - 탭 바 모양 커스터마이징
     private func customizeTabBarAppearance() {
-        
-//        tabBar.barTintColor = .clear
         
         // 탭 바의 둥근 모양을 설정
         let shapeLayer = CAShapeLayer()
@@ -220,6 +233,12 @@ class ViewController: UITabBarController {
     
     // MARK: - 탭 바 그림자 추가
     private func addShadowToTabBar() {
+        
+        // 기존 그림자 레이어 제거
+            if let existingShadowLayer = tabBar.layer.sublayers?.first(where: { $0.shadowPath != nil }) {
+                existingShadowLayer.removeFromSuperlayer()
+            }
+        
         // 그림자를 추가할 경로 설정 (탭 바의 bounds에 맞게 설정)
         let shadowPath = UIBezierPath(roundedRect: tabBar.bounds, cornerRadius: 20) // 둥근 모서리 적용
         
@@ -233,6 +252,7 @@ class ViewController: UITabBarController {
         
         // 그림자 레이어를 탭 바의 레이어에 추가
         tabBar.layer.insertSublayer(shadowLayer, at: 0)
+        
     }
     
     

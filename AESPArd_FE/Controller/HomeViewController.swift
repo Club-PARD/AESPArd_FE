@@ -9,7 +9,8 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
-    var userName = "규희"
+    var userName : String = "규희"
+    var presentationCount :Int = 3
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -37,6 +38,10 @@ class HomeViewController: UIViewController {
         self.tabBarController?.tabBar.backgroundImage = UIImage()
         
         self.tabBarController?.tabBar.barTintColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
+        
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
 
     }
     
@@ -82,7 +87,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         if section == 0 {
             return 48.0 // HeaderTableCell의 높이
         }
-        return 0 // 나머지 섹션은 헤더를 표시하지 않음
+        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -92,7 +97,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
             return headerCell
         }
-        return nil // 0번 섹션이 아닌 경우 헤더를 표시하지 않음
+        return UIView() // 빈 뷰를 반환하여 간격 제거
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -109,10 +114,11 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         case 1:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PTListFilterTableCell", for: indexPath)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PTListFilterTableCell", for: indexPath) as! PTListFilterTableCell
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
+            cell.configure(with: presentationCount)
             return cell
             
         case 2:
@@ -134,7 +140,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         case 0:
             return 326 // 섹션 1의 셀 높이 - 중앙 그래프
         case 1:
-            return 80 // 섹션 2의 셀 높이 - 발표 리스트 필터
+            return 122 // 섹션 2의 셀 높이 - 발표 리스트 필터
         case 2:
             //                // 섹션 3의 행에 따라 다르게 설정
             //                if indexPath.row == 0 {
