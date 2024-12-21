@@ -14,6 +14,10 @@ class ViewController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // 내비게이션 바 숨기기
+        self.navigationController?.isNavigationBarHidden = true
+        
         setTabBar() // 탭 바 설정
         addShadowedCircleBehindButton() // 중앙 버튼 뒤에 그림자 추가
         setupCentralButton() // 중앙 버튼 설정
@@ -40,13 +44,13 @@ class ViewController: UITabBarController {
         
         tabBarItems[0].image = UIImage(named: "home-05")
         tabBarItems[0].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
-            
+        
         
         tabBarItems[1].image = nil // 중앙 버튼으로 대체
         
         tabBarItems[2].image = UIImage(named: "user-02")
         tabBarItems[2].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
-                }
+    }
     
     // MARK: - 중앙 버튼 설정
     private func setupCentralButton() {
@@ -92,7 +96,7 @@ class ViewController: UITabBarController {
         let circleWrapperView = UIView()
         circleWrapperView.frame = CGRect(
             x: (view.bounds.width / 2) - circleRadius, // 중앙에 배치
-            y: view.bounds.height - circleSize - 19 - view.safeAreaInsets.bottom,
+            y: view.bounds.height - circleSize - 20 - view.safeAreaInsets.bottom,
             width: circleSize,
             height: circleSize
         )
@@ -101,7 +105,7 @@ class ViewController: UITabBarController {
         let rectangleView = UIView()
         rectangleView.frame = CGRect(
             x: -20,
-            y: 30,
+            y: 36,
             width: circleSize + 40, // 원과 동일한 너비
             height: circleSize // 원과 동일한 높이
         )
@@ -141,16 +145,16 @@ class ViewController: UITabBarController {
         // 원을 감싸는 뷰를 메인 뷰에 추가
         view.addSubview(circleWrapperView)
     }
-
-
-
+    
+    
+    
     // MARK: - 중앙 버튼 동작
     @objc private func centralButtonTapped() {
         // 중앙 버튼 탭 시 두 번째 탭으로 이동
-//        self.selectedIndex = 1
+        //        self.selectedIndex = 1
         let modalVC = CameraViewController()
-            modalVC.modalPresentationStyle = .fullScreen // 전체 화면 모달로 설정
-            present(modalVC, animated: true, completion: nil)
+        modalVC.modalPresentationStyle = .fullScreen // 전체 화면 모달로 설정
+        present(modalVC, animated: true, completion: nil)
     }
     
     // MARK: - 탭 바 레이아웃 조정
@@ -220,7 +224,7 @@ class ViewController: UITabBarController {
         let shadowLayer = CALayer()
         shadowLayer.shadowPath = shadowPath.cgPath
         shadowLayer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
-        shadowLayer.shadowOpacity = 1 
+        shadowLayer.shadowOpacity = 1
         shadowLayer.shadowRadius = 15
         shadowLayer.shadowOffset = CGSize(width: 0, height: 0)
         
