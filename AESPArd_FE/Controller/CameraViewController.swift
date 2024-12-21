@@ -100,9 +100,11 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     
     //카메라 권한 없을 때 알림을 띄우는 메서드
     private func showPermissionAlert() {
+        // UIAlertController가 AlertDialog(화면 중간에 생기는 경고창) 만드는 것
         let alert = UIAlertController(title: "Camera Access Needed",
                                       message: "Please enable camera access in Settings.",
                                       preferredStyle: .alert)
+        // addAction이 경고 창 밑에 보면 "확인", "취소" 이런게 있잖음? 그런거 만드는 거
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
@@ -120,6 +122,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         
         do {
             //카메라 입력 장치 설정
+            // AVCaptureDeviceInput: 선택한 입력 장치로 만들어내는 입력값을 capture session에 제공하는 객체임. 한마디로 너가 영상 열심히 찍고 매니저한테 가져다 주는 거임.
             let cameraInput = try AVCaptureDeviceInput(device: camera)
             if captureSession.canAddInput(cameraInput) {
                 captureSession.addInput(cameraInput) // 세션에 카메라 입력 추가
@@ -143,6 +146,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         captureSession.addInput(audioInput) // 세션에 오디오 입력 추가
         
         //비디오 출력 장치 설정
+        // AVCaptureMovieFileOutput: 영상 촬영하고 다오는 출력값. 한마디로 촬영한 영상 파일
         let movieOutput = AVCaptureMovieFileOutput()
         if captureSession.canAddOutput(movieOutput) {
             captureSession.addOutput(movieOutput) // 세션에 비디오 출력 추가
@@ -151,6 +155,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         
         
         // 미리보기 레이어 설정
+        // 사진 촬영할때 보면 찍기 전에 그리고 찍을 때 카메라가 찍고 있는거 보여 주잖아? 그거 말하는 거임
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill // 비디오 크기 비율 설정
         previewLayer.frame = view.bounds // 미리보기 레이어 크기 설정
@@ -204,6 +209,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
             movieFileOutput.startRecording(to: outputURL, recordingDelegate: self)
             isRecording = true
             
+            // DispatchQueue: main thread에서의 비동기 실행을 위한 오브젝트
             DispatchQueue.main.async {
                 self.shutterButton.setTitle("■", for: .normal)
                 self.shutterButton.setTitleColor(.red, for: .normal)
