@@ -36,7 +36,7 @@ class ViewController: UITabBarController {
         self.viewControllers = [vc1, vc2, vc3]
         self.tabBar.tintColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1) // 선택된 탭 아이템 색상
         self.tabBar.unselectedItemTintColor = UIColor(red: 0.69, green: 0.78, blue: 1, alpha: 1) // 선택안된 탭 아이템 색상
-        self.tabBar.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1) // 탭 바 배경색
+        self.tabBar.backgroundColor =  UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1) // 탭 바 배경색
         self.tabBar.isTranslucent = false // 불투명
         
         // 탭 바 아이템 커스터마이징
@@ -182,6 +182,9 @@ class ViewController: UITabBarController {
     
     // MARK: - 탭 바 모양 커스터마이징
     private func customizeTabBarAppearance() {
+        
+//        tabBar.barTintColor = .clear
+        
         // 탭 바의 둥근 모양을 설정
         let shapeLayer = CAShapeLayer()
         let cornerRadius: CGFloat = 20

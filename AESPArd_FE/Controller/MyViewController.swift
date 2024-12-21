@@ -14,7 +14,8 @@ class MyViewController: UIViewController {
         
         self.navigationController?.isNavigationBarHidden = true
         
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
+        
         setUI()
     }
     
