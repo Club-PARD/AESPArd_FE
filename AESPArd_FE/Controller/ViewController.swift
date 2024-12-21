@@ -15,8 +15,7 @@ class ViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setTabBar() // 탭 바 설정
-        // 중앙 버튼 뒤에 원 추가
-        addShadowedCircleBehindButton()
+        addShadowedCircleBehindButton() // 중앙 버튼 뒤에 그림자 추가
         setupCentralButton() // 중앙 버튼 설정
         customizeTabBarAppearance() // 탭 바 모양 커스터마이징
         addShadowToTabBar() // 탭 바 그림자 추가
