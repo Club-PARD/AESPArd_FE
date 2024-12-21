@@ -36,7 +36,6 @@ class PTListFilterTableCell: UITableViewCell {
         // 버튼 크기와 배경 설정
         button.backgroundColor = .white
         button.layer.cornerRadius = 15.0
-        button.layer.masksToBounds = true
         
         button.layer.masksToBounds = false
         button.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
@@ -64,7 +63,6 @@ class PTListFilterTableCell: UITableViewCell {
         // 버튼 크기와 배경 설정
         button.backgroundColor = .white
         button.layer.cornerRadius = 15.0
-        button.layer.masksToBounds = true
         
         button.layer.masksToBounds = false
         button.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
@@ -167,10 +165,15 @@ class PTListFilterTableCell: UITableViewCell {
     
     //삭제 버튼 클릭 메서드
     @objc func deleteButtonTapped() {
-        deleteButton.setTitleColor(UIColor(red: 1, green: 0, blue: 0, alpha: 1), for: .normal)
-        deleteButton.setImage(UIImage(named: "trash-click"), for: .normal)
-        resetOtherButtons(except: deleteButton)
+        if deleteButton.currentImage == UIImage(named: "trash-click") {
+            deleteButton.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
+            deleteButton.setImage(UIImage(named: "trash"), for: .normal)
+        } else {
+            deleteButton.setTitleColor(UIColor(red: 1, green: 0, blue: 0, alpha: 1), for: .normal)
+            deleteButton.setImage(UIImage(named: "trash-click"), for: .normal)
+        }
     }
+
     
     // 다른 버튼들을 초기 상태로 복원하는 메서드
     func resetOtherButtons(except button: UIButton) {
@@ -181,9 +184,5 @@ class PTListFilterTableCell: UITableViewCell {
         if button != importButton {
             importButton.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
             importButton.setImage(UIImage(named: "importanceStar"), for: .normal)
-        }
-        if button != deleteButton {
-            deleteButton.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
-            deleteButton.setImage(UIImage(named: "trash"), for: .normal)
         }
     }}

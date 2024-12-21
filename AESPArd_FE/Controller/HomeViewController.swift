@@ -9,8 +9,16 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
+    //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
     var presentationCount :Int = 3
+    
+    //발표 정보
+    var presentationName : String = "발표이름"
+    var ptDetailCount : Int = 4
+    var presentationDate : Int = 1
+    var ptDetailTotalScore : Int = 88
+    
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -122,10 +130,11 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PresentationListTableCell", for: indexPath)
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PresentationListTableCell", for: indexPath) as! PresentationListTableCell
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
+            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore)
             return cell
             
         default:
