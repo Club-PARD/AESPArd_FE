@@ -45,6 +45,14 @@ class PresentationListTableCell: UITableViewCell {
         return button
     }()
     
+    let deleteCheckButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(named: "check_X"), for: .normal)
+        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -144,6 +152,15 @@ class PresentationListTableCell: UITableViewCell {
             bookmarkButton.setImage(UIImage(named: "bookmark_O"), for: .normal)
         } else {
             bookmarkButton.setImage(UIImage(named: "bookmark_X"), for: .normal)
+        }
+    }
+    
+    //삭제하기 -> 리스트 체크 버튼
+    @objc func deleteCheckButtonTapped(){
+        if deleteCheckButton.currentImage == UIImage(named: "check_X") {
+            deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
+        } else {
+            deleteCheckButton.setImage(UIImage(named: "check_X"), for: .normal)
         }
     }
     
