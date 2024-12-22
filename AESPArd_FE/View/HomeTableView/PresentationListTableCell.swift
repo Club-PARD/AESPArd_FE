@@ -41,7 +41,7 @@ class PresentationListTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "bookmark_X"), for: .normal)
-        button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
+//        button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -49,7 +49,7 @@ class PresentationListTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "check_X"), for: .normal)
-        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+//        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
         return button
     }()
     

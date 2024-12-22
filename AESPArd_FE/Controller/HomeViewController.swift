@@ -24,6 +24,13 @@ class HomeViewController: UIViewController {
     var barVaue: Double = 0.84
     
     
+    // 필터링 모드
+    var filterMode : String = "recent"
+    // 삭제모드 여부
+    var isDeleteMode : Bool = false
+    //삭제하려고 선택한 리스트 갯수
+    var selectDeleteCount : Int = 0
+    
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -160,6 +167,22 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return 88 // 박스 크기 80px + 아래 패딩 8px
         default:
             return 60 // 기본 셀 높이
+        }
+    }
+    
+    // 셀 클릭 시 호출되는 메서드
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 섹션 2의 셀이 클릭되었을 때
+        if indexPath.section == 2 {
+
+            if filterMode == "recent" {
+                
+            } else {
+                
+            }
+            
+            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
+            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
 }
