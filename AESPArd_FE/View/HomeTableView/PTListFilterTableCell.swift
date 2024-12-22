@@ -23,9 +23,9 @@ class PTListFilterTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("최신순", for: .normal)
-        button.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
+        button.setTitleColor(UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 12)
-        button.setImage(UIImage(named: "calendar"), for: .normal)
+        button.setImage(UIImage(named: "calendar-click"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.contentHorizontalAlignment = .center
         

@@ -11,7 +11,7 @@ class HomeViewController: UIViewController {
     
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
-    var presentationCount :Int = 3
+    var presentationCount :Int = 5
     
     //발표 정보
     var presentationName : String = "발표이름"
@@ -83,7 +83,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 2 {
-            return 5 // 마지막 섹션은 행이 5개
+            return presentationCount // 마지막 섹션은 행은 발표 갯수만큼
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
