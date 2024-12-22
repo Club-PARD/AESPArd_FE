@@ -25,6 +25,16 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     private var isRecording = false //녹화 상태
     private var isScreenCovered = false // 화면 가리기 상태 변수
     
+    //뒤로가기 버튼
+    private let backButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Back", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20)
+        button.setTitleColor(.white, for: .normal)
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     //녹화 시작/끝 버튼
     private let shutterButton: UIButton = {
@@ -109,6 +119,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         present(alert, animated: true)
     }
     
+    //MARK: - 세션 설정 및 제약조건 설정
     //AVCaptureSession을 설정하는 메서드
     private func setupSession() {
         captureSession = AVCaptureSession() // 세션 생성
@@ -164,11 +175,15 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         view.addSubview(fullScreenBlueView) //화면 가리기 뷰
         
         // 버튼들을 화면에 추가
+        view.addSubview(backButton)
         view.addSubview(shutterButton)
         view.addSubview(recordingTimeLabel)
         view.addSubview(toggleScreenCoverButton)
         
         NSLayoutConstraint.activate([
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+                    backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            
             fullScreenBlueView.topAnchor.constraint(equalTo: view.topAnchor),
             fullScreenBlueView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             fullScreenBlueView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -326,10 +341,16 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         }
     }
     
+    //비디오 플레이어 모달창으로 이동
     @objc func moveVideoPlayerModal(with videoURL: URL) {
         let videoPlayerController = VideoPlayerController()
         videoPlayerController.videoURL = videoURL
         videoPlayerController.modalPresentationStyle = .fullScreen
         self.present(videoPlayerController, animated: true)
+    }
+    
+    //뒤로 가기
+    @objc private func backButtonTapped() {
+        self.dismiss(animated: true, completion: nil)
     }
 }
