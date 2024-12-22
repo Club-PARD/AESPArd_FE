@@ -49,8 +49,8 @@ class BarGraphView: UIView {
             )
             
             let shapeLayer = CAShapeLayer()
-                        shapeLayer.path = path.cgPath
-                        barView.layer.mask = shapeLayer
+            shapeLayer.path = path.cgPath
+            barView.layer.mask = shapeLayer
             
             // 세로 그라데이션 추가
             let gradientLayer = CAGradientLayer()
@@ -61,11 +61,13 @@ class BarGraphView: UIView {
             gradientLayer.locations = [0, 1]  // 그라데이션의 시작과 끝 위치
             gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)  // 세로 방향 (위에서 아래로)
             gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
-            //            gradientLayer.bounds = barView.bounds
-            //            gradientLayer.position =  CGPoint(x: barView.frame.midX, y: barView.frame.midY)
-            barView.layer.addSublayer(gradientLayer)
             
+            gradientLayer.bounds = barView.bounds
+            gradientLayer.position =  CGPoint(x: 12.5, y: barHeight/2)
+            
+            barView.layer.addSublayer(gradientLayer)
             addSubview(barView)
+            
             
             // 막대 상단에 퍼센트 값 표시 라벨 추가
             let percentageLabel = UILabel()
