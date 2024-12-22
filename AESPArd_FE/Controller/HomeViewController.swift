@@ -13,11 +13,23 @@ class HomeViewController: UIViewController {
     var userName : String = "규희"
     var presentationCount :Int = 5
     
+    //막대 그래프 데이터
+    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+    
     //발표 정보
     var presentationName : String = "발표이름"
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
+    var barVaue: Double = 0.84
+    
+    
+    // 필터링 모드
+    var filterMode : String = "recent"
+    // 삭제모드 여부
+    var isDeleteMode : Bool = false
+    //삭제하려고 선택한 리스트 갯수
+    var selectDeleteCount : Int = 0
     
     
     let tableView: UITableView = {
@@ -119,6 +131,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .none
             // 사용자 이름을 설정
             cell.configure(with: userName)
+            cell.barGraphView.percentages = graphData //막대그래프 정보 전달
             return cell
             
         case 1:
@@ -134,7 +147,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore)
+            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
             return cell
             
         default:
@@ -151,17 +164,25 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         case 1:
             return 122 // 섹션 2의 셀 높이 - 발표 리스트 필터
         case 2:
-            //                // 섹션 3의 행에 따라 다르게 설정
-            //                if indexPath.row == 0 {
-            //                    return 120 // 섹션 3의 첫 번째 행은 높이를 120으로 설정
-            //                } else if indexPath.row == 1 {
-            //                    return 80 // 섹션 3의 두 번째 행은 높이를 80으로 설정
-            //                } else {
-            //                    return 60 // 나머지 행은 높이를 60으로 설정
-            //                }
             return 88 // 박스 크기 80px + 아래 패딩 8px
         default:
             return 60 // 기본 셀 높이
+        }
+    }
+    
+    // 셀 클릭 시 호출되는 메서드
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 섹션 2의 셀이 클릭되었을 때
+        if indexPath.section == 2 {
+
+            if filterMode == "recent" {
+                
+            } else {
+                
+            }
+            
+            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
+            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
 }
