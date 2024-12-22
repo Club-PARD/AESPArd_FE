@@ -18,6 +18,7 @@ class HomeViewController: UIViewController {
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
+    var barVaue: Double = 0.84
     
     
     let tableView: UITableView = {
@@ -134,7 +135,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore)
+            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
             return cell
             
         default:

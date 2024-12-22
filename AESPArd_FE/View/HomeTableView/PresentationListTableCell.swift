@@ -49,16 +49,35 @@ class PresentationListTableCell: UITableViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
-        view.layer.cornerRadius = 20
-        
+//        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+        view.layer.cornerRadius = 40
         view.layer.masksToBounds = false
+
+        
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
         view.layer.shadowRadius = 15
         view.layer.shadowOffset = CGSize(width: 0, height: 0)
         
+        
         return view
     }()
+    
+    let smallContainerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .white
+        view.layer.cornerRadius = 20
+        view.layer.masksToBounds = true
+        return view
+    }()
+    
+    let circularProgressBar: CircularProgressBar = {
+        let progressBar = CircularProgressBar()
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+        return progressBar
+    }()
+    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -71,9 +90,9 @@ class PresentationListTableCell: UITableViewCell {
     
     func setUI() {
         contentView.addSubview(containerView)
+        containerView.addSubview(smallContainerView)
         
         containerView.addSubview(bookmarkButton)
-        
         containerView.addSubview(ptName)
         
         containerView.addSubview(ptCountContainer)
@@ -81,11 +100,18 @@ class PresentationListTableCell: UITableViewCell {
         
         containerView.addSubview(ptDate)
         
+        containerView.addSubview(circularProgressBar)
+        
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            
+            smallContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            smallContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            smallContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -30),
+            smallContainerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
             bookmarkButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             bookmarkButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
@@ -103,7 +129,12 @@ class PresentationListTableCell: UITableViewCell {
             
             ptDate.topAnchor.constraint(equalTo: ptName.bottomAnchor, constant: 2),
             ptDate.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor, constant: 12),
-
+            
+            circularProgressBar.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            circularProgressBar.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            circularProgressBar.widthAnchor.constraint(equalToConstant: 80),
+            circularProgressBar.heightAnchor.constraint(equalToConstant: 80)
+            
         ])
     }
     
@@ -117,10 +148,11 @@ class PresentationListTableCell: UITableViewCell {
     }
     
     // 발표 정보 설정 메서드
-    func configure(presentationName: String, ptDetailCount: Int, presentationDate: Int, ptDetailTotalScore: Int) {
+    func configure(presentationName: String, ptDetailCount: Int, presentationDate: Int, ptDetailTotalScore: Int, barVaue: Double) {
         
         ptName.text = presentationName
         ptCount.text = "\(ptDetailCount)개"
         ptDate.text = "발표세부정보설명 · \(presentationDate)일 전"
+        circularProgressBar.value = barVaue
     }
 }
