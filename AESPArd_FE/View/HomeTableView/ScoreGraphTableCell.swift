@@ -56,18 +56,28 @@ class ScoreGraphTableCell: UITableViewCell {
         return view
     }()
     
+    //막대 그래프 눈속임용 UIView
+    private let emptyView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .clear // 배경색 설정
+        return view
+    }()
+    
     func setUI() {
         
         contentView.addSubview(containerView)
         contentView.addSubview(greetingLabel)
-        
+
+        containerView.addSubview(emptyView)
         containerView.addSubview(graphLabel)
+
         containerView.addSubview(barGraphView)
         
         NSLayoutConstraint.activate([
             greetingLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             greetingLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            greetingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -100),
+            greetingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             greetingLabel.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -16),
             
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
@@ -77,8 +87,13 @@ class ScoreGraphTableCell: UITableViewCell {
             graphLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
             graphLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             
+            emptyView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            emptyView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor, constant: -155.5),
+            emptyView.widthAnchor.constraint(equalToConstant: 10),
+            emptyView.heightAnchor.constraint(equalToConstant: 10),
+            
             barGraphView.topAnchor.constraint(equalTo: graphLabel.bottomAnchor, constant: 28),
-            barGraphView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 31),
+            barGraphView.centerXAnchor.constraint(equalTo: emptyView.leadingAnchor),
 //            barGraphView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -31),
             barGraphView.heightAnchor.constraint(equalToConstant: 149)
         ])
