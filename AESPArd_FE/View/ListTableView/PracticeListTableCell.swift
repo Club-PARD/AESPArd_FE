@@ -21,6 +21,11 @@ class PracticeListTableCell: UITableViewCell {
         
     }
     
+    deinit {
+        // 옵저버 제거
+        NotificationCenter.default.removeObserver(self, name: .listDeleteCheckNotification, object: nil)
+    }
+    
     let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false

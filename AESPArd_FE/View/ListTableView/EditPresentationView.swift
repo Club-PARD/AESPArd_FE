@@ -7,6 +7,16 @@
 
 import UIKit
 
+//이름 수정
+extension Notification.Name {
+    static let editNameNotification = Notification.Name("editNameNotification")
+}
+
+//폴더 삭제
+extension Notification.Name {
+    static let deletePresentationFolderNotification = Notification.Name("deletePresentationFolderNotification")
+}
+
 class EditPresentationView: UIView {
     
     required init?(coder: NSCoder) {
@@ -84,12 +94,14 @@ class EditPresentationView: UIView {
     @objc func editNameButtonTapped() {
         print("이름 수정 됨 ㅋ")
         self.isHidden = true
+        NotificationCenter.default.post(name:.editNameNotification, object: nil)
     }
     
     //발표 파일 삭제하기 버튼
     @objc func editDeletePresentaionButtonTapped() {
         print("발표 파일 삭제")
         self.isHidden = true
+        NotificationCenter.default.post(name:.deletePresentationFolderNotification, object: nil)
     }
     
     

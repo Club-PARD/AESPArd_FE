@@ -13,6 +13,11 @@ class PresentationListTableCell: UITableViewCell {
         NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
     }
     
+    deinit {
+        // 옵저버 제거
+        NotificationCenter.default.removeObserver(self, name: .deleteCheckNotification, object: nil)
+    }
+    
     let ptName: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false

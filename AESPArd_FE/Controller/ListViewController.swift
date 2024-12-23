@@ -37,7 +37,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isHidden = true // 기본적으로 숨김
         view.layer.cornerRadius = 13
-//        view.clipsToBounds = true
+        //        view.clipsToBounds = true
         
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
@@ -72,7 +72,21 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         }
         setUI()
         
+        //edit 창 토글
         NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPresentationNotification, object: nil)
+        
+        // edit 이름 수정 alert
+        NotificationCenter.default.addObserver(self, selector: #selector(editNameAlert), name: .editNameNotification, object: nil)
+        
+        //edit 폴더 삭제 alert
+        NotificationCenter.default.addObserver(self, selector: #selector(editDeletePresentaionAlert), name: .deletePresentationFolderNotification, object: nil)
+    }
+    
+    deinit {
+        // 옵저버 제거
+        NotificationCenter.default.removeObserver(self, name: .editPresentationNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .editNameNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .deletePresentationFolderNotification, object: nil)
     }
     
     private func setUI() {
@@ -97,7 +111,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             editPresentationView.widthAnchor.constraint(equalToConstant: 262),
             editPresentationView.heightAnchor.constraint(equalToConstant: 96),
             editPresentationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-//            editPresentationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            //            editPresentationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
     
@@ -111,11 +125,67 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
     @objc func handleEditViewToggleNotification() {
-                if !editPresentationView.isHidden {
-                    editPresentationView.isHidden = true
-                } else {
-                    editPresentationView.isHidden = false
-                }
+        if !editPresentationView.isHidden {
+            editPresentationView.isHidden = true
+        } else {
+            editPresentationView.isHidden = false
+        }
+    }
+    
+    // 이름 수정하기 Alert
+    @objc func editNameAlert() {
+        // Alert 생성
+        let alertController = UIAlertController(title: "이름 수정하기", message: "해당 발표 파일의 이름을 수정할 수 있어요.", preferredStyle: .alert)
+        
+        // 텍스트 필드 추가
+        alertController.addTextField { textField in
+//            textField.placeholder = "새로운 이름"
+            textField.text = self.presentationFolderName // 기존 이름을 텍스트 필드에 설정
+//            textField.autocorrectionType = .no
+//            textField.spellCheckingType = .no
+        }
+        
+        // 취소 버튼 추가
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        // 확인 버튼 추가
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
+            // 텍스트 필드에서 입력된 이름을 가져옴
+            if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
+                // 새로운 이름을 presentationFolderName에 반영
+//                self.presentationFolderName = newName
+//                print("새로운 이름: \(self.presentationFolderName)")
+            }
+        }
+        
+        // 버튼들 추가
+        alertController.addAction(cancelAction)
+        alertController.addAction(confirmAction)
+        
+        // 알림 표시
+        self.present(alertController, animated: true, completion: nil)
+    }
+
+
+    
+    //발표 파일 삭제하기 Alert
+    @objc func editDeletePresentaionAlert() {
+        // 알림 컨트롤러 생성
+        let alertController = UIAlertController(title: "발표 파일 삭제하기", message: "발표 파일을 삭제하시겠어요?\n이 작업은 되돌릴 수 없어요.", preferredStyle: .alert)
+        
+        // 취소 버튼 추가
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        // 삭제 버튼 추가
+        let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
+            print("삭제됨")
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(deleteAction)
+        
+        // 알림 표시
+        self.present(alertController, animated: true, completion: nil)
     }
     
 }
@@ -229,5 +299,5 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    
 }
+
