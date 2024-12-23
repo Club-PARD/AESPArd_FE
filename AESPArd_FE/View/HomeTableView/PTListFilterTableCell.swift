@@ -1,5 +1,9 @@
 import UIKit
 
+extension Notification.Name {
+    static let deleteCheckNotification = Notification.Name("deleteCheckNotification")
+}
+
 class PTListFilterTableCell: UITableViewCell {
     
     let listCountLabel: UILabel = {
@@ -166,9 +170,14 @@ class PTListFilterTableCell: UITableViewCell {
     //삭제 버튼 클릭 메서드
     @objc func deleteButtonTapped() {
         if deleteButton.currentImage == UIImage(named: "trash-click") {
+            NotificationCenter.default.post(name:.deleteCheckNotification, object: nil)
+            
             deleteButton.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
             deleteButton.setImage(UIImage(named: "trash"), for: .normal)
         } else {
+            
+            NotificationCenter.default.post(name:.deleteCheckNotification, object: nil)
+            
             deleteButton.setTitleColor(UIColor(red: 1, green: 0, blue: 0, alpha: 1), for: .normal)
             deleteButton.setImage(UIImage(named: "trash-click"), for: .normal)
         }
