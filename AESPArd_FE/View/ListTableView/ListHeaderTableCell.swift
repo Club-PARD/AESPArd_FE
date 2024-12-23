@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let editPresentationNotification = Notification.Name("editPresentationNotification")
+}
+
 protocol ListHeaderTableCellDelegate: AnyObject {
     func dismissViewController()
 }
@@ -98,7 +102,7 @@ class ListHeaderTableCell: UITableViewCell {
     
     //수정 버튼 탭
     @objc func moreEditButtonTapped() {
-        print("수정버튼 클릭")
+        NotificationCenter.default.post(name:.editPresentationNotification, object: nil)
     }
     
     

@@ -32,6 +32,21 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         return tableView
     }()
     
+    let editPresentationView: EditPresentationView = {
+        let view = EditPresentationView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true // 기본적으로 숨김
+        view.layer.cornerRadius = 13
+//        view.clipsToBounds = true
+        
+        view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
+        view.layer.shadowOpacity = 1
+        view.layer.shadowRadius = 15
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+        
+        return view
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -56,11 +71,14 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.sectionHeaderTopPadding = 0
         }
         setUI()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPresentationNotification, object: nil)
     }
     
     private func setUI() {
         
         view.addSubview(tableView)
+        view.addSubview(editPresentationView)
         
         // 각 섹션별 셀 등록
         tableView.register(LineGraphTableCell.self, forCellReuseIdentifier: "LineGraphTableCell")
@@ -72,7 +90,14 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            // EditPresentationView 레이아웃 설정
+            editPresentationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
+            editPresentationView.widthAnchor.constraint(equalToConstant: 262),
+            editPresentationView.heightAnchor.constraint(equalToConstant: 96),
+            editPresentationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+//            editPresentationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
     
@@ -83,6 +108,16 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         self.dismiss(animated: true, completion: nil)
         print("2차")
     }
+    
+    //edit 버튼 클릭시 UIview 등장/숨기기 토글
+    @objc func handleEditViewToggleNotification() {
+                if !editPresentationView.isHidden {
+                    editPresentationView.isHidden = true
+                } else {
+                    editPresentationView.isHidden = false
+                }
+    }
+    
 }
 
 // MARK: - 2. tableView extension 생성
@@ -131,7 +166,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-
+            
             return cell
             
         case 1:
@@ -139,7 +174,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
- 
+            
             cell.configure(practiceCount: practiceCount)
             
             return cell
@@ -156,7 +191,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
             //발표 연습 이름 라벨
             cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
- 
+            
             return cell
             
         default:
@@ -176,6 +211,21 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             return 68 // 박스 크기 60px + 아래 패딩 8px
         default:
             return 60 // 기본 셀 높이
+        }
+    }
+    
+    // 셀 클릭 시 호출되는 메서드
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 섹션 2의 셀이 클릭되었을 때
+        if indexPath.section == 2 {
+            
+            //            let modalViewController = ListViewController()
+            //            modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+            //            self.definesPresentationContext = true // 현재 컨텍스트를 정의
+            //            self.present(modalViewController, animated: true)
+            //
+            //            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
+            //            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
     

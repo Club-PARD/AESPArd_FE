@@ -42,6 +42,8 @@ class DeleteSelectedListTableCell: UITableViewCell {
         button.imageView?.contentMode = .scaleAspectFit
         button.contentHorizontalAlignment = .center
         button.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        button.contentVerticalAlignment = .center
+//        button.backgroundColor = .green
         return button
     }()
     
@@ -55,7 +57,8 @@ class DeleteSelectedListTableCell: UITableViewCell {
             listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             listCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
-            deleteButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 47),
+            deleteButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 30),
+            deleteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
    
         ])
