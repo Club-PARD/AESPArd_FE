@@ -9,8 +9,20 @@ import UIKit
 
 class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
+    //발표 폴더 이름
+    var presentationFolderName :String = "협체발표"
     //발표연습 갯수
     var practiceCount :Int = 5
+    
+    //섹션 2
+    //발표 연습 이름
+    var practiceName : String = "번째 테이크"
+    //발표 연습 날짜
+    var practiceDate : String = "2023. 12. 20"
+    //발표 연습 점수
+    var practiceScore : Double =  0.84
+    
+    
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -102,6 +114,9 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             let headerCell = ListHeaderTableCell(style: .default, reuseIdentifier: "ListHeaderTableCell")
             headerCell.delegate = self  // 델리게이트 설정
             headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
+            
+            //폴더 이름 데이터 전달
+            headerCell.configure(presentationFolderName: presentationFolderName)
             return headerCell
         }
         return UIView() // 빈 뷰를 반환하여 간격 제거
@@ -125,6 +140,8 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
  
+            cell.configure(practiceCount: practiceCount)
+            
             return cell
             
         case 2:
@@ -132,6 +149,13 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
+            
+            cell.configure(practiceDate:practiceDate, practiceScore:practiceScore)
+            
+            //순서
+            cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
+            //발표 연습 이름 라벨
+            cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
  
             return cell
             

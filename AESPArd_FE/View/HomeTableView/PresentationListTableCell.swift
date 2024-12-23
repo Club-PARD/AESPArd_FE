@@ -2,6 +2,17 @@ import UIKit
 
 class PresentationListTableCell: UITableViewCell {
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: "PresentationListTableCell")
+        setUI()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
+    }
+    
     let ptName: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -94,18 +105,6 @@ class PresentationListTableCell: UITableViewCell {
         progressBar.translatesAutoresizingMaskIntoConstraints = false
         return progressBar
     }()
-    
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "PresentationListTableCell")
-        setUI()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
-    }
     
     func setUI() {
         contentView.addSubview(containerView)

@@ -35,7 +35,6 @@ class ListHeaderTableCell: UITableViewCell {
     let headerLabel : UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "협체발표"
         label.font = UIFont(name: "Pretendard-Medium", size: 16)
         label.textColor = .black
         return label
@@ -54,7 +53,7 @@ class ListHeaderTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "more"), for: .normal)
-//        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(moreEditButtonTapped), for: .touchUpInside)
 //        button.backgroundColor = .green
         return button
     }()
@@ -86,11 +85,22 @@ class ListHeaderTableCell: UITableViewCell {
         ])
     }
     
+    //뒤로가기 버튼 탭
     @objc func backButtonTapped() {
         // delegate로 ListViewController의 dismissViewController 호출
             delegate?.dismissViewController()
-        print("1차")
-        }
+    }
+    
+    // 발표 정보 설정 메서드
+    func configure(presentationFolderName: String) {
+        headerLabel.text = "\(presentationFolderName)"
+    }
+    
+    //수정 버튼 탭
+    @objc func moreEditButtonTapped() {
+        print("수정버튼 클릭")
+    }
+    
     
 }
 
