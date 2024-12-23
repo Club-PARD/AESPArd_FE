@@ -46,6 +46,7 @@ class ListHeaderTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "back"), for: .normal)
         button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+//        button.backgroundColor = .green
         return button
     }()
     
@@ -54,6 +55,7 @@ class ListHeaderTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "more"), for: .normal)
 //        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+//        button.backgroundColor = .green
         return button
     }()
     
@@ -72,12 +74,14 @@ class ListHeaderTableCell: UITableViewCell {
             
             backButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             backButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            backButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             
             headerLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             headerLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             moreButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             moreButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            moreButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             
         ])
     }

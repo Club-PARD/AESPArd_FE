@@ -42,6 +42,11 @@ class PresentationListTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "bookmark_X"), for: .normal)
         button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
+//        button.backgroundColor = .green
+        
+        button.layer.cornerRadius = 20
+        button.layer.masksToBounds = true
+        
         return button
     }()
     
@@ -51,6 +56,9 @@ class PresentationListTableCell: UITableViewCell {
         button.setImage(UIImage(named: "check_X"), for: .normal)
         button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
         button.isHidden = true
+//        button.backgroundColor = .green
+        button.layer.cornerRadius = 20
+        button.layer.masksToBounds = true
         return button
     }()
     
@@ -58,10 +66,10 @@ class PresentationListTableCell: UITableViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
-//        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+        //        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
         view.layer.cornerRadius = 40
         view.layer.masksToBounds = false
-
+        
         
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
@@ -125,14 +133,18 @@ class PresentationListTableCell: UITableViewCell {
             smallContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -30),
             smallContainerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
-            bookmarkButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            bookmarkButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             bookmarkButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            bookmarkButton.widthAnchor.constraint(equalToConstant: 48),
+            bookmarkButton.heightAnchor.constraint(equalToConstant: 80),
             
-            deleteCheckButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            deleteCheckButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             deleteCheckButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            deleteCheckButton.widthAnchor.constraint(equalToConstant: 48),
+            deleteCheckButton.heightAnchor.constraint(equalToConstant: 80),
             
             ptName.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 21.5),
-            ptName.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor, constant: 12),
+            ptName.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor),
             
             ptCountContainer.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 22),
             ptCountContainer.leadingAnchor.constraint(equalTo: ptName.trailingAnchor, constant: 4),
@@ -143,7 +155,7 @@ class PresentationListTableCell: UITableViewCell {
             ptCount.trailingAnchor.constraint(equalTo: ptCountContainer.trailingAnchor, constant: -6),
             
             ptDate.topAnchor.constraint(equalTo: ptName.bottomAnchor, constant: 2),
-            ptDate.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor, constant: 12),
+            ptDate.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor),
             
             circularProgressBar.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             circularProgressBar.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
