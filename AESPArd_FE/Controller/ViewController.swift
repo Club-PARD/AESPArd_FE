@@ -15,11 +15,18 @@ class ViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // 현재 디바이스 모델 식별자 출력
+        let modelIdentifier = UIDevice.current.modelIdentifier
+        
         // 내비게이션 바 숨기기
         self.navigationController?.isNavigationBarHidden = true
         
         setTabBar() // 탭 바 설정
-        addShadowedCircleBehindButton() // 중앙 버튼 뒤에 그림자 추가
+        if isIPhoneSE() {
+            print("iPhone SE detected. Skipping shadowed circle setup.")
+        } else {
+            addShadowedCircleBehindButton() // 중앙 버튼 뒤에 그림자 추가
+        }
         setupCentralButton() // 중앙 버튼 설정
         customizeTabBarAppearance() // 탭 바 모양 커스터마이징
         addShadowToTabBar() // 탭 바 그림자 추가
@@ -235,9 +242,9 @@ class ViewController: UITabBarController {
     private func addShadowToTabBar() {
         
         // 기존 그림자 레이어 제거
-            if let existingShadowLayer = tabBar.layer.sublayers?.first(where: { $0.shadowPath != nil }) {
-                existingShadowLayer.removeFromSuperlayer()
-            }
+        if let existingShadowLayer = tabBar.layer.sublayers?.first(where: { $0.shadowPath != nil }) {
+            existingShadowLayer.removeFromSuperlayer()
+        }
         
         // 그림자를 추가할 경로 설정 (탭 바의 bounds에 맞게 설정)
         let shadowPath = UIBezierPath(roundedRect: tabBar.bounds, cornerRadius: 20) // 둥근 모서리 적용
@@ -255,5 +262,20 @@ class ViewController: UITabBarController {
         
     }
     
+    // MARK: - iPhone SE 모델인지 확인
+    private func isIPhoneSE() -> Bool {
+        let seModels = ["x86_64", "iPhone8,4", "iPhone12,8", "iPhone14,4"] // iPhone SE 1st, 2nd, 3rd Gen 모델 식별자
+        return seModels.contains(UIDevice.current.modelIdentifier)
+    }
     
+}
+
+// MARK: - UIDevice 확장으로 모델 식별자 가져오기
+extension UIDevice {
+    var modelIdentifier: String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return String(bytes: Data(bytes: &systemInfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)?
+            .trimmingCharacters(in: .controlCharacters) ?? "Unknown"
+    }
 }

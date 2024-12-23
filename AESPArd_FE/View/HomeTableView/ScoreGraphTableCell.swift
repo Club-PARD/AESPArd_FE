@@ -25,6 +25,15 @@ class ScoreGraphTableCell: UITableViewCell {
         return label
     }()
     
+    private let graphLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 16)
+        label.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+        
+        return label
+    }()
+    
     private let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -40,25 +49,59 @@ class ScoreGraphTableCell: UITableViewCell {
         return view
     }()
     
+    // 막대 그래프
+    let barGraphView: BarGraphView = {
+        let view = BarGraphView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    //막대 그래프 눈속임용 UIView
+    private let emptyView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .clear // 배경색 설정
+        return view
+    }()
+    
     func setUI() {
         
         contentView.addSubview(containerView)
         contentView.addSubview(greetingLabel)
+
+        containerView.addSubview(emptyView)
+        containerView.addSubview(graphLabel)
+
+        containerView.addSubview(barGraphView)
         
         NSLayoutConstraint.activate([
             greetingLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             greetingLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            greetingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -100),
+            greetingLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             greetingLabel.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: -16),
             
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerView.heightAnchor.constraint(equalToConstant: 224),
+            
+            graphLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            graphLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            
+            emptyView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
+            emptyView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor, constant: -155.5),
+            emptyView.widthAnchor.constraint(equalToConstant: 10),
+            emptyView.heightAnchor.constraint(equalToConstant: 10),
+            
+            barGraphView.topAnchor.constraint(equalTo: graphLabel.bottomAnchor, constant: 28),
+            barGraphView.centerXAnchor.constraint(equalTo: emptyView.leadingAnchor),
+//            barGraphView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -31),
+            barGraphView.heightAnchor.constraint(equalToConstant: 149)
         ])
     }
     
     // 라벨 유저 이름 텍스트 설정 메서드
     func configure(with userName: String) {
         greetingLabel.text = "\(userName)님, 오늘도\n프리와 함께 발표준비해요!"
+        graphLabel.text = "\(userName)님의 전달력 항목 점수 그래프"
     }
 }
