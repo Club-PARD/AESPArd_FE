@@ -41,7 +41,7 @@ class PresentationListTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "bookmark_X"), for: .normal)
-//        button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -49,7 +49,8 @@ class PresentationListTableCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "check_X"), for: .normal)
-//        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     
@@ -94,12 +95,15 @@ class PresentationListTableCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setUI()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
     }
     
     func setUI() {
         contentView.addSubview(containerView)
         containerView.addSubview(smallContainerView)
         
+        containerView.addSubview(deleteCheckButton)
         containerView.addSubview(bookmarkButton)
         containerView.addSubview(ptName)
         
@@ -123,6 +127,9 @@ class PresentationListTableCell: UITableViewCell {
             
             bookmarkButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             bookmarkButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            
+            deleteCheckButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            deleteCheckButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             
             ptName.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 21.5),
             ptName.leadingAnchor.constraint(equalTo: bookmarkButton.trailingAnchor, constant: 12),
@@ -164,6 +171,8 @@ class PresentationListTableCell: UITableViewCell {
         }
     }
     
+    //삭제하기 버튼 누를 시 체크박스 등장
+    
     // 발표 정보 설정 메서드
     func configure(presentationName: String, ptDetailCount: Int, presentationDate: Int, ptDetailTotalScore: Int, barVaue: Double) {
         
@@ -171,5 +180,16 @@ class PresentationListTableCell: UITableViewCell {
         ptCount.text = "\(ptDetailCount)개"
         ptDate.text = "발표세부정보설명 · \(presentationDate)일 전"
         circularProgressBar.value = barVaue
+    }
+    
+    // 버튼 상태를 토글하는 메서드
+    @objc func handleButtonToggleNotification() {
+        if !bookmarkButton.isHidden {
+            bookmarkButton.isHidden = true
+            deleteCheckButton.isHidden = false
+        } else {
+            bookmarkButton.isHidden = false
+            deleteCheckButton.isHidden = true
+        }
     }
 }
