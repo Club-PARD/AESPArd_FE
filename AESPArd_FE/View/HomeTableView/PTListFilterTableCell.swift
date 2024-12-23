@@ -96,7 +96,7 @@ class PTListFilterTableCell: UITableViewCell {
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        super.init(style: style, reuseIdentifier: "PTListFilterTableCell")
         setUI()
     }
     
@@ -177,7 +177,7 @@ class PTListFilterTableCell: UITableViewCell {
         } else {
             
             NotificationCenter.default.post(name:.deleteCheckNotification, object: nil)
-            
+//            
             deleteButton.setTitleColor(UIColor(red: 1, green: 0, blue: 0, alpha: 1), for: .normal)
             deleteButton.setImage(UIImage(named: "trash-click"), for: .normal)
         }

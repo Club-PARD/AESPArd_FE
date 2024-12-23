@@ -42,6 +42,10 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // 탭 바 컨트롤러의 delegate 설정
+        self.tabBarController?.delegate = self
+        
         self.navigationController?.isNavigationBarHidden = true
         
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
@@ -62,7 +66,7 @@ class HomeViewController: UIViewController {
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
-
+        
     }
     
     
@@ -90,7 +94,7 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 3 // 섹션 4개
+        return 3 // 섹션 3개
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -174,15 +178,32 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 섹션 2의 셀이 클릭되었을 때
         if indexPath.section == 2 {
-
-            if filterMode == "recent" {
-                
-            } else {
-                
-            }
+            
+            let modalViewController = ListViewController()
+            modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+            //            modalViewController.view.backgroundColor = UIColor(white: 0, alpha: 0.5) // 배경을 투명하게 설정
+            self.definesPresentationContext = true // 현재 컨텍스트를 정의
+            self.present(modalViewController, animated: true)
             
             // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
             tableView.deselectRow(at: indexPath, animated: true)
         }
+    }
+}
+
+// MARK: - 모달 창 열렸을 때 홈 버튼 클릭시 모달 꺼지도록 함
+extension HomeViewController: UITabBarControllerDelegate {
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        // 현재 선택된 탭이 HomeViewController일 때, 모달을 닫음
+        if let navController = viewController as? UINavigationController,
+           let homeVC = navController.viewControllers.first as? HomeViewController {
+            // HomeViewController에 표시된 모달이 있다면 닫기
+            if let presentedVC = homeVC.presentedViewController {
+                presentedVC.dismiss(animated: true, completion: nil)
+            }
+        }
+        
+        return true
     }
 }
