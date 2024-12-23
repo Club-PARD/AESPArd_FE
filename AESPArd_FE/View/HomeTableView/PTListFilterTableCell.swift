@@ -20,6 +20,8 @@ class PTListFilterTableCell: UITableViewCell {
         button.setImage(UIImage(named: "searchIcon"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
+        button.contentHorizontalAlignment = .right
+//        button.backgroundColor = .green
         return button
     }()
     
@@ -96,7 +98,7 @@ class PTListFilterTableCell: UITableViewCell {
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        super.init(style: style, reuseIdentifier: "PTListFilterTableCell")
         setUI()
     }
     
@@ -112,9 +114,11 @@ class PTListFilterTableCell: UITableViewCell {
             listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             listCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
-            searchButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
-            searchButton.widthAnchor.constraint(equalToConstant: 20),
+            searchButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            searchButton.leadingAnchor.constraint(equalTo: listCountLabel.trailingAnchor, constant: 40),
+            
+//            searchButton.widthAnchor.constraint(equalToConstant: 20),
             searchButton.heightAnchor.constraint(equalToConstant: 20),
             
             recentButton.topAnchor.constraint(equalTo: listCountLabel.bottomAnchor, constant: 16),
@@ -177,7 +181,7 @@ class PTListFilterTableCell: UITableViewCell {
         } else {
             
             NotificationCenter.default.post(name:.deleteCheckNotification, object: nil)
-            
+//            
             deleteButton.setTitleColor(UIColor(red: 1, green: 0, blue: 0, alpha: 1), for: .normal)
             deleteButton.setImage(UIImage(named: "trash-click"), for: .normal)
         }
