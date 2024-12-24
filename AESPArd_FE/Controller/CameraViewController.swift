@@ -202,8 +202,8 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         ])
         
         DispatchQueue.global(qos: .background).async { [weak self] in
-            self?.captureSession.startRunning()
-        } // 카메라 세션 시작
+                    self?.captureSession.startRunning()
+                } // 카메라 세션 시작
     }
     
     //MARK: 녹화 시작~중
