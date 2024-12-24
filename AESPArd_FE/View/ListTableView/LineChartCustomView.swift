@@ -152,7 +152,7 @@ class LineChartCustomView: UIView {
             let point = transformer.pixelForValues(x: Double(i), y: scoreData[i]) // 데이터 포인트의 픽셀 좌표 계산
             
             // 원 위치
-            let circle = UIView(frame: CGRect(x: point.x - 10, y: point.y - 10, width: 41, height: 30))
+            let circle = UIView(frame: CGRect(x: point.x - 18, y: point.y - 15, width: 41, height: 30))
             circle.backgroundColor = .white
             circle.layer.cornerRadius = 15
             

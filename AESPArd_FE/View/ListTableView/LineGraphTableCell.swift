@@ -95,7 +95,7 @@ class LineGraphTableCell: UITableViewCell {
             
             chartView.topAnchor.constraint(equalTo: containerView.topAnchor),
             chartView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            chartView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -26),
+            chartView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -13),
             chartView.heightAnchor.constraint(equalToConstant: 210),
         
         ])
