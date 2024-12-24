@@ -195,12 +195,12 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
 extension HomeViewController: UITabBarControllerDelegate {
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        // 현재 선택된 탭이 HomeViewController일 때, 모달을 닫음
+        // 현재 선택된 탭이 HomeViewController일 때
         if let navController = viewController as? UINavigationController,
            let homeVC = navController.viewControllers.first as? HomeViewController {
-            // HomeViewController에 표시된 모달이 있다면 닫기
-            if let presentedVC = homeVC.presentedViewController {
-                presentedVC.dismiss(animated: true, completion: nil)
+            // 모든 모달 창 닫기
+            homeVC.dismiss(animated: true) {
+                print("모든 모달 창이 닫혔습니다.")
             }
         }
         

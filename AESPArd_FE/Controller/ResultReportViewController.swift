@@ -1,55 +1,24 @@
 //
-//  ListViewController.swift
+//  ReportResultViewController.swift
 //  AESPArd_FE
 //
-//  Created by 이유현 on 12/23/24.
+//  Created by 이유현 on 12/24/24.
 //
 
 import UIKit
 
-class ListViewController : UIViewController, ListHeaderTableCellDelegate {
+class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
-    //발표 폴더 이름
-    var presentationFolderName :String = "협체발표"
-    //발표연습 갯수
-    var practiceCount :Int = 5
+    var practiceName: String = "1번째 테이크" //발표 연습 이름
+    var practiceTotalScore: Int = 88
+    var itembarVaue : Double =  0.84 //원형 프로그레스바
     
-    //섹션 2
-    //발표 연습 이름
-    var practiceName : String = "번째 테이크"
-    //발표 연습 날짜
-    var practiceDate : String = "2023. 12. 20"
-    //발표 연습 점수
-    var practiceScore : Double =  0.84
-    
-    
-    
-    let tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.backgroundColor = .clear
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return tableView
-    }()
-    
-    let editPresentationView: EditPresentationView = {
-        let view = EditPresentationView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.isHidden = true // 기본적으로 숨김
-        view.layer.cornerRadius = 13
-        //        view.clipsToBounds = true
-        
-        view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
-        view.layer.shadowOpacity = 1
-        view.layer.shadowRadius = 15
-        view.layer.shadowOffset = CGSize(width: 0, height: 0)
-        
-        return view
-    }()
+    var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리 비율", "발표 내용 AI 분석 기능"]
+    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84, -1.0]
+    var itemDetailList : [String] = ["14초 초과되었어요", "조금 빠른 편이에요", "조금 작은 편이에요", "9회, 조금 많아요", "15회, 다소 많아요", "비율 기준치 작성", "유료 구독 시 이용 가능합니다"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.navigationController?.isNavigationBarHidden = true
         
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
@@ -73,32 +42,52 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         setUI()
         
         //edit 창 토글
-        NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPresentationNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPracticeNotification, object: nil)
         
         // edit 이름 수정 alert
-        NotificationCenter.default.addObserver(self, selector: #selector(editNameAlert), name: .editNameNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(editNameAlert), name: .editPracticeNameNotification, object: nil)
         
         //edit 폴더 삭제 alert
-        NotificationCenter.default.addObserver(self, selector: #selector(editDeletePresentaionAlert), name: .deletePresentationFolderNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(editDeletePresentaionAlert), name: .deletePracticeNotification, object: nil)
     }
     
     deinit {
         // 옵저버 제거
-        NotificationCenter.default.removeObserver(self, name: .editPresentationNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .editNameNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .deletePresentationFolderNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .editPracticeNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .editPracticeNameNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .deletePracticeNotification, object: nil)
     }
     
-    private func setUI() {
+    let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .clear
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
+        return tableView
+    }()
+    
+    let editPracticeView: EditPracticeView = {
+        let view = EditPracticeView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true // 기본적으로 숨김
+        view.layer.cornerRadius = 13
+        
+        view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
+        view.layer.shadowOpacity = 1
+        view.layer.shadowRadius = 15
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+        
+        return view
+    }()
+    
+    func setUI(){
         view.addSubview(tableView)
-        view.addSubview(editPresentationView)
+        view.addSubview(editPracticeView)
         
         // 각 섹션별 셀 등록
-        tableView.register(LineGraphTableCell.self, forCellReuseIdentifier: "LineGraphTableCell")
-        tableView.register(DeleteSelectedListTableCell.self, forCellReuseIdentifier: "DeleteSelectedListTableCell")
-        tableView.register(PracticeListTableCell.self, forCellReuseIdentifier: "PracticeListTableCell")
-        
+        tableView.register(VideoPlayerViewCell.self, forCellReuseIdentifier: "VideoPlayerViewCell")
+        tableView.register(PracticeTotalScoreCell.self, forCellReuseIdentifier: "PracticeTotalScoreCell")
+        tableView.register(DropDownDetailTableCell.self, forCellReuseIdentifier: "DropDownDetailTableCell") //드롭다운 닫힘
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -106,40 +95,40 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             
-            editPresentationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
-            editPresentationView.widthAnchor.constraint(equalToConstant: 262),
-            editPresentationView.heightAnchor.constraint(equalToConstant: 96),
-            editPresentationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            //            editPresentationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            editPracticeView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
+            editPracticeView.widthAnchor.constraint(equalToConstant: 262),
+            editPracticeView.heightAnchor.constraint(equalToConstant: 96),
+            editPracticeView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
         ])
+    
     }
     
-    
-    
-    // ListHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
-    func dismissViewController() {
+    // PracticeHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
+    func dismissPracticeViewController() {
         self.dismiss(animated: true, completion: nil)
         print("2차")
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
     @objc func handleEditViewToggleNotification() {
-        if !editPresentationView.isHidden {
-            editPresentationView.isHidden = true
+        if !editPracticeView.isHidden {
+            editPracticeView.isHidden = true
         } else {
-            editPresentationView.isHidden = false
+            editPracticeView.isHidden = false
         }
     }
+    
     
     // 이름 수정하기 Alert
     @objc func editNameAlert() {
         // Alert 생성
-        let alertController = UIAlertController(title: "이름 수정하기", message: "해당 발표 파일의 이름을 수정할 수 있어요.", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "이름 수정하기", message: "해당 연습 파일의 이름을 수정할 수 있어요.", preferredStyle: .alert)
         
         // 텍스트 필드 추가
         alertController.addTextField { textField in
             //            textField.placeholder = "새로운 이름"
-            textField.text = self.presentationFolderName // 기존 이름을 텍스트 필드에 설정
+            textField.text = self.practiceName // 기존 이름을 텍스트 필드에 설정
             //            textField.autocorrectionType = .no
             //            textField.spellCheckingType = .no
         }
@@ -167,10 +156,10 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     
     
-    //발표 파일 삭제하기 Alert
+    //연습 파일 삭제하기 Alert
     @objc func editDeletePresentaionAlert() {
         // 알림 컨트롤러 생성
-        let alertController = UIAlertController(title: "발표 파일 삭제하기", message: "발표 파일을 삭제하시겠어요?\n이 작업은 되돌릴 수 없어요.", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "연습 파일 삭제하기", message: "연습 파일을 삭제하시겠어요?\n이 작업은 되돌릴 수 없어요.", preferredStyle: .alert)
         
         // 취소 버튼 추가
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
@@ -186,18 +175,18 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 알림 표시
         self.present(alertController, animated: true, completion: nil)
     }
-    
 }
 
+
 // MARK: - 2. tableView extension 생성
-extension ListViewController: UITableViewDelegate, UITableViewDataSource {
+extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 3 // 섹션 3개
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 2 {
-            return practiceCount // 마지막 섹션은 행은 발표 연습 갯수만큼
+            return 7 // 마지막 섹션은 행은 평가 항목 갯수
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
@@ -215,12 +204,12 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if section == 0 {
             // ListHeaderTableCell을 0번 섹션의 헤더로 설정
-            let headerCell = ListHeaderTableCell(style: .default, reuseIdentifier: "ListHeaderTableCell")
-            headerCell.delegate = self  // 델리게이트 설정
+            let headerCell = PracticeHeaderTableCell(style: .default, reuseIdentifier: "PracticeHeaderTableCell")
+                headerCell.delegate = self  // 델리게이트 설정
             headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
             
-            //폴더 이름 데이터 전달
-            headerCell.configure(presentationFolderName: presentationFolderName)
+            //발표 연습 이름 데이터 전달
+            headerCell.configure(practiceName: practiceName)
             return headerCell
         }
         return UIView() // 빈 뷰를 반환하여 간격 제거
@@ -230,36 +219,35 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         // 섹션에 맞는 셀을 반환
         switch indexPath.section {
         case 0:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "LineGraphTableCell", for: indexPath) as! LineGraphTableCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "VideoPlayerViewCell", for: indexPath) as! VideoPlayerViewCell
             // 셀에 데이터 설정 (필요한 설정 추가)
-            
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
             return cell
             
         case 1:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "DeleteSelectedListTableCell", for: indexPath) as! DeleteSelectedListTableCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PracticeTotalScoreCell", for: indexPath) as! PracticeTotalScoreCell
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            
-            cell.configure(practiceCount: practiceCount)
+            cell.totalScoreLabel.text = "\(practiceTotalScore)점"
             
             return cell
             
         case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PracticeListTableCell", for: indexPath) as! PracticeListTableCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
-            cell.configure(practiceDate:practiceDate, practiceScore:practiceScore)
+            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] )
             
-            //순서
-            cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
-            //발표 연습 이름 라벨
-            cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
+            if(indexPath.row == 6){
+                cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
+                cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
+//                cell.circularProgressBar.label = "???"
+            }
             
             return cell
             
@@ -273,30 +261,14 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         // 각 섹션과 행에 대해 다르게 설정
         switch indexPath.section {
         case 0:
-            return 272 // 섹션 1의 셀 높이 - 중앙 선 그래프
+            return 316 // 섹션 1의 셀 높이 - 발표 비디오 영상
         case 1:
-            return 80 // 섹션 2의 셀 높이 - 발표 리스트 삭제 버튼
+            return 96 // 섹션 2의 셀 높이 - 발표 연습 총 점수
         case 2:
-            return 68 // 박스 크기 60px + 아래 패딩 8px
+            return 88 // 박스 크기 80px + 아래 패딩 8px
+            // or 190+8
         default:
             return 60 // 기본 셀 높이
         }
     }
-    
-    // 셀 클릭 시 호출되는 메서드
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 섹션 2의 셀이 클릭되었을 때
-        if indexPath.section == 2 {
-            
-            let modalViewController = ResultReportViewController()
-            modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
-            self.definesPresentationContext = true // 현재 컨텍스트를 정의
-            self.present(modalViewController, animated: true)
-            
-            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
-            tableView.deselectRow(at: indexPath, animated: true)
-        }
-    }
-    
 }
-

@@ -1,30 +1,24 @@
-//
-//  ListHeaderTableCell.swift
-//  AESPArd_FE
-//
-//  Created by 이유현 on 12/23/24.
-//
 
 import UIKit
 
 extension Notification.Name {
-    static let editPresentationNotification = Notification.Name("editPresentationNotification")
+    static let editPracticeNotification = Notification.Name("editPracticeNotification")
 }
 
-protocol ListHeaderTableCellDelegate: AnyObject {
-    func dismissViewController()
+protocol PracticeHeaderTableCellDelegate: AnyObject {
+    func dismissPracticeViewController()
 }
 
-class ListHeaderTableCell: UITableViewCell {
+class PracticeHeaderTableCell: UITableViewCell {
     
-    weak var delegate: ListHeaderTableCellDelegate?
+    weak var delegate: PracticeHeaderTableCellDelegate?
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "ListHeaderTableCell")
+        super.init(style: style, reuseIdentifier: "PracticeHeaderTableCell")
         setUI()
         
     }
@@ -93,18 +87,17 @@ class ListHeaderTableCell: UITableViewCell {
     
     //뒤로가기 버튼 탭
     @objc func backButtonTapped() {
-        // delegate로 ListViewController의 dismissViewController 호출
-            delegate?.dismissViewController()
+            delegate?.dismissPracticeViewController()
     }
     
-    // 발표 정보 설정 메서드
-    func configure(presentationFolderName: String) {
-        headerLabel.text = "\(presentationFolderName)"
+    // 발표 연습 정보 설정 메서드
+    func configure(practiceName: String) {
+        headerLabel.text = "\(practiceName)"
     }
     
     //수정 버튼 탭
     @objc func moreEditButtonTapped() {
-        NotificationCenter.default.post(name:.editPresentationNotification, object: nil)
+        NotificationCenter.default.post(name:.editPracticeNotification, object: nil)
     }
     
 }
