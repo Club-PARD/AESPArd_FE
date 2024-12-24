@@ -7,18 +7,15 @@
 
 import UIKit
 
-class PracticeTotalScoreCell: UITableViewCell {
-    
-    weak var delegate: ListHeaderTableCellDelegate?
+class PracticeTotalScoreView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "PracticeTotalScoreCell")
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setUI()
-        
     }
     
     private let scoreLabel: UILabel = {
@@ -54,17 +51,17 @@ class PracticeTotalScoreCell: UITableViewCell {
     
     func setUI(){
         
-        contentView.addSubview(scoreLabel)
-        contentView.addSubview(totalScoreView)
+        self.addSubview(scoreLabel)
+        self.addSubview(totalScoreView)
         totalScoreView.addSubview(totalScoreLabel)
         
         NSLayoutConstraint.activate([
-            scoreLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 45),
-            scoreLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24),
-            scoreLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            scoreLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 45),
+            scoreLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -24),
+            scoreLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
             
-            totalScoreView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
-            totalScoreView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            totalScoreView.topAnchor.constraint(equalTo: self.topAnchor, constant: 40),
+            totalScoreView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
             totalScoreView.heightAnchor.constraint(equalToConstant: 40),
             
             //            totalScoreLabel.centerXAnchor.constraint(equalTo: totalScoreView.centerXAnchor),

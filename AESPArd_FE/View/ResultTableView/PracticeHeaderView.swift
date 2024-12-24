@@ -9,7 +9,7 @@ protocol PracticeHeaderTableCellDelegate: AnyObject {
     func dismissPracticeViewController()
 }
 
-class PracticeHeaderTableCell: UITableViewCell {
+class PracticeHeaderView: UIView {
     
     weak var delegate: PracticeHeaderTableCellDelegate?
     
@@ -17,10 +17,9 @@ class PracticeHeaderTableCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "PracticeHeaderTableCell")
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setUI()
-        
     }
     
     let containerView: UIView = {
@@ -43,7 +42,7 @@ class PracticeHeaderTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "back"), for: .normal)
         button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         return button
     }()
     
@@ -52,22 +51,22 @@ class PracticeHeaderTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "more"), for: .normal)
         button.addTarget(self, action: #selector(moreEditButtonTapped), for: .touchUpInside)
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         return button
     }()
     
     func setUI(){
         
-        contentView.addSubview(containerView)
+        self.addSubview(containerView)
         containerView.addSubview(backButton)
         containerView.addSubview(headerLabel)
         containerView.addSubview(moreButton)
         
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.topAnchor.constraint(equalTo: self.topAnchor),
+            containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             
             backButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             backButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
@@ -87,7 +86,7 @@ class PracticeHeaderTableCell: UITableViewCell {
     
     //뒤로가기 버튼 탭
     @objc func backButtonTapped() {
-            delegate?.dismissPracticeViewController()
+        delegate?.dismissPracticeViewController()
     }
     
     // 발표 연습 정보 설정 메서드

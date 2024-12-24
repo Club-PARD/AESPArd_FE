@@ -25,6 +25,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         
         tableView.delegate = self
         tableView.dataSource = self
+        practiceHeaderView.delegate =  self
+        
         setUI()
         
         // 섹션 구분선 숨기기
@@ -40,6 +42,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             tableView.sectionHeaderTopPadding = 0
         }
         setUI()
+        
+        practiceHeaderView.configure(practiceName: practiceName)
         
         //edit 창 토글
         NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPracticeNotification, object: nil)
@@ -58,6 +62,24 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         NotificationCenter.default.removeObserver(self, name: .deletePracticeNotification, object: nil)
     }
     
+    let practiceHeaderView: PracticeHeaderView = {
+        let view = PracticeHeaderView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    let videoPlayerView: VideoPlayerView = {
+        let view = VideoPlayerView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    let practiceTotalScoreView: PracticeTotalScoreView = {
+        let view = PracticeTotalScoreView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .clear
@@ -71,6 +93,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isHidden = true // 기본적으로 숨김
         view.layer.cornerRadius = 13
+//        view.delegate = self
         
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
@@ -81,16 +104,24 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     }()
     
     func setUI(){
+        
+        view.addSubview(practiceHeaderView)
+        
         view.addSubview(tableView)
         view.addSubview(editPracticeView)
         
         // 각 섹션별 셀 등록
-        tableView.register(VideoPlayerViewCell.self, forCellReuseIdentifier: "VideoPlayerViewCell")
-        tableView.register(PracticeTotalScoreCell.self, forCellReuseIdentifier: "PracticeTotalScoreCell")
         tableView.register(DropDownDetailTableCell.self, forCellReuseIdentifier: "DropDownDetailTableCell") //드롭다운 닫힘
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            
+            practiceHeaderView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            practiceHeaderView.heightAnchor.constraint(equalToConstant: 48),
+            practiceHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            practiceHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            
+            tableView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -101,7 +132,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             editPracticeView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
         ])
-    
+        
     }
     
     // PracticeHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
@@ -181,94 +212,33 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
 // MARK: - 2. tableView extension 생성
 extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 3 // 섹션 3개
+        return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 2 {
-            return 7 // 마지막 섹션은 행은 평가 항목 갯수
-        } else {
-            return 1 // 나머지 섹션은 각 1개 행
-        }
-    }
-    
-    // 섹션에 대한 헤더 설정
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        // 0번 섹션에 대해서만 헤더 높이를 설정
-        if section == 0 {
-            return 48.0 // HeaderTableCell의 높이
-        }
-        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section == 0 {
-            // ListHeaderTableCell을 0번 섹션의 헤더로 설정
-            let headerCell = PracticeHeaderTableCell(style: .default, reuseIdentifier: "PracticeHeaderTableCell")
-                headerCell.delegate = self  // 델리게이트 설정
-            headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
-            
-            //발표 연습 이름 데이터 전달
-            headerCell.configure(practiceName: practiceName)
-            return headerCell
-        }
-        return UIView() // 빈 뷰를 반환하여 간격 제거
+        return 7 // 마지막 섹션은 행은 평가 항목 갯수
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // 섹션에 맞는 셀을 반환
-        switch indexPath.section {
-        case 0:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "VideoPlayerViewCell", for: indexPath) as! VideoPlayerViewCell
-            // 셀에 데이터 설정 (필요한 설정 추가)
-            cell.backgroundColor = .clear
-            cell.selectionStyle = .none
-            
-            return cell
-            
-        case 1:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PracticeTotalScoreCell", for: indexPath) as! PracticeTotalScoreCell
-            // 셀에 데이터 설정 (필요한 설정 추가)
-            cell.backgroundColor = .clear
-            cell.selectionStyle = .none
-            cell.totalScoreLabel.text = "\(practiceTotalScore)점"
-            
-            return cell
-            
-        case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
-            // 셀에 데이터 설정 (필요한 설정 추가)
-            cell.backgroundColor = .clear
-            cell.selectionStyle = .none
-            
-            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] )
-            
-            if(indexPath.row == 6){
-                cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
-                cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
-//                cell.circularProgressBar.label = "???"
-            }
-            
-            return cell
-            
-        default:
-            return UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
+        // 셀에 데이터 설정 (필요한 설정 추가)
+        cell.backgroundColor = .clear
+        cell.selectionStyle = .none
+        
+        cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] )
+        
+        if(indexPath.row == 6){
+            cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
+            cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
+            //                cell.circularProgressBar.label = "???"
         }
+        
+        return cell
     }
     
     // 셀의 높이를 다르게 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        // 각 섹션과 행에 대해 다르게 설정
-        switch indexPath.section {
-        case 0:
-            return 316 // 섹션 1의 셀 높이 - 발표 비디오 영상
-        case 1:
-            return 96 // 섹션 2의 셀 높이 - 발표 연습 총 점수
-        case 2:
-            return 88 // 박스 크기 80px + 아래 패딩 8px
-            // or 190+8
-        default:
-            return 60 // 기본 셀 높이
-        }
+        
+        return 88 // 박스 크기 80px + 아래 패딩 8px
     }
 }
