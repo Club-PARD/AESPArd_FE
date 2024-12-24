@@ -17,6 +17,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84, -1.0]
     var itemDetailList : [String] = ["14초 초과되었어요", "조금 빠른 편이에요", "조금 작은 편이에요", "9회, 조금 많아요", "15회, 다소 많아요", "비율 기준치 작성", "유료 구독 시 이용 가능합니다"]
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
@@ -43,6 +44,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         }
         setUI()
         
+        //데이터 전달
         practiceHeaderView.configure(practiceName: practiceName)
         
         //edit 창 토글
@@ -62,6 +64,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         NotificationCenter.default.removeObserver(self, name: .deletePracticeNotification, object: nil)
     }
     
+    //MARK: - 클로저로 UI 생성
     let practiceHeaderView: PracticeHeaderView = {
         let view = PracticeHeaderView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -103,6 +106,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         return view
     }()
     
+    //MARK: - 제약조건
     func setUI(){
         
         view.addSubview(practiceHeaderView)
@@ -134,6 +138,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         ])
         
     }
+    
+    //MARK: - 관련 메서드
     
     // PracticeHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissPracticeViewController() {

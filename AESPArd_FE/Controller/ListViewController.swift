@@ -22,6 +22,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //발표 연습 점수
     var practiceScore : Double =  0.84
     
+    //선 그래프 점수
+    var scoreListData: [Double] = [82, 34, 67, 69, 89]
     
     
     let tableView: UITableView = {
@@ -236,6 +238,9 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
+            //데이터 전달
+            cell.chartView.scoreData = scoreListData
+            cell.chartView.setNeedsLayout() // 데이터 전달 후 차트 새로고침
             return cell
             
         case 1:

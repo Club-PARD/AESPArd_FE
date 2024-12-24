@@ -62,12 +62,20 @@ class LineGraphTableCell: UITableViewCell {
         return view
     }()
     
+    let chartView: LineChartCustomView = {
+        let view = LineChartCustomView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     func setUI(){
         
         contentView.addSubview(containerView)
         contentView.addSubview(guideLabel)
         contentView.addSubview(talkImageView)
         talkImageView.addSubview(talkLabel)
+        
+        contentView.addSubview(chartView)
         
         NSLayoutConstraint.activate([
             
@@ -85,6 +93,11 @@ class LineGraphTableCell: UITableViewCell {
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerView.heightAnchor.constraint(equalToConstant: 224),
             
+            chartView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            chartView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            chartView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -26),
+            chartView.heightAnchor.constraint(equalToConstant: 210),
+        
         ])
     }
 }
