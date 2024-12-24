@@ -181,8 +181,6 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
                 
             }
             
-            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
-            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
 }
