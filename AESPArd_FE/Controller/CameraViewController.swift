@@ -166,6 +166,9 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         view.bringSubviewToFront(recordingTimeLabel)
         view.bringSubviewToFront(toggleScreenCoverButton)
         view.bringSubviewToFront(aimImageView)
+        DispatchQueue.global(qos: .background).async { [weak self] in
+                    self?.captureSession.startRunning()
+                } // 카메라 세션 시작
     }
     
     private func setupTimerLabel() {
