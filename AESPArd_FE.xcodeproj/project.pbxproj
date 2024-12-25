@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0C09B45D2D0FEF4500042B72 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 0C09B45C2D0FEF4500042B72 /* .gitignore */; };
+		14D8572B2D1AEDB30041E9C9 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 14D8572A2D1AEDB30041E9C9 /* DGCharts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14D8572B2D1AEDB30041E9C9 /* DGCharts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +133,7 @@
 			);
 			name = AESPArd_FE;
 			packageProductDependencies = (
+				14D8572A2D1AEDB30041E9C9 /* DGCharts */,
 			);
 			productName = AESPArd_FE;
 			productReference = 0C86D0A62D0FE81A00BE4FB4 /* AESPArd_FE.app */;
@@ -214,6 +217,9 @@
 			);
 			mainGroup = 0C86D09D2D0FE81A00BE4FB4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0C86D0A72D0FE81A00BE4FB4 /* Products */;
 			projectDirPath = "";
@@ -574,6 +580,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		14D8572A2D1AEDB30041E9C9 /* DGCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGCharts;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0C86D09E2D0FE81A00BE4FB4 /* Project object */;
 }
