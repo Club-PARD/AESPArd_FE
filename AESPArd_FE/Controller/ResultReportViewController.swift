@@ -59,6 +59,10 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //총 점수
+        practiceTotalScoreView.totalScoreLabel.text = "\(practiceTotalScore)점"
+
     }
     
     deinit {
@@ -84,6 +88,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     let practiceTotalScoreView: PracticeTotalScoreView = {
         let view = PracticeTotalScoreView()
         view.translatesAutoresizingMaskIntoConstraints = false
+//        view.totalScoreLabel.text = "\(practiceTotalScore)점"
         return view
     }()
     
@@ -123,6 +128,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     func setUI(){
         
         view.addSubview(practiceHeaderView)
+        view.addSubview(videoPlayerView)
+        view.addSubview(practiceTotalScoreView)
         
         view.addSubview(tableView)
         view.addSubview(transparentOverlay) //edit창 이외 터치 이벤트 감지
@@ -138,8 +145,17 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             practiceHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             practiceHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
+            videoPlayerView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
+            videoPlayerView.heightAnchor.constraint(equalToConstant: 316),
+            videoPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            videoPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            tableView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
+            practiceTotalScoreView.topAnchor.constraint(equalTo: videoPlayerView.bottomAnchor),
+            practiceTotalScoreView.heightAnchor.constraint(equalToConstant: 100),
+            practiceTotalScoreView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            practiceTotalScoreView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: practiceTotalScoreView.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
