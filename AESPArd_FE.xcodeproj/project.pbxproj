@@ -303,11 +303,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-<<<<<<< HEAD
 				DEVELOPMENT_TEAM = 4JXC27SJKM;
-=======
-				DEVELOPMENT_TEAM = PG4DAQ672A;
->>>>>>> feature
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
