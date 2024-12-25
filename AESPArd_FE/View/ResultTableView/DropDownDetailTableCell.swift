@@ -7,6 +7,11 @@
 
 import UIKit
 
+
+extension Notification.Name {
+    static let dropDownNotification = Notification.Name("dropDownNotification")
+}
+
 class DropDownDetailTableCell: UITableViewCell {
     
     weak var delegate: ListHeaderTableCellDelegate?
@@ -21,7 +26,7 @@ class DropDownDetailTableCell: UITableViewCell {
         
     }
     
-    private var AI : String = ""
+    private var rowIndex: Int = 0 // 행 번호를 저장할 변수 추가
     
     let containerView: UIView = {
         let view = UIView()
@@ -71,7 +76,7 @@ class DropDownDetailTableCell: UITableViewCell {
         let progressView = UIProgressView(progressViewStyle: .default)
         progressView.translatesAutoresizingMaskIntoConstraints = false
         progressView.progress = 0.5 // 초기 진행률 설정
-//        progressView.tintColor = UIColor.blue // 진행 부분 색상
+        //        progressView.tintColor = UIColor.blue // 진행 부분 색상
         progressView.trackTintColor = UIColor(red: 0.94, green: 0.95, blue: 0.95, alpha: 1) // 트랙 부분 색상
         progressView.layer.cornerRadius = 8 // 외부 모서리 둥글게 설정
         progressView.clipsToBounds = true
@@ -89,6 +94,55 @@ class DropDownDetailTableCell: UITableViewCell {
         return label
     }()
     
+    //MARK: - 드롭다운 열렸을 경우
+    let evaluationLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
+        label.isHidden = true
+        return label
+    }()
+    
+    let myEvaluationLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
+        label.isHidden = true
+        return label
+    }()
+    
+    let evaluationValueLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+        label.isHidden = true
+        return label
+    }()
+    
+    let myValueLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
+        label.isHidden = true
+        return label
+    }()
+    
+    let helpButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(named: "help-circle"), for: .normal)
+        button.addTarget(self, action: #selector(helpButtonTapped), for: .touchUpInside)
+        button.backgroundColor = .green
+        button.isHidden = true
+        
+        return button
+    }()
+    
+    //MARK: - 제약조건
     func setUI(){
         
         contentView.addSubview(containerView)
@@ -99,6 +153,13 @@ class DropDownDetailTableCell: UITableViewCell {
         
         containerView.addSubview(progressView)
         progressView.addSubview(itemScore)
+        
+        //드롭다운 열렸을 경우
+        containerView.addSubview(evaluationLabel)
+        containerView.addSubview(myEvaluationLabel)
+        containerView.addSubview(evaluationValueLabel)
+        containerView.addSubview(myValueLabel)
+        containerView.addSubview(helpButton)
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -112,9 +173,9 @@ class DropDownDetailTableCell: UITableViewCell {
             itemExplain.topAnchor.constraint(equalTo: itemName.bottomAnchor, constant: 2),
             itemExplain.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             
-            dropDownButton.topAnchor.constraint(equalTo: contentView.topAnchor),
+            dropDownButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 36),
             dropDownButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            dropDownButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            //            dropDownButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             dropDownButton.widthAnchor.constraint(equalToConstant: 56),
             
             progressView.topAnchor.constraint(equalTo: itemExplain.bottomAnchor, constant: 8),
@@ -124,14 +185,33 @@ class DropDownDetailTableCell: UITableViewCell {
             
             itemScore.centerYAnchor.constraint(equalTo: progressView.centerYAnchor),
             itemScore.leadingAnchor.constraint(equalTo: progressView.leadingAnchor, constant: 7),
+            
+            //드롭다운 열렸을 경우
+            evaluationLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 20),
+            evaluationLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            
+            myEvaluationLabel.topAnchor.constraint(equalTo: evaluationLabel.bottomAnchor, constant: 8),
+            myEvaluationLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            
+            evaluationValueLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 20),
+            evaluationValueLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            
+            myValueLabel.topAnchor.constraint(equalTo: evaluationValueLabel.bottomAnchor, constant: 8),
+            myValueLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            
+            helpButton.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 18),
+            helpButton.leadingAnchor.constraint(equalTo: evaluationLabel.trailingAnchor, constant: 4),
+            
         ])
     }
     
+    //MARK: - 메서드
+    
     // 발표 항목 정보 설정 메서드
-    func configure(itemNameList: String, itemTotalScore: Double, itemDetailList: String) {
+    func configure(itemNameList: String, itemTotalScore: Double, itemDetailList: String, rowIndex: Int) {
+        self.rowIndex = rowIndex
         itemName.text = itemNameList
         itemExplain.text = itemDetailList
-        AI = itemNameList
         
         progressView.setProgress(Float(itemTotalScore), animated: false)
         
@@ -149,6 +229,37 @@ class DropDownDetailTableCell: UITableViewCell {
     
     //드롭다운 버튼 메서드
     @objc func dropDownButtonTapped() {
+        let currentImage = dropDownButton.image(for: .normal)
+        let chevronDownImage = UIImage(named: "chevron-down")
+        let chevronUpImage = UIImage(named: "chevron-up")
         
+        if currentImage == chevronDownImage {
+            //드롭다운이 열림
+            dropDownButton.setImage(chevronUpImage, for: .normal)
+            
+            evaluationLabel.isHidden = false
+            myEvaluationLabel.isHidden = false
+            evaluationValueLabel.isHidden = false
+            myValueLabel.isHidden = false
+            if(rowIndex != 0 ){
+                helpButton.isHidden = false
+            }
+            
+        } else {
+            //드롭다운이 닫힘
+            dropDownButton.setImage(chevronDownImage, for: .normal)
+            
+            evaluationLabel.isHidden = true
+            myEvaluationLabel.isHidden = true
+            evaluationValueLabel.isHidden = true
+            myValueLabel.isHidden = true
+            helpButton.isHidden = true
+        }
     }
+    
+    //헬프 버튼 메서드
+    @objc func helpButtonTapped() {
+        print("클릭됨")
+    }
+    
 }

@@ -17,6 +17,15 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84]
     var itemDetailList : [String] = ["7초 초과되었어요.", "조금 느린 편이에요. 조금만 빠르게 말해볼까요?", "발표에 딱 맞는 목소리 크기였어요!", "의식적으로 발화 지연 표현을 고치려고 노력해보세요!", "너무 많아요. 발표 내용을 더 숙지해보세요.", "훌륭해요! 실전에서도 관객과의 소통이 중요해요."]
     
+    //드롭다운 열렸을 경우 보여주는 값
+    var evaluationList : [String] = ["내가 입력한 발표 시간", "발표에 적절한 WPM", "발표에 적절한 목소리 데시벨", "나의 발화 지연 횟수", "나의 불필요한 공백 횟수", "관객을 바라본 시선의 비율"]
+    var myEvaluationlList : [String] = ["영상 발표 시간", "나의 WPM", "나의 목소리 데시벨"]
+    
+    var evaluationValuelList : [String] = ["05:30~07:30", "???WPM", "???dB", "9회", "5회", "???%"]
+    var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
+    
+    // 드롭다운 상태 저장
+    var dropDownStates: [Bool] = Array(repeating: false, count: 6)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,7 +71,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         
         //총 점수
         practiceTotalScoreView.totalScoreLabel.text = "\(practiceTotalScore)점"
-
+        
     }
     
     deinit {
@@ -88,7 +97,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     let practiceTotalScoreView: PracticeTotalScoreView = {
         let view = PracticeTotalScoreView()
         view.translatesAutoresizingMaskIntoConstraints = false
-//        view.totalScoreLabel.text = "\(practiceTotalScore)점"
+        //        view.totalScoreLabel.text = "\(practiceTotalScore)점"
         return view
     }()
     
@@ -105,7 +114,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isHidden = true // 기본적으로 숨김
         view.layer.cornerRadius = 13
-//        view.delegate = self
+        //        view.delegate = self
         
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
@@ -276,11 +285,20 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
         
-        cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] )
+        cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] , rowIndex: indexPath.row)
         
-        if(indexPath.row == 6){
-            cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
-            cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
+        // 드롭다운 버튼 클릭 시 상태 변경
+        cell.dropDownButton.addTarget(self, action: #selector(dropDownButtonTapped(_:)), for: .touchUpInside)
+        cell.dropDownButton.tag = indexPath.row
+        
+        //드롭다운 열렸을 경우 보여줄 값 지정
+        cell.evaluationLabel.text = evaluationList[indexPath.row]
+        if(indexPath.row<3){
+            cell.myEvaluationLabel.text = myEvaluationlList[indexPath.row]
+        }
+        cell.evaluationValueLabel.text = evaluationValuelList[indexPath.row]
+        if(indexPath.row<3){
+            cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
         }
         
         return cell
@@ -288,7 +306,28 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
     
     // 셀의 높이를 다르게 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if dropDownStates[indexPath.row] {
+            // 드롭다운이 열려 있는 경우
+            if indexPath.row == 3 || indexPath.row == 4 || indexPath.row == 5 {
+                // 3, 4, 5번 행에 대해 높이를 143으로 설정
+                return 143
+            } else {
+                // 그 외의 행에 대해서는 168로 설정
+                return 168
+            }
+        } else {
+            // 드롭다운이 닫혀 있는 경우
+            return 104
+        }
+    }
+
+    
+    // MARK: - 드롭다운 버튼 메서드
+    @objc func dropDownButtonTapped(_ sender: UIButton) {
         
-        return 104 // 박스 크기 96px + 아래 패딩 8px
+        let rowIndex = sender.tag
+        dropDownStates[rowIndex].toggle() // 상태 토글
+        tableView.beginUpdates()
+        tableView.endUpdates()
     }
 }
