@@ -34,6 +34,15 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         return tableView
     }()
     
+    //edit 창 이외 클릭시에도 꺼지게 하도록 감지하는 투명 창
+    let transparentOverlay: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor.clear // 투명한 배경
+        view.isHidden = true // 기본적으로 숨김
+        return view
+    }()
+    
     let editPresentationView: EditPresentationView = {
         let view = EditPresentationView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -82,6 +91,10 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         //edit 폴더 삭제 alert
         NotificationCenter.default.addObserver(self, selector: #selector(editDeletePresentaionAlert), name: .deletePresentationFolderNotification, object: nil)
+        
+        // 투명한 뷰에 터치 이벤트 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
+        transparentOverlay.addGestureRecognizer(tapGesture)
     }
     
     deinit {
@@ -94,6 +107,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     private func setUI() {
         
         view.addSubview(tableView)
+        view.addSubview(transparentOverlay) //edit창 이외 터치 이벤트 감지
         view.addSubview(editPresentationView)
         
         // 각 섹션별 셀 등록
@@ -107,6 +121,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            transparentOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            transparentOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            transparentOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            transparentOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             editPresentationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
             editPresentationView.widthAnchor.constraint(equalToConstant: 262),
@@ -126,13 +145,25 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
     @objc func handleEditViewToggleNotification() {
-        if !editPresentationView.isHidden {
-            editPresentationView.isHidden = true
-        } else {
+        if editPresentationView.isHidden {
             editPresentationView.isHidden = false
+            transparentOverlay.isHidden = false // 투명 뷰 표시
+        } else {
+            hideEditView()
         }
     }
     
+    @objc func handleOverlayTap() {
+        hideEditView()
+    }
+    
+    private func hideEditView() {
+        editPresentationView.isHidden = true
+        transparentOverlay.isHidden = true // 투명 뷰 숨기기
+    }
+    
+ 
+    //MARK: -Alert 함수
     // 이름 수정하기 Alert
     @objc func editNameAlert() {
         // Alert 생성
