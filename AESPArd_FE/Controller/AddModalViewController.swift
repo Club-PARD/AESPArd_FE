@@ -7,15 +7,16 @@
 
 import UIKit
 
-class AddModalViewController: UIViewController {
+class AddModalViewController: UIViewController, UIViewControllerTransitioningDelegate {
 
     // 클백할 때 이거 변수 다시 설정하기
     var presentationName: String = "발표이름"
     var presentationDate: Int = 1
     var presentationDetailCount: Int = 4
     private var previouslySelectedIndexPath: IndexPath?
-    
+    var ptNumber: Int = 4
 
+    
     // 발표 영상 촬영하기 버튼
     let addButton: UIButton = {
         let button = UIButton()
@@ -82,6 +83,7 @@ class AddModalViewController: UIViewController {
         super.viewDidLoad()
         setUI()
         setupPanGesture() // 드래그 제스처 활성화
+        tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: "AddModalTableViewCell")
         tableView.delegate = self
         tableView.dataSource = self
     }
@@ -126,6 +128,8 @@ class AddModalViewController: UIViewController {
                 ])
 
     }
+
+    
     // 모달 뷰 애니메이션 설정
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -161,14 +165,56 @@ class AddModalViewController: UIViewController {
     
     @objc func moveTocameraViewController() {
         let cameraVC = CameraViewController()
-        cameraVC.modalPresentationStyle = .fullScreen
+        cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
     }
     
     @objc func moveToNewExtraModal() {
+        let excludedView = backgroundOverlay // 제외할 뷰를 참조
         let extraVC = NewExtraModalViewController()
-        present(extraVC, animated: true, completion: nil)
+
+        // 기존 뷰 제거 처리
+        for subview in view.subviews {
+            if subview != excludedView { // 제외할 뷰가 아니면
+                UIView.animate(withDuration: 0.3, animations: {
+                    subview.transform = CGAffineTransform(translationX: 0, y: self.view.frame.height) // 아래로 슬라이드
+                    subview.alpha = 0 // 동시에 투명도 줄이기
+                }, completion: { _ in
+                    subview.removeFromSuperview() // 애니메이션 완료 후 제거
+                })
+            }
+        }
+
+        // 애니메이션 후 새로운 모달 추가
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            // 새로운 모달 뷰컨트롤러 추가
+            self.addChild(extraVC) // `extraVC`를 자식 뷰 컨트롤러로 추가
+            self.view.addSubview(extraVC.view) // `extraVC`의 뷰를 현재 뷰에 추가
+
+            // 초기 위치 설정: 화면 아래에서 시작
+            extraVC.view.transform = CGAffineTransform(translationX: 0, y: self.view.frame.height)
+            extraVC.view.alpha = 0 // 투명도 0으로 설정
+
+            // 제약 조건 추가
+            extraVC.view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                extraVC.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+                extraVC.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+                extraVC.view.topAnchor.constraint(equalTo: self.view.topAnchor),
+                extraVC.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            ])
+
+            // 슬라이드 업 애니메이션
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
+                extraVC.view.transform = .identity // 원래 위치로 복귀
+                extraVC.view.alpha = 1 // 투명도 1로 설정
+            }, completion: { _ in
+                extraVC.didMove(toParent: self) // 자식 뷰 컨트롤러 설정 완료
+            })
+        }
     }
+
+
 
     func setupPanGesture() {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
@@ -212,7 +258,7 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
     
     // 섹션 수
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 4 // 하나의 섹션
+        return ptNumber // 하나의 섹션
     }
     
     // 각 섹션의 행 수
@@ -220,84 +266,16 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         return 1 // 제목과 내용이 하나의 셀에 들어가므로 1개 행
     }
     
-    // 셀 설정
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AddModalTableViewCell", for: indexPath)
         cell.backgroundColor = .white
-        cell.selectionStyle = .none // 기본 선택 효과 제거
+        cell.selectionStyle = .none 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
-        
-        // 제목 레이블
-        let titleLabel = UILabel()
-        titleLabel.text = presentationName // 제목 텍스트
-        titleLabel.font = UIFont(name: "Pretendard-SemiBold", size: 18)
-        titleLabel.textColor = UIColor.black
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        cell.contentView.addSubview(titleLabel)
-        
-        // 세부 내용 레이블
-        let detailLabel = UILabel()
-        detailLabel.text = "발표세부정보설명 · \(presentationDate)일 전" // 세부 내용 텍스트
-        detailLabel.font = UIFont(name: "Pretendard-Medium", size: 14)
-        detailLabel.textColor = UIColor.gray
-        detailLabel.translatesAutoresizingMaskIntoConstraints = false
-        cell.contentView.addSubview(detailLabel)
-        
-        // 카운트 배경 뷰 및 레이블 (독립적 추가)
-        let countBackgroundView = UIView()
-        countBackgroundView.backgroundColor = .clear
-        countBackgroundView.layer.borderWidth = 1
-        countBackgroundView.layer.borderColor = UIColor(red: 0.54, green: 0.68, blue: 1, alpha: 1).cgColor
-        countBackgroundView.translatesAutoresizingMaskIntoConstraints = false
-        countBackgroundView.layer.cornerRadius = 11
-
-        let countLabel = UILabel()
-        countLabel.textColor = UIColor(red: 0.54, green: 0.68, blue: 1, alpha: 1)
-        countLabel.font = UIFont(name: "Pretendard-Medium", size: 12)
-        countLabel.textAlignment = .center
-        countLabel.text = "\(presentationDetailCount)개"
-        countLabel.translatesAutoresizingMaskIntoConstraints = false
-        countBackgroundView.addSubview(countLabel)
-        
-        cell.contentView.addSubview(countBackgroundView)
-        countBackgroundView.addSubview(countLabel)
-        
-        // 제약 조건 설정
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 17),
-            titleLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 15),
-            
-            detailLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
-            detailLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 15),
-            detailLabel.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -17),
-            
-            cell.leadingAnchor.constraint(equalTo: modalView.leadingAnchor),
-            cell.trailingAnchor.constraint(equalTo: modalView.trailingAnchor),
-            
-            countBackgroundView.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 5),
-            countBackgroundView.topAnchor.constraint(equalTo: titleLabel.topAnchor),
-            countBackgroundView.bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor),
-
-                // countLabel을 countBackgroundView 내부 중앙에 배치 및 패딩 적용
-            countLabel.leadingAnchor.constraint(equalTo: countBackgroundView.leadingAnchor, constant: 7),
-            countLabel.trailingAnchor.constraint(equalTo: countBackgroundView.trailingAnchor, constant: -7),
-            countLabel.topAnchor.constraint(equalTo: countBackgroundView.topAnchor, constant: 2),
-            countLabel.bottomAnchor.constraint(equalTo: countBackgroundView.bottomAnchor, constant: -2)
-        ])
-        
-        // 레이아웃 계산 후 cornerRadius 적용
-//        cell.layoutIfNeeded() // 레이아웃 강제 업데이트
-//        let calculatedHeight = countLabel.intrinsicContentSize.height // 패딩 추가
-//        let calculatedWidth = countLabel.intrinsicContentSize.width + 30
-//        countBackgroundView.layer.cornerRadius = (calculatedHeight / 2) * 1.5
-        
         return cell
+        
+        
     }
-    
-    
-    
     
     // 셀 높이 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -332,7 +310,4 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         addButton.backgroundColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1) // 셀이 선택 해제되었을 때 버튼 색깔 반환
     }
 
-
-
-    }
-
+}
