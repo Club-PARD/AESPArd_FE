@@ -33,6 +33,7 @@ class CameraOverlayView: UIView {
         let config = UIButton.Configuration.filled()
         let button = UIButton(configuration: config)
         button.setTitle("촬영 시작하기", for: .normal)
+        button.titleLabel?.font = UIFont(name: "Pretendard-SemiBold", size: 20)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor(red: 0.2, green: 0.439, blue: 1, alpha: 1)
         button.layer.cornerRadius = 20
@@ -111,7 +112,10 @@ class CameraOverlayView: UIView {
             backButton.heightAnchor.constraint(equalToConstant: 40),
             
             startStopRecordingButton.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            startStopRecordingButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -34),
+            startStopRecordingButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            startStopRecordingButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            startStopRecordingButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor),
+            startStopRecordingButton.heightAnchor.constraint(equalToConstant: 52),
             
             recordingTimeLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             recordingTimeLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 8),
