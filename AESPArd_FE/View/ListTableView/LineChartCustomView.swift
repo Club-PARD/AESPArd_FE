@@ -8,7 +8,12 @@ class LineChartCustomView: UIView {
     var dayData: [String] = ["1번째", "2번째", "3번째", "4번째", "5번째"]
     var scoreData: [Double] = [11, 22, 33, 44, 55] {
         didSet {
-            // scoreData가 변경될 때마다 차트를 새로 고침
+            // `dayData`를 새로 설정
+            dayData = (1...scoreData.count).map { "\($0)번째" }
+            
+            // 차트를 새로 고침
+            self.myLineChart.xAxis.valueFormatter = IndexAxisValueFormatter(values: dayData)
+            self.myLineChart.xAxis.setLabelCount(scoreData.count, force: true)
             self.setLineData(lineChartView: self.myLineChart, lineChartDataEntries: self.entryData(values: self.scoreData))
             self.setNeedsLayout() // 레이아웃 강제 갱신
         }
@@ -181,7 +186,7 @@ class LineChartCustomView: UIView {
             let scoreLabel = UILabel()
             scoreLabel.text = "\(Int(scoreData[i]))점"
             scoreLabel.font = UIFont(name: "Pretendard-Medium", size: 14)
-
+            
             if score >= 80 {
                 scoreLabel.textColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 녹색
             } else if score >= 60 {
