@@ -16,12 +16,24 @@ class CameraOverlayView: UIView {
         }
     }
     
+    
+   
+    let backButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Back", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .gray
+        button.layer.cornerRadius = 15
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     // 촬영 시작 버튼
-    private let startRecordingButton: UIButton = {
+    let startStopRecordingButton: UIButton = {
         let config = UIButton.Configuration.filled()
         let button = UIButton(configuration: config)
         button.setTitle("촬영 시작하기", for: .normal)
-        button.setTitleColor(.systemBlue, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor(red: 0.2, green: 0.439, blue: 1, alpha: 1)
         button.layer.cornerRadius = 20
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -48,6 +60,9 @@ class CameraOverlayView: UIView {
         return view
     }()
     
+    
+    // MARK: - 시선 추적 UI
+    
     let eyeTrackingTimeLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
@@ -57,9 +72,7 @@ class CameraOverlayView: UIView {
         return label
     }()
     
-//    let aimImageView = UIImageView(image: UIImage(named: "Cursor"))
-//    aimImageView.frame.size = CGSize(width: 30, height: 30)
-//    aimImageView.center = view.center // Initially center the cursor on screen
+
     
     let aimImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "Cursor"))
@@ -81,16 +94,24 @@ class CameraOverlayView: UIView {
     private func setupView() {
         self.backgroundColor = .clear
         
+        self.addSubview(backButton)
         
-        self.addSubview(startRecordingButton)
+        self.addSubview(startStopRecordingButton)
         self.addSubview(recordingTimeLabel)
         
         self.addSubview(eyeTrackingTimeLabel)
         self.addSubview(aimImageView)
         
         NSLayoutConstraint.activate([
-            startRecordingButton.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            startRecordingButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -34),
+            
+            // Back Button Constraints
+            backButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 16),
+            backButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            backButton.widthAnchor.constraint(equalToConstant: 60),
+            backButton.heightAnchor.constraint(equalToConstant: 40),
+            
+            startStopRecordingButton.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            startStopRecordingButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -34),
             
             recordingTimeLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             recordingTimeLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 8),
@@ -104,6 +125,10 @@ class CameraOverlayView: UIView {
             aimImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
         ])
         
+    }
+    
+    func toggleFullScreenCover(isHidden: Bool) {
+        fullScreenCoverView.isHidden = isHidden
     }
     
 }
