@@ -9,12 +9,10 @@ import UIKit
 
 
 extension Notification.Name {
-    static let dropDownNotification = Notification.Name("dropDownNotification")
+    static let helpButtonNotification = Notification.Name("helpButtonNotification")
 }
 
 class DropDownDetailTableCell: UITableViewCell {
-    
-    weak var delegate: ListHeaderTableCellDelegate?
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -136,10 +134,36 @@ class DropDownDetailTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "help-circle"), for: .normal)
         button.addTarget(self, action: #selector(helpButtonTapped), for: .touchUpInside)
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         button.isHidden = true
         
         return button
+    }()
+    
+    let helpView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor(red: 0.9, green: 0.93, blue: 1, alpha: 1)
+        view.layer.cornerRadius = 20
+        
+        view.layer.masksToBounds = false
+        view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
+        view.layer.shadowOpacity = 1
+        view.layer.shadowRadius = 15
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+        view.isHidden = true
+        
+        return view
+    }()
+    
+    let helpLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
+        label.numberOfLines = 0
+        label.isHidden = true
+        return label
     }()
     
     //MARK: - 제약조건
@@ -160,6 +184,10 @@ class DropDownDetailTableCell: UITableViewCell {
         containerView.addSubview(evaluationValueLabel)
         containerView.addSubview(myValueLabel)
         containerView.addSubview(helpButton)
+        
+        //help
+        containerView.addSubview(helpView)
+        helpView.addSubview(helpLabel)
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -201,6 +229,17 @@ class DropDownDetailTableCell: UITableViewCell {
             
             helpButton.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 18),
             helpButton.leadingAnchor.constraint(equalTo: evaluationLabel.trailingAnchor, constant: 4),
+            
+            helpView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 103),
+            helpView.leadingAnchor.constraint(equalTo: helpButton.trailingAnchor),
+            helpView.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),  // 최소 너비
+            helpView.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),  // 최소 높이
+
+            // helpLabel의 제약조건
+            helpLabel.topAnchor.constraint(equalTo: helpView.topAnchor, constant: 8),
+            helpLabel.leadingAnchor.constraint(equalTo: helpView.leadingAnchor, constant: 12),
+            helpLabel.trailingAnchor.constraint(equalTo: helpView.trailingAnchor, constant: -12),
+            helpLabel.bottomAnchor.constraint(equalTo: helpView.bottomAnchor, constant: -8)
             
         ])
     }
@@ -254,12 +293,18 @@ class DropDownDetailTableCell: UITableViewCell {
             evaluationValueLabel.isHidden = true
             myValueLabel.isHidden = true
             helpButton.isHidden = true
+            
+            helpView.isHidden = true
+            helpLabel.isHidden = true
         }
     }
     
     //헬프 버튼 메서드
     @objc func helpButtonTapped() {
-        print("클릭됨")
+        let isCurrentlyHidden = helpView.isHidden
+    
+        helpView.isHidden = !isCurrentlyHidden
+        helpLabel.isHidden = !isCurrentlyHidden
     }
     
 }

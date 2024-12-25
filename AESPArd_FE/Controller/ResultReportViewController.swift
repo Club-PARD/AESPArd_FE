@@ -24,6 +24,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var evaluationValuelList : [String] = ["05:30~07:30", "???WPM", "???dB", "9회", "5회", "???%"]
     var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
     
+    //hep 버튼 텍스트
+    var helpText : [String] = ["WPM은 분당 단어 수에요\n아나운서의 WPM을 참고해\n기준을 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 카메라를\n바라본 비율을 측정해요 "]
+    
     // 드롭다운 상태 저장
     var dropDownStates: [Bool] = Array(repeating: false, count: 6)
     
@@ -309,6 +312,9 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
                 cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
             }
             
+            if(indexPath.row>0){
+                cell.helpLabel.text = helpText[indexPath.row-1]
+            }
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(withIdentifier: "GoToEvaluationCell", for: indexPath) as! GoToEvaluationCell
