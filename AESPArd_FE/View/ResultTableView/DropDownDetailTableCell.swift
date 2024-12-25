@@ -136,7 +136,7 @@ class DropDownDetailTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "help-circle"), for: .normal)
         button.addTarget(self, action: #selector(helpButtonTapped), for: .touchUpInside)
-        button.backgroundColor = .green
+//        button.backgroundColor = .green
         button.isHidden = true
         
         return button

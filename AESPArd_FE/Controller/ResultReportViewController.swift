@@ -146,6 +146,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         
         // 각 섹션별 셀 등록
         tableView.register(DropDownDetailTableCell.self, forCellReuseIdentifier: "DropDownDetailTableCell") //드롭다운 닫힘
+        tableView.register(GoToEvaluationCell.self, forCellReuseIdentifier: "GoToEvaluationCell")
         
         NSLayoutConstraint.activate([
             
@@ -272,52 +273,75 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
 // MARK: - 2. tableView extension 생성
 extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 6 // 마지막 섹션은 행은 평가 항목 갯수
+        if section == 0 {
+            return 6 // 마지막 섹션은 행은 평가 항목 갯수
+        } else {
+            return 1 // 나머지 섹션은 각 1개 행
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
-        // 셀에 데이터 설정 (필요한 설정 추가)
-        cell.backgroundColor = .clear
-        cell.selectionStyle = .none
-        
-        cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] , rowIndex: indexPath.row)
-        
-        // 드롭다운 버튼 클릭 시 상태 변경
-        cell.dropDownButton.addTarget(self, action: #selector(dropDownButtonTapped(_:)), for: .touchUpInside)
-        cell.dropDownButton.tag = indexPath.row
-        
-        //드롭다운 열렸을 경우 보여줄 값 지정
-        cell.evaluationLabel.text = evaluationList[indexPath.row]
-        if(indexPath.row<3){
-            cell.myEvaluationLabel.text = myEvaluationlList[indexPath.row]
+        // 섹션에 맞는 셀을 반환
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
+            // 셀에 데이터 설정 (필요한 설정 추가)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            
+            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] , rowIndex: indexPath.row)
+            
+            // 드롭다운 버튼 클릭 시 상태 변경
+            cell.dropDownButton.addTarget(self, action: #selector(dropDownButtonTapped(_:)), for: .touchUpInside)
+            cell.dropDownButton.tag = indexPath.row
+            
+            //드롭다운 열렸을 경우 보여줄 값 지정
+            cell.evaluationLabel.text = evaluationList[indexPath.row]
+            if(indexPath.row<3){
+                cell.myEvaluationLabel.text = myEvaluationlList[indexPath.row]
+            }
+            cell.evaluationValueLabel.text = evaluationValuelList[indexPath.row]
+            if(indexPath.row<3){
+                cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
+            }
+            
+            return cell
+        case 1:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "GoToEvaluationCell", for: indexPath) as! GoToEvaluationCell
+            // 셀에 데이터 설정 (필요한 설정 추가)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            
+            return cell
+        default:
+            return UITableViewCell()
         }
-        cell.evaluationValueLabel.text = evaluationValuelList[indexPath.row]
-        if(indexPath.row<3){
-            cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
-        }
-        
-        return cell
     }
     
     // 셀의 높이를 다르게 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if dropDownStates[indexPath.row] {
-            // 드롭다운이 열려 있는 경우
-            if indexPath.row == 3 || indexPath.row == 4 || indexPath.row == 5 {
-                // 3, 4, 5번 행에 대해 높이를 143으로 설정
-                return 143
+        // 각 섹션과 행에 대해 다르게 설정
+        switch indexPath.section {
+        case 0:
+            if dropDownStates[indexPath.row] {
+                // 드롭다운이 열려 있는 경우
+                if indexPath.row == 3 || indexPath.row == 4 || indexPath.row == 5 {
+                    // 3, 4, 5번 행에 대해 높이를 143으로 설정
+                    return 143
+                } else {
+                    // 그 외의 행에 대해서는 168로 설정
+                    return 168
+                }
             } else {
-                // 그 외의 행에 대해서는 168로 설정
-                return 168
+                // 드롭다운이 닫혀 있는 경우
+                return 104
             }
-        } else {
-            // 드롭다운이 닫혀 있는 경우
-            return 104
+        default:
+            return 72
         }
     }
 
