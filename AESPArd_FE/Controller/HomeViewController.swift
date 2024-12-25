@@ -185,8 +185,6 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             self.definesPresentationContext = true // 현재 컨텍스트를 정의
             self.present(modalViewController, animated: true)
             
-            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
-            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
 }
