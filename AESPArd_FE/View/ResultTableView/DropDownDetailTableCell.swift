@@ -27,7 +27,7 @@ class DropDownDetailTableCell: UITableViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .white
-        view.layer.cornerRadius = 50
+        view.layer.cornerRadius = 20
         view.layer.masksToBounds = false
         
         
@@ -40,26 +40,11 @@ class DropDownDetailTableCell: UITableViewCell {
         return view
     }()
     
-    let smallContainerView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 20
-        view.layer.masksToBounds = true
-        return view
-    }()
-    
-    let circularProgressBar: CircularProgressBar = {
-        let progressBar = CircularProgressBar()
-        progressBar.translatesAutoresizingMaskIntoConstraints = false
-        return progressBar
-    }()
-    
     let itemName: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Pretendard-Medium", size: 16)
-        label.textColor = UIColor(red: 0.18, green: 0.184, blue: 0.196, alpha: 1)
+        label.font =  UIFont(name: "Pretendard-Medium", size: 14)
+        label.textColor = UIColor(red: 0.62, green: 0.62, blue: 0.65, alpha: 1)
         return label
     }()
     
@@ -67,7 +52,7 @@ class DropDownDetailTableCell: UITableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "Pretendard-Medium", size: 14)
-        label.textColor = UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
+        label.textColor =  UIColor(red: 0, green: 0, blue: 0, alpha: 1)
         return label
     }()
     
@@ -76,21 +61,44 @@ class DropDownDetailTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "chevron-down"), for: .normal)
         button.addTarget(self, action: #selector(dropDownButtonTapped), for: .touchUpInside)
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         button.layer.cornerRadius = 20
         
         return button
     }()
     
+    let progressView: UIProgressView = {
+        let progressView = UIProgressView(progressViewStyle: .default)
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        progressView.progress = 0.5 // 초기 진행률 설정
+//        progressView.tintColor = UIColor.blue // 진행 부분 색상
+        progressView.trackTintColor = UIColor(red: 0.94, green: 0.95, blue: 0.95, alpha: 1) // 트랙 부분 색상
+        progressView.layer.cornerRadius = 8 // 외부 모서리 둥글게 설정
+        progressView.clipsToBounds = true
+        
+        progressView.subviews[1].clipsToBounds = true //내부 모서리 둥글게 설정
+        progressView.layer.sublayers![1].cornerRadius = 8
+        return progressView
+    }()
+    
+    let itemScore: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font =  UIFont(name: "Pretendard-Medium", size: 16)
+        label.textColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        return label
+    }()
+    
     func setUI(){
         
         contentView.addSubview(containerView)
-        containerView.addSubview(smallContainerView)
-        containerView.addSubview(circularProgressBar)
         
         containerView.addSubview(itemName)
         containerView.addSubview(itemExplain)
         containerView.addSubview(dropDownButton)
+        
+        containerView.addSubview(progressView)
+        progressView.addSubview(itemScore)
         
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -98,41 +106,49 @@ class DropDownDetailTableCell: UITableViewCell {
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
-            smallContainerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            smallContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            smallContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 33),
-            smallContainerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-            
-            circularProgressBar.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            circularProgressBar.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            circularProgressBar.widthAnchor.constraint(equalToConstant: 80),
-            circularProgressBar.heightAnchor.constraint(equalToConstant: 80),
-            
-            itemName.topAnchor.constraint(equalTo: smallContainerView.topAnchor, constant: 21.5),
-            itemName.leadingAnchor.constraint(equalTo: circularProgressBar.trailingAnchor, constant: 16),
+            itemName.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 14),
+            itemName.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             
             itemExplain.topAnchor.constraint(equalTo: itemName.bottomAnchor, constant: 2),
-            itemExplain.leadingAnchor.constraint(equalTo: circularProgressBar.trailingAnchor, constant: 16),
+            itemExplain.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             
             dropDownButton.topAnchor.constraint(equalTo: contentView.topAnchor),
-            dropDownButton.trailingAnchor.constraint(equalTo: smallContainerView.trailingAnchor),
-            dropDownButton.bottomAnchor.constraint(equalTo: smallContainerView.bottomAnchor),
+            dropDownButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            dropDownButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             dropDownButton.widthAnchor.constraint(equalToConstant: 56),
+            
+            progressView.topAnchor.constraint(equalTo: itemExplain.bottomAnchor, constant: 8),
+            progressView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            progressView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -65),
+            progressView.heightAnchor.constraint(equalToConstant: 24),
+            
+            itemScore.centerYAnchor.constraint(equalTo: progressView.centerYAnchor),
+            itemScore.leadingAnchor.constraint(equalTo: progressView.leadingAnchor, constant: 7),
         ])
     }
     
     // 발표 항목 정보 설정 메서드
     func configure(itemNameList: String, itemTotalScore: Double, itemDetailList: String) {
-        circularProgressBar.value = itemTotalScore
         itemName.text = itemNameList
         itemExplain.text = itemDetailList
         AI = itemNameList
+        
+        progressView.setProgress(Float(itemTotalScore), animated: false)
+        
+        if itemTotalScore <= 0.6 {
+            progressView.tintColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1) // 빨간색
+        } else if itemTotalScore <= 0.8 {
+            progressView.tintColor = UIColor(red: 1, green: 0.717, blue: 0, alpha: 1) // 주황색
+        } else {
+            progressView.tintColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 초록색
+        }
+        
+        itemScore.text = "\(Int(itemTotalScore*100))점"
+        
     }
     
     //드롭다운 버튼 메서드
     @objc func dropDownButtonTapped() {
-        if(AI != "발표 내용 AI 분석 기능" ){
-            print("드롭다운ㅋㅋ")
-        }
+        
     }
 }

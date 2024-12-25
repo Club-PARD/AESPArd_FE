@@ -13,9 +13,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var practiceTotalScore: Int = 88
     var itembarVaue : Double =  0.84 //원형 프로그레스바
     
-    var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리 비율", "발표 내용 AI 분석 기능"]
-    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84, -1.0]
-    var itemDetailList : [String] = ["14초 초과되었어요", "조금 빠른 편이에요", "조금 작은 편이에요", "9회, 조금 많아요", "15회, 다소 많아요", "비율 기준치 작성", "유료 구독 시 이용 가능합니다"]
+    var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리"]
+    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84]
+    var itemDetailList : [String] = ["7초 초과되었어요.", "조금 느린 편이에요. 조금만 빠르게 말해볼까요?", "발표에 딱 맞는 목소리 크기였어요!", "의식적으로 발화 지연 표현을 고치려고 노력해보세요!", "너무 많아요. 발표 내용을 더 숙지해보세요.", "훌륭해요! 실전에서도 관객과의 소통이 중요해요."]
     
     
     override func viewDidLoad() {
@@ -267,7 +267,7 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 7 // 마지막 섹션은 행은 평가 항목 갯수
+        return 6 // 마지막 섹션은 행은 평가 항목 갯수
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -281,7 +281,6 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
         if(indexPath.row == 6){
             cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
             cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
-            //                cell.circularProgressBar.label = "???"
         }
         
         return cell
@@ -290,6 +289,6 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
     // 셀의 높이를 다르게 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        return 88 // 박스 크기 80px + 아래 패딩 8px
+        return 104 // 박스 크기 96px + 아래 패딩 8px
     }
 }
