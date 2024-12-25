@@ -85,15 +85,21 @@ class CircularProgressBar: UIView {
         
         // 프로그래스 바 중앙에 표시될 레이블
         let label = UILabel()
-        label.text = String(Int(value * 100)) + "점"
         
-        // value에 따라 레이블 색상 변경
-        if value <= 0.6 {
-            label.textColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1) // 빨간색
-        } else if value <= 0.8 {
-            label.textColor = UIColor(red: 1, green: 0.717, blue: 0, alpha: 1) // 주황색
+        if value == -1 {
+            label.text = "???"
+            label.textColor = UIColor(red: 0.94, green: 0.95, blue: 0.95, alpha: 1)
         } else {
-            label.textColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 초록색
+            label.text = String(Int(value * 100)) + "점"
+            
+            // value에 따라 레이블 색상 변경
+            if value <= 0.6 {
+                label.textColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1) // 빨간색
+            } else if value <= 0.8 {
+                label.textColor = UIColor(red: 1, green: 0.717, blue: 0, alpha: 1) // 주황색
+            } else {
+                label.textColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 초록색
+            }
         }
         
         label.font = UIFont(name: "Pretendard-SemiBold", size: 20)

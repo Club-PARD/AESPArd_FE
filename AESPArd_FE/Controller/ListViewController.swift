@@ -22,6 +22,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //발표 연습 점수
     var practiceScore : Double =  0.84
     
+    //선 그래프 점수
+    var scoreListData: [Double] = [82, 34, 67, 69, 89]
     
     
     let tableView: UITableView = {
@@ -30,6 +32,15 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         return tableView
+    }()
+    
+    //edit 창 이외 클릭시에도 꺼지게 하도록 감지하는 투명 창
+    let transparentOverlay: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor.clear // 투명한 배경
+        view.isHidden = true // 기본적으로 숨김
+        return view
     }()
     
     let editPresentationView: EditPresentationView = {
@@ -80,6 +91,10 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         //edit 폴더 삭제 alert
         NotificationCenter.default.addObserver(self, selector: #selector(editDeletePresentaionAlert), name: .deletePresentationFolderNotification, object: nil)
+        
+        // 투명한 뷰에 터치 이벤트 추가
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
+        transparentOverlay.addGestureRecognizer(tapGesture)
     }
     
     deinit {
@@ -92,6 +107,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     private func setUI() {
         
         view.addSubview(tableView)
+        view.addSubview(transparentOverlay) //edit창 이외 터치 이벤트 감지
         view.addSubview(editPresentationView)
         
         // 각 섹션별 셀 등록
@@ -106,7 +122,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             
-            // EditPresentationView 레이아웃 설정
+            transparentOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            transparentOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            transparentOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            transparentOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
             editPresentationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
             editPresentationView.widthAnchor.constraint(equalToConstant: 262),
             editPresentationView.heightAnchor.constraint(equalToConstant: 96),
@@ -125,13 +145,25 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
     @objc func handleEditViewToggleNotification() {
-        if !editPresentationView.isHidden {
-            editPresentationView.isHidden = true
-        } else {
+        if editPresentationView.isHidden {
             editPresentationView.isHidden = false
+            transparentOverlay.isHidden = false // 투명 뷰 표시
+        } else {
+            hideEditView()
         }
     }
     
+    @objc func handleOverlayTap() {
+        hideEditView()
+    }
+    
+    private func hideEditView() {
+        editPresentationView.isHidden = true
+        transparentOverlay.isHidden = true // 투명 뷰 숨기기
+    }
+    
+ 
+    //MARK: -Alert 함수
     // 이름 수정하기 Alert
     @objc func editNameAlert() {
         // Alert 생성
@@ -139,10 +171,10 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         // 텍스트 필드 추가
         alertController.addTextField { textField in
-//            textField.placeholder = "새로운 이름"
+            //            textField.placeholder = "새로운 이름"
             textField.text = self.presentationFolderName // 기존 이름을 텍스트 필드에 설정
-//            textField.autocorrectionType = .no
-//            textField.spellCheckingType = .no
+            //            textField.autocorrectionType = .no
+            //            textField.spellCheckingType = .no
         }
         
         // 취소 버튼 추가
@@ -153,8 +185,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
                 // 새로운 이름을 presentationFolderName에 반영
-//                self.presentationFolderName = newName
-//                print("새로운 이름: \(self.presentationFolderName)")
+                //                self.presentationFolderName = newName
+                //                print("새로운 이름: \(self.presentationFolderName)")
             }
         }
         
@@ -165,8 +197,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 알림 표시
         self.present(alertController, animated: true, completion: nil)
     }
-
-
+    
+    
     
     //발표 파일 삭제하기 Alert
     @objc func editDeletePresentaionAlert() {
@@ -237,6 +269,9 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
+            //데이터 전달
+            cell.chartView.scoreData = scoreListData
+            cell.chartView.setNeedsLayout() // 데이터 전달 후 차트 새로고침
             return cell
             
         case 1:
@@ -289,13 +324,13 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         // 섹션 2의 셀이 클릭되었을 때
         if indexPath.section == 2 {
             
-            //            let modalViewController = ListViewController()
-            //            modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
-            //            self.definesPresentationContext = true // 현재 컨텍스트를 정의
-            //            self.present(modalViewController, animated: true)
-            //
-            //            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
-            //            tableView.deselectRow(at: indexPath, animated: true)
+            let modalViewController = ResultReportViewController()
+            modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+            self.definesPresentationContext = true // 현재 컨텍스트를 정의
+            self.present(modalViewController, animated: true)
+            
+            // 선택된 셀을 강조 표시 (선택 해제 시 다시 원래 상태로 돌아가도록 설정)
+            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
     
