@@ -302,9 +302,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QPXSR9M985;
+				DEVELOPMENT_TEAM = PG4DAQ672A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record audio during video recording.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need to save recorded videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to store and manage your recorded videos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -314,7 +318,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.AESPArd-FE.www.AESPArd-FE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.AESPArd-FE.www";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -329,9 +333,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QPXSR9M985;
+				DEVELOPMENT_TEAM = PG4DAQ672A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record audio during video recording.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need to save recorded videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to store and manage your recorded videos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -341,7 +349,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.AESPArd-FE.www.AESPArd-FE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.AESPArd-FE.www";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
