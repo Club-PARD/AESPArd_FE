@@ -33,7 +33,7 @@ class AddModalTableViewCell: UITableViewCell {
     // MARK: - UI 셋업
 
     private func setupUI() {
-        configure(title: "발표이름", detail: "발표세부정보설명 · \(ptDate)", count: 4)
+        configure(title: "발표이름", detail: "발표세부정보설명 · \(ptDate)일 전", count: 4)
         backgroundColor = .white
         selectionStyle = .none
 

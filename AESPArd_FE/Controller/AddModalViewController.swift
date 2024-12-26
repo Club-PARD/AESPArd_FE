@@ -26,6 +26,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         button.backgroundColor = UIColor(red: 0.82, green: 0.83, blue: 0.84, alpha: 1)
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(moveTocameraViewController), for: .touchUpInside)
+        button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -86,6 +87,22 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: "AddModalTableViewCell")
         tableView.delegate = self
         tableView.dataSource = self
+        
+        // 버튼 컨테이너 추가해서 X 버튼 위에 투명하게 올려서 반응시킴 (수퍼뷰에 넣어야 제약 조건에 맞아요 뷰 계층 한 층 내려보려니까 제약 꼬여서 수퍼뷰에서 돌립니다..)
+        // 이거 exitButton setUI랑 계층 맞추니까 exitButton 위에 올리는거다보니 제약이 겹쳐서 제약오류나요
+        let buttonContainer = UIButton()
+            buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+            buttonContainer.addTarget(self, action: #selector(exit), for: .touchUpInside) // 동일 액션 연결
+            buttonContainer.backgroundColor = .clear
+            modalView.addSubview(buttonContainer)
+        
+        // 버튼 컨테이너 제약조건 설정한건데 애초에 컨테이너가 수퍼뷰에 정의되어 있어서 수퍼뷰에서 제약도 설정해야함,,
+        NSLayoutConstraint.activate([
+            buttonContainer.topAnchor.constraint(equalTo: modalView.topAnchor, constant: 20), // 기존 top 제약
+            buttonContainer.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 20), // 기존 leading 제약
+            buttonContainer.widthAnchor.constraint(equalToConstant: 40),  // 터치 영역 크기
+            buttonContainer.heightAnchor.constraint(equalToConstant: 40)  // 터치 영역 크기
+        ])
     }
     // MARK: - 2. 제약조건 생성 및 애니메이션 설정
     func setUI() {
@@ -296,18 +313,26 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         selectedCell?.backgroundColor = UIColor(red: 0.9, green: 0.93, blue: 1, alpha: 1) // 연한 파란색 (셀의 색)
         
         addButton.backgroundColor = UIColor(red: 51/255, green: 112/255, blue: 255/255, alpha: 1) // 진한 파란색 (버튼의 색)
-
-
+        
         // 현재 선택된 IndexPath 저장
         previouslySelectedIndexPath = indexPath
+        
+        // 버튼 활성화
+        addButton.isEnabled = true
     }
 
+    // 셀 선택 해제 시 버튼 비활성화 로직 수정
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         // 선택 해제된 셀을 원래 상태로 복원
         let deselectedCell = tableView.cellForRow(at: indexPath)
         deselectedCell?.backgroundColor = .white
         
         addButton.backgroundColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1) // 셀이 선택 해제되었을 때 버튼 색깔 반환
+        
+        // 선택된 셀이 없으면 버튼 비활성화
+        if tableView.indexPathsForSelectedRows?.count == 0 {
+            addButton.isEnabled = false
+            addButton.backgroundColor = UIColor(red: 0.82, green: 0.83, blue: 0.84, alpha: 1) // 비활성화 색상
+        }
     }
-
 }
