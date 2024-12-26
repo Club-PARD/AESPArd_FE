@@ -16,17 +16,23 @@ class CameraOverlayView: UIView {
         }
     }
     
-    
-   
     let backButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Back", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .gray
-        button.layer.cornerRadius = 15
+        let button = UIButton()
+        
+        // Load the image and set its rendering mode to .alwaysTemplate
+        if let backImage = UIImage(named: "back")?.withRenderingMode(.alwaysTemplate) {
+            button.setImage(backImage, for: .normal)
+        }
+        
+        // Set the tintColor to white
+        button.tintColor = .white
+        
+        // Disable autoresizing mask to use Auto Layout
         button.translatesAutoresizingMaskIntoConstraints = false
+        
         return button
     }()
+   
     
     // 촬영 시작 버튼
     let startStopRecordingButton: UIButton = {
@@ -105,10 +111,11 @@ class CameraOverlayView: UIView {
         NSLayoutConstraint.activate([
             
             // Back Button Constraints
-            backButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 16),
             backButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
-            backButton.widthAnchor.constraint(equalToConstant: 60),
-            backButton.heightAnchor.constraint(equalToConstant: 40),
+            backButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 12),
+//            backButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+//            backButton.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+
             
             startStopRecordingButton.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             startStopRecordingButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),

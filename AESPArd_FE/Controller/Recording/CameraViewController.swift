@@ -331,6 +331,9 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             NotificationCenter.default.post(name: .updateEyeTrackingTime, object: nil, userInfo: ["time": "Time: 0.0s"])
             
             DispatchQueue.main.async {
+                // 오버레이뷰를 없애줘야 터치가 되고 다음 화면에서도 안보임
+                self.removeOverlayWindow()
+                
                 if let previewController = previewController {
                     previewController.previewControllerDelegate = self
                     previewController.modalPresentationStyle = .fullScreen
@@ -365,7 +368,11 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
         previewController.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
-            debugPrint("버튼 눌렀음")
+            
+            // **Re-setup the overlay window after dismissing the preview**
+            //self.setupOverlayWindow()
+            
+            // **Navigate to AnalyzingViewController**
             self.determineUserActionAndNavigate()
         }
     }
@@ -401,7 +408,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                     fetchOptions.fetchLimit = 1
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-                    
+                    debugPrint("가져옴")
                     if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
                         let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
                         // If the asset was created within the last 10 seconds, assume it was saved
@@ -429,16 +436,19 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             let analyzingVC = AnalyzingViewController()
             analyzingVC.assetIdentifier = identifier
             debugPrint("Navigating to AnalyzingViewController")
-            
+
             if let navigationController = self.navigationController {
                 navigationController.pushViewController(analyzingVC, animated: true)
-                debugPrint("Pushed to navigation controller")
+                debugPrint("Pushed AnalyzingViewController onto the navigation stack")
             } else {
+                // This block should rarely execute now, but kept for safety
+                analyzingVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                 self.present(analyzingVC, animated: true, completion: nil)
-                debugPrint("Presented AnalyzingViewController")
+                debugPrint("Presented AnalyzingViewController modally")
             }
         }
     }
+
     
     // MARK: - RPScreenRecorderDelegate
     
