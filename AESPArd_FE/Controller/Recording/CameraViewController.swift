@@ -108,6 +108,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     private func removeOverlayWindow() {
         overlayWindow?.isHidden = true
+        overlayWindow?.rootViewController = nil
         overlayWindow = nil
     }
     
@@ -389,40 +390,76 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                     debugPrint("저장 확인됨 이제 다른 뷰로 넘어가기 전")
                     self.navigateToAnalyzingViewController(with: identifier)
                 } else {
+                    debugPrint("너, 취소한거야.")
                     //self.navigateToHomeViewController()
                 }
             }
         }
     }
     
+//    
+//    private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
+//        debugPrint("checkIfRecordingWasSaved 호출됨")
+//        // Request authorization to access Photos
+//        PHPhotoLibrary.requestAuthorization { status in
+//            DispatchQueue.main.async { // Ensure UI operations are on main thread
+//                if status == .authorized {
+//                    // Fetch the most recent video asset
+//                    debugPrint("너 권한있어. 계속해.")
+//                    let fetchOptions = PHFetchOptions()
+//                    fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//                    fetchOptions.fetchLimit = 1
+//                    let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
+//                    debugPrint("가져옴")
+//                    if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
+//                        let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
+//                        // If the asset was created within the last 60 seconds, assume it was saved
+//                        if timeSinceRecordingStopped < 60 {
+//                            debugPrint("10초 이내")
+//                            completion(true, asset.localIdentifier)
+//                        } else {
+//                            completion(false, nil)
+//                        }
+//                    } else {
+//                        completion(false, nil)
+//                    }
+//                } else {
+//                    // If access is denied, assume the user canceled
+//                    completion(false, nil)
+//                }
+//            }
+//        }
+//    }
     
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
-        debugPrint("checkIfRecordingWasSaved 호출됨")
+        debugPrint("checkIfRecordingWasSaved called")
+        
         // Request authorization to access Photos
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async { // Ensure UI operations are on main thread
-                if status == .authorized {
+                switch status {
+                case .authorized, .limited:
+                    debugPrint("Authorization granted.")
+                    
                     // Fetch the most recent video asset
-                    debugPrint("너 권한있어. 계속해.")
                     let fetchOptions = PHFetchOptions()
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                     fetchOptions.fetchLimit = 1
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-                    debugPrint("가져옴")
-                    if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
-                        let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
-                        // If the asset was created within the last 10 seconds, assume it was saved
-                        if timeSinceRecordingStopped < 10 {
-                            debugPrint("10초 이내")
-                            completion(true, asset.localIdentifier)
-                        } else {
-                            completion(false, nil)
-                        }
+                    
+                    debugPrint("Fetched assets.")
+                    
+                    if let asset = fetchResult.firstObject {
+                        debugPrint("Latest video asset found with identifier: \(asset.localIdentifier)")
+                        completion(true, asset.localIdentifier)
                     } else {
+                        debugPrint("No video assets found.")
                         completion(false, nil)
                     }
-                } else {
-                    // If access is denied, assume the user canceled
+                    
+                default:
+                    // If access is denied or restricted, assume the user canceled
+                    debugPrint("Authorization denied or restricted.")
                     completion(false, nil)
                 }
             }
