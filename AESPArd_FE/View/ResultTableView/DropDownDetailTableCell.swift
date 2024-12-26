@@ -24,6 +24,12 @@ class DropDownDetailTableCell: UITableViewCell {
         
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        helpView.isHidden = true
+        helpLabel.isHidden = true
+    }
+    
     private var rowIndex: Int = 0 // 행 번호를 저장할 변수 추가
     
     let containerView: UIView = {
@@ -280,9 +286,8 @@ class DropDownDetailTableCell: UITableViewCell {
             myEvaluationLabel.isHidden = false
             evaluationValueLabel.isHidden = false
             myValueLabel.isHidden = false
-            if(rowIndex != 0 ){
-                helpButton.isHidden = false
-            }
+            helpButton.isHidden = false
+
             
         } else {
             //드롭다운이 닫힘
