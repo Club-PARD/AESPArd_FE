@@ -144,13 +144,15 @@ class ViewController: UITabBarController {
         // 탭 바 아이템 커스터마이징
         guard let tabBarItems = self.tabBar.items else { return }
         
-        tabBarItems[0].image = UIImage(named: "home-05")
+        tabBarItems[0].image = UIImage(named: "home")
+        tabBarItems[0].selectedImage = UIImage(named: "home-05")
         tabBarItems[0].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
         
         
         tabBarItems[1].image = nil // 중앙 버튼으로 대체
         
-        tabBarItems[2].image = UIImage(named: "user-02")
+        tabBarItems[2].image = UIImage(named: "user")
+        tabBarItems[2].selectedImage = UIImage(named: "user-02")
         tabBarItems[2].imageInsets = UIEdgeInsets(top: 12, left: 0, bottom: -12, right: 0) // 아래로 16px 이동
     }
     
