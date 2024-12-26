@@ -10,7 +10,7 @@ import ARKit
 import SceneKit
 import AVFoundation // 카메라 권한 확인용
 import ReplayKit
-
+import Photos
 
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
@@ -129,7 +129,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             completion(false)
         }
     }
-    
     
     
     // MARK: - 공용함수
@@ -364,7 +363,81 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // MARK: - RPPreviewViewControllerDelegate
     
     func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
-        previewController.dismiss(animated: true)
+        previewController.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            debugPrint("버튼 눌렀음")
+            self.determineUserActionAndNavigate()
+        }
+    }
+   
+    
+    // MARK: - 프리뷰 창에서 다음 선택지 고르는 함수들
+    
+    private func determineUserActionAndNavigate() {
+        debugPrint("determineUserActionAndNavigate 호출됨")
+        checkIfRecordingWasSaved { [weak self] wasSaved, assetIdentifier in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if wasSaved, let identifier = assetIdentifier {
+                    debugPrint("저장 확인됨 이제 다른 뷰로 넘어가기 전")
+                    self.navigateToAnalyzingViewController(with: identifier)
+                } else {
+                    //self.navigateToHomeViewController()
+                }
+            }
+        }
+    }
+    
+    
+    private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
+        debugPrint("checkIfRecordingWasSaved 호출됨")
+        // Request authorization to access Photos
+        PHPhotoLibrary.requestAuthorization { status in
+            DispatchQueue.main.async { // Ensure UI operations are on main thread
+                if status == .authorized {
+                    // Fetch the most recent video asset
+                    debugPrint("너 권한있어. 계속해.")
+                    let fetchOptions = PHFetchOptions()
+                    fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+                    fetchOptions.fetchLimit = 1
+                    let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
+                    
+                    if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
+                        let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
+                        // If the asset was created within the last 10 seconds, assume it was saved
+                        if timeSinceRecordingStopped < 10 {
+                            debugPrint("10초 이내")
+                            completion(true, asset.localIdentifier)
+                        } else {
+                            completion(false, nil)
+                        }
+                    } else {
+                        completion(false, nil)
+                    }
+                } else {
+                    // If access is denied, assume the user canceled
+                    completion(false, nil)
+                }
+            }
+        }
+    }
+    
+    
+    private func navigateToAnalyzingViewController(with identifier: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let analyzingVC = AnalyzingViewController()
+            analyzingVC.assetIdentifier = identifier
+            debugPrint("Navigating to AnalyzingViewController")
+            
+            if let navigationController = self.navigationController {
+                navigationController.pushViewController(analyzingVC, animated: true)
+                debugPrint("Pushed to navigation controller")
+            } else {
+                self.present(analyzingVC, animated: true, completion: nil)
+                debugPrint("Presented AnalyzingViewController")
+            }
+        }
     }
     
     // MARK: - RPScreenRecorderDelegate
