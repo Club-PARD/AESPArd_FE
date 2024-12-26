@@ -11,6 +11,8 @@ class MyViewController : UIViewController {
     
     var userName: String? = "김규희"
     var userAdress: String? = "gyuheekim@gmail.com"
+    var message: String? = "프로젝트 매니저 이지환 / sonforhj03@gmail.com"
+
 
     
     // 페이지 상단 위 로고
@@ -45,43 +47,46 @@ class MyViewController : UIViewController {
         button.titleLabel?.textAlignment = .left
         button.layer.cornerRadius = 20
         button.titleLabel?.numberOfLines = 2 // 여러 줄로 표시
-        button.contentEdgeInsets = UIEdgeInsets(top: 17, left: 16, bottom: 18, right: 200)
+        button.contentEdgeInsets = UIEdgeInsets(top: 17, left: 16, bottom: 18, right: 190)
+        button.titleLabel?.lineBreakMode = .byWordWrapping
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    let centerButton: UIButton = {
-        let button = UIButton()
+    let centerButton: ExpandableButton = {
+        let button = ExpandableButton()
         button.setTitle(" 고객센터", for: .normal)
         button.setImage(UIImage(named: "phone"), for: .normal)
         button.setTitleColor(UIColor(red: 0, green: 0.125, blue: 0.42, alpha: 1), for: .normal)
+        button.touchAreaInsets = UIEdgeInsets(top: 30, left: 100, bottom: 30, right: 100) // 터치 영역 확장
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 16)
         button.backgroundColor = .clear
-//        button.addTarget(<#T##target: Any?##Any?#>, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    let logoutButton: UIButton = {
-        let button = UIButton()
+    let logoutButton: ExpandableButton = {
+        let button = ExpandableButton()
         button.setTitle(" 로그아웃", for: .normal)
         button.setImage(UIImage(named: "logout"), for: .normal)
         button.setTitleColor(UIColor(red: 0, green: 0.125, blue: 0.42, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 16)
+        button.touchAreaInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10) // 터치 영역 확장
         button.backgroundColor = .clear
+        button
 //        button.addTarget(<#T##target: Any?##Any?#>, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    let appResetButton: UIButton = {
-        let button = UIButton()
+    let appResetButton: ExpandableButton = {
+        let button = ExpandableButton()
         button.setTitle(" 앱 초기화", for: .normal)
         button.setImage(UIImage(named: "reset"), for: .normal)
         button.setTitleColor(UIColor(red: 0, green: 0.125, blue: 0.42, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 16)
+        button.touchAreaInsets = UIEdgeInsets(top: 30, left: 100, bottom: 30, right: 100) // 터치 영역 확장
         button.backgroundColor = .clear
-//        button.addTarget(<#T##target: Any?##Any?#>, action: <#T##Selector#>, for: <#T##UIControl.Event#>)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -95,6 +100,9 @@ class MyViewController : UIViewController {
         
         setUI()
         setupNameButtonTitle()
+
+        centerButton.addTarget(self, action: #selector(centerButtonTapped), for: .touchUpInside)
+        appResetButton.addTarget(self, action: #selector(appResetButtonTapped), for: .touchUpInside)
     }
     
     func setUI() {
@@ -163,5 +171,63 @@ class MyViewController : UIViewController {
         nameButton.setAttributedTitle(attributedString, for: .normal)
     }
     
+    // 고객센터 버튼 누르면 나타나는 토스트메세지 기능 구현하기
+    func showToast(_ message : String, withDuration: Double, delay: Double) {
+        let toastWidth: CGFloat = 350
+        let toastLabel = UILabel(frame: CGRect(
+            x: self.view.frame.size.width/2 - 175,
+            y: self.view.frame.size.height-100, width: toastWidth, height: 35))
+        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        toastLabel.textColor = UIColor.white
+        toastLabel.font = UIFont(name: "Pretendard-SemiBold", size: 14)
+        toastLabel.textAlignment = .center
+        toastLabel.text = "\(message)"
+        toastLabel.alpha = 1.0
+        toastLabel.layer.cornerRadius = 4
+        toastLabel.clipsToBounds  =  true
+            
+        self.view.addSubview(toastLabel)
+            
+        UIView.animate(withDuration: withDuration, delay: delay, options: .curveEaseOut, animations: {
+            toastLabel.alpha = 0.0
+        }, completion: {(isCompleted) in
+            toastLabel.removeFromSuperview()
+        })
+    }
+    
+    func logoutFunction() {
+        
+    }
+    
+    @objc func centerButtonTapped() {
+        showToast("프로젝트 매니저 이지환 / sonforhj03@gmail.com", withDuration: 2, delay: 1.5)
+    }
+    
+//    @objc func logoutButtonTapped() {
+//        
+//    }
+    // 서비스 초기화 버튼 눌렀을 때 나타나는 알림화면
+    @objc func appResetButtonTapped() {
+        let alert = UIAlertController(
+            title: "서비스 초기화",
+            message: "서비스를 초기화 하시겠어요? \n이 작업은 되돌릴 수 없어요.",
+            preferredStyle: .alert
+        )
+        
+        // 삭제하기 버튼
+        let resetAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
+            print("서비스 초기화 작업 수행") // 여기에서 초기화 로직 추가
+            // 예를 들어, 데이터를 삭제하거나 초기 상태로 되돌리는 작업
+        }
+        
+        // 취소 버튼
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        alert.addAction(resetAction)
+        alert.addAction(cancelAction)
+        
+        // UIAlertController를 화면에 표시
+        self.present(alert, animated: true, completion: nil)
+    }
     
 }

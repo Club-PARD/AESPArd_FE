@@ -19,7 +19,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     private var textFieldConstraints: [NSLayoutConstraint] = []
     
     
-    
+    // MARK: - 1. 각종 변수 선언 및 정의
     
     // 발표 영상 촬영하기 버튼
     let addButton: UIButton = {
@@ -45,7 +45,6 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     }()
     
     let TimeSettingButtonView1 = FirstTimePickerInputView()
-    
     let TimeSettingButtonView2 = SecondTimePickerInputView()
     
     // 텍스트 필드
@@ -126,7 +125,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     // 촬영 시간 보이게 하는 토글 스위치
     let seePTtimeSwitch: UISwitch = {
         let seePTtimeSwitch = UISwitch()
-        seePTtimeSwitch.isOn = false
+        seePTtimeSwitch.isOn = true
         seePTtimeSwitch.onTintColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         seePTtimeSwitch.thumbTintColor = UIColor.white // 스위치 버튼 색상
         
@@ -137,13 +136,15 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     // 촬영 화면 보이게 하는 토글 스위치
     let seePtSceneSwitch: UISwitch = {
         let seePtSceneSwitch = UISwitch()
-        seePtSceneSwitch.isOn = false
+        seePtSceneSwitch.isOn = true
         seePtSceneSwitch.onTintColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         seePtSceneSwitch.thumbTintColor = UIColor.white
         //       seePTtimeSwitch.addTarget(self, action: #selector(switchToggled(_:)), for: .valueChanged)
         seePtSceneSwitch.translatesAutoresizingMaskIntoConstraints = false
         return seePtSceneSwitch
     }()
+    
+    
     
     
     
@@ -167,6 +168,26 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         // 키보드 표시 및 숨김 이벤트 등록
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        
+        // 버튼 컨테이너 추가해서 X 버튼 위에 투명하게 올려서 반응시킴 (수퍼뷰에 넣어야 제약 조건에 맞아요 뷰 계층 한 층 내려보려니까 제약 꼬여서 수퍼뷰에서 돌립니다..)
+        // 이거 exitButton setUI랑 계층 맞추니까 exitButton 위에 올리는거다보니 제약이 겹쳐서 제약오류나요
+        let buttonContainer = UIButton()
+            buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+            buttonContainer.addTarget(self, action: #selector(exit), for: .touchUpInside) // 동일 액션 연결
+            buttonContainer.backgroundColor = .clear
+            modalView.addSubview(buttonContainer)
+        
+        // 버튼 컨테이너 제약조건 설정한건데 애초에 컨테이너가 수퍼뷰에 정의되어 있어서 수퍼뷰에서 제약도 설정해야함,,
+        NSLayoutConstraint.activate([
+            buttonContainer.topAnchor.constraint(equalTo: modalView.topAnchor, constant: 20), // 기존 top 제약
+            buttonContainer.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 20), // 기존 leading 제약
+            buttonContainer.widthAnchor.constraint(equalToConstant: 40),  // 터치 영역 크기
+            buttonContainer.heightAnchor.constraint(equalToConstant: 40)  // 터치 영역 크기
+        ])
+        
+        
+        
         
     }
     // MARK: - 2. 제약조건 생성 및 애니메이션 설정
@@ -193,6 +214,9 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         modalViewBottomConstraint = modalView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         modalViewBottomConstraint.isActive = true
         
+        let heightConstraint = modalView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5)
+        heightConstraint.priority = .defaultLow // 기본보다 낮은 우선순위 설정
+        
         
         NSLayoutConstraint.activate([
             
@@ -200,7 +224,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             modalView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             modalView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             modalView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 100),
-            modalView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5),
+            modalView.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -20),
+            heightConstraint,
             
             
             
