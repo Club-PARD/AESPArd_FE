@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let selectedDeletePracticeNotification = Notification.Name("selectedDeletePracticeNotification")
+}
+
 class PracticeListTableCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
@@ -161,6 +165,12 @@ class PracticeListTableCell: UITableViewCell {
         } else {
             selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
         }
+        
+        
+        if let practiceName = practiceNameLabel.text {
+            NotificationCenter.default.post(name: .selectedDeletePracticeNotification, object: nil, userInfo: ["cellName": practiceName])
+        }
+        
     }
 }
 

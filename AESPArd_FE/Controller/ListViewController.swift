@@ -103,6 +103,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         //삭제모드 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .listDeleteCheckNotification, object: nil)
+        
+        //삭제할꺼 리스트 추가 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeletePracticeNotification, object: nil)
     }
     
     deinit {
@@ -110,6 +113,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         NotificationCenter.default.removeObserver(self, name: .editPresentationNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: .editNameNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: .deletePresentationFolderNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .selectedDeletePracticeNotification, object: nil)
     }
     
     private func setUI() {
@@ -173,7 +177,26 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     // 버튼 상태를 토글하는 메서드
     @objc func handleButtonToggleNotification() {
         isDeleteMode.toggle()
+        
+        if !isDeleteMode {
+            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            selectedDeleteId.removeAll()
+        }
+        
         tableView.reloadData()
+    }
+    
+    @objc func handleDeleteSelection(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let cellName = userInfo["cellName"] as? String else { return }
+        
+        if selectedDeleteId.contains(cellName) {
+            selectedDeleteId.removeAll { $0 == cellName }
+        } else {
+            selectedDeleteId.append(cellName)
+        }
+        tableView.reloadData()
+
     }
  
     //MARK: -Alert 함수
@@ -313,6 +336,15 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             if(isDeleteMode){
                 cell.recentCountButton.isHidden = true
                 cell.selectedDeleteButton.isHidden = false
+                
+                // 삭제 선택한 리스트 있는지 확인
+                if selectedDeleteId.contains("\(indexPath[1]+1)\(practiceName)") {
+                    // 이미 선택된 경우 체크 표시
+                    cell.selectedDeleteButton.setImage(UIImage(named: "check_O"), for: .normal)
+                } else {
+                    // 선택되지 않은 경우 X 표시
+                    cell.selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
+                }
             }
             else{
                 cell.recentCountButton.isHidden = false
