@@ -315,6 +315,7 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
             if(indexPath.row>0){
                 cell.helpLabel.text = helpText[indexPath.row-1]
             }
+
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(withIdentifier: "GoToEvaluationCell", for: indexPath) as! GoToEvaluationCell
