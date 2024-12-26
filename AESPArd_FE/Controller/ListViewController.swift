@@ -28,8 +28,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     // 삭제모드 여부
     var isDeleteMode : Bool = false
-    //삭제하려고 선택한 리스트 갯수
-    var selectDeleteCount : [Int] = []
+    //삭제하려고 선택한 리스트 
+    var selectedDeleteId : [String] = []
     
     let tableView: UITableView = {
         let tableView = UITableView()

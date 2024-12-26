@@ -11,14 +11,15 @@ class HomeViewController: UIViewController {
     
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
-    var presentationCount :Int = 20
+    var presentationCount :Int = 10
     
     //막대 그래프 데이터
 //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
     let graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
-    var presentationName : String = "발표이름"
+    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
+
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
@@ -29,8 +30,8 @@ class HomeViewController: UIViewController {
     var filterMode : String = "recent"
     // 삭제모드 여부
     var isDeleteMode : Bool = false
-    //삭제하려고 선택한 리스트 갯수
-    var selectDeleteCount : [Int] = []
+    //삭제하려고 선택한 리스트 
+    var selectedDeleteId : [String] = []
     
     
     let tableView: UITableView = {
@@ -68,10 +69,19 @@ class HomeViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
+        //삭제 모드인지 확인
         NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
         
+        //삭제할꺼 리스트 추가 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeleteNotification, object: nil)
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .deleteCheckNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .selectedDeleteNotification, object: nil)
+    }
+
     
     func setUI(){
         
@@ -95,8 +105,28 @@ class HomeViewController: UIViewController {
     // 버튼 상태를 토글하는 메서드
     @objc func handleButtonToggleNotification() {
         isDeleteMode.toggle()
+        
+        if !isDeleteMode {
+            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            selectedDeleteId.removeAll()
+        }
+        
         tableView.reloadData()
     }
+    
+    @objc func handleDeleteSelection(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let cellName = userInfo["cellName"] as? String else { return }
+        
+        if selectedDeleteId.contains(cellName) {
+            selectedDeleteId.removeAll { $0 == cellName }
+        } else {
+            selectedDeleteId.append(cellName)
+        }
+        tableView.reloadData()
+//        print("Updated selectedDeleteId: \(selectedDeleteId)")
+    }
+    
 }
 
 // MARK: - 2. tableView extension 생성
@@ -160,11 +190,20 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
             
             if(isDeleteMode){
                 cell.bookmarkButton.isHidden = true
                 cell.deleteCheckButton.isHidden = false
+                
+                // 삭제 선택한 리스트 있는지 확인
+                if selectedDeleteId.contains(presentationName[indexPath.row]) {
+                    // 이미 선택된 경우 체크 표시
+                    cell.deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
+                } else {
+                    // 선택되지 않은 경우 X 표시
+                    cell.deleteCheckButton.setImage(UIImage(named: "check_X"), for: .normal)
+                }
             }
             else{
                 cell.bookmarkButton.isHidden = false
