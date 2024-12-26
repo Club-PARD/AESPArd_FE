@@ -13,10 +13,22 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var practiceTotalScore: Int = 88
     var itembarVaue : Double =  0.84 //원형 프로그레스바
     
-    var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리 비율", "발표 내용 AI 분석 기능"]
-    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84, -1.0]
-    var itemDetailList : [String] = ["14초 초과되었어요", "조금 빠른 편이에요", "조금 작은 편이에요", "9회, 조금 많아요", "15회, 다소 많아요", "비율 기준치 작성", "유료 구독 시 이용 가능합니다"]
+    var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리"]
+    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84]
+    var itemDetailList : [String] = ["7초 초과되었어요.", "조금 느린 편이에요. 조금만 빠르게 말해볼까요?", "발표에 딱 맞는 목소리 크기였어요!", "의식적으로 발화 지연 표현을 고치려고 노력해보세요!", "너무 많아요. 발표 내용을 더 숙지해보세요.", "훌륭해요! 실전에서도 관객과의 소통이 중요해요."]
     
+    //드롭다운 열렸을 경우 보여주는 값
+    var evaluationList : [String] = ["내가 입력한 발표 시간", "발표에 적절한 WPM", "발표에 적절한 목소리 데시벨", "나의 발화 지연 횟수", "나의 불필요한 공백 횟수", "관객을 바라본 시선의 비율"]
+    var myEvaluationlList : [String] = ["영상 발표 시간", "나의 WPM", "나의 목소리 데시벨"]
+    
+    var evaluationValuelList : [String] = ["05:30~07:30", "???WPM", "???dB", "9회", "5회", "???%"]
+    var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
+    
+    //hep 버튼 텍스트
+    var helpText : [String] = ["WPM은 분당 단어 수에요\n아나운서의 WPM을 참고해\n기준을 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 카메라를\n바라본 비율을 측정해요 "]
+    
+    // 드롭다운 상태 저장
+    var dropDownStates: [Bool] = Array(repeating: false, count: 6)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,6 +71,10 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //총 점수
+        practiceTotalScoreView.totalScoreLabel.text = "\(practiceTotalScore)점"
+        
     }
     
     deinit {
@@ -84,6 +100,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     let practiceTotalScoreView: PracticeTotalScoreView = {
         let view = PracticeTotalScoreView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        //        view.totalScoreLabel.text = "\(practiceTotalScore)점"
         return view
     }()
     
@@ -100,7 +117,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isHidden = true // 기본적으로 숨김
         view.layer.cornerRadius = 13
-//        view.delegate = self
+        //        view.delegate = self
         
         view.layer.shadowColor = UIColor(red: 0, green: 0.271, blue: 0.91, alpha: 0.1).cgColor
         view.layer.shadowOpacity = 1
@@ -123,6 +140,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     func setUI(){
         
         view.addSubview(practiceHeaderView)
+        view.addSubview(videoPlayerView)
+        view.addSubview(practiceTotalScoreView)
         
         view.addSubview(tableView)
         view.addSubview(transparentOverlay) //edit창 이외 터치 이벤트 감지
@@ -130,6 +149,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         
         // 각 섹션별 셀 등록
         tableView.register(DropDownDetailTableCell.self, forCellReuseIdentifier: "DropDownDetailTableCell") //드롭다운 닫힘
+        tableView.register(GoToEvaluationCell.self, forCellReuseIdentifier: "GoToEvaluationCell")
         
         NSLayoutConstraint.activate([
             
@@ -138,8 +158,17 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             practiceHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             practiceHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
+            videoPlayerView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
+            videoPlayerView.heightAnchor.constraint(equalToConstant: 316),
+            videoPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            videoPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            tableView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
+            practiceTotalScoreView.topAnchor.constraint(equalTo: videoPlayerView.bottomAnchor),
+            practiceTotalScoreView.heightAnchor.constraint(equalToConstant: 100),
+            practiceTotalScoreView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            practiceTotalScoreView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: practiceTotalScoreView.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -247,33 +276,89 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
 // MARK: - 2. tableView extension 생성
 extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 7 // 마지막 섹션은 행은 평가 항목 갯수
+        if section == 0 {
+            return 6 // 마지막 섹션은 행은 평가 항목 갯수
+        } else {
+            return 1 // 나머지 섹션은 각 1개 행
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
-        // 셀에 데이터 설정 (필요한 설정 추가)
-        cell.backgroundColor = .clear
-        cell.selectionStyle = .none
-        
-        cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] )
-        
-        if(indexPath.row == 6){
-            cell.itemName.textColor =  UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
-            cell.dropDownButton.setImage(UIImage(named: "false-chevron"), for: .normal)
-            //                cell.circularProgressBar.label = "???"
+        // 섹션에 맞는 셀을 반환
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DropDownDetailTableCell", for: indexPath) as! DropDownDetailTableCell
+            // 셀에 데이터 설정 (필요한 설정 추가)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            
+            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] , rowIndex: indexPath.row)
+            
+            // 드롭다운 버튼 클릭 시 상태 변경
+            cell.dropDownButton.addTarget(self, action: #selector(dropDownButtonTapped(_:)), for: .touchUpInside)
+            cell.dropDownButton.tag = indexPath.row
+            
+            //드롭다운 열렸을 경우 보여줄 값 지정
+            cell.evaluationLabel.text = evaluationList[indexPath.row]
+            if(indexPath.row<3){
+                cell.myEvaluationLabel.text = myEvaluationlList[indexPath.row]
+            }
+            cell.evaluationValueLabel.text = evaluationValuelList[indexPath.row]
+            if(indexPath.row<3){
+                cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
+            }
+            
+            if(indexPath.row>0){
+                cell.helpLabel.text = helpText[indexPath.row-1]
+            }
+
+            return cell
+        case 1:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "GoToEvaluationCell", for: indexPath) as! GoToEvaluationCell
+            // 셀에 데이터 설정 (필요한 설정 추가)
+            cell.backgroundColor = .clear
+            cell.selectionStyle = .none
+            
+            return cell
+        default:
+            return UITableViewCell()
         }
-        
-        return cell
     }
     
     // 셀의 높이를 다르게 설정
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        // 각 섹션과 행에 대해 다르게 설정
+        switch indexPath.section {
+        case 0:
+            if dropDownStates[indexPath.row] {
+                // 드롭다운이 열려 있는 경우
+                if indexPath.row == 3 || indexPath.row == 4 || indexPath.row == 5 {
+                    // 3, 4, 5번 행에 대해 높이를 143으로 설정
+                    return 143
+                } else {
+                    // 그 외의 행에 대해서는 168로 설정
+                    return 168
+                }
+            } else {
+                // 드롭다운이 닫혀 있는 경우
+                return 104
+            }
+        default:
+            return 72
+        }
+    }
+
+    
+    // MARK: - 드롭다운 버튼 메서드
+    @objc func dropDownButtonTapped(_ sender: UIButton) {
         
-        return 88 // 박스 크기 80px + 아래 패딩 8px
+        let rowIndex = sender.tag
+        dropDownStates[rowIndex].toggle() // 상태 토글
+        tableView.beginUpdates()
+        tableView.endUpdates()
     }
 }
