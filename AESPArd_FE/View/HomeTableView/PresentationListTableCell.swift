@@ -9,8 +9,7 @@ class PresentationListTableCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: "PresentationListTableCell")
         setUI()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
+    
     }
     
     deinit {

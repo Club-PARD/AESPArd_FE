@@ -17,8 +17,6 @@ class PracticeListTableCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: "PracticeListTableCell")
         setUI()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .listDeleteCheckNotification, object: nil)
-        
     }
     
     deinit {
@@ -162,17 +160,6 @@ class PracticeListTableCell: UITableViewCell {
             selectedDeleteButton.setImage(UIImage(named: "check_O"), for: .normal)
         } else {
             selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
-        }
-    }
-    
-    // 버튼 상태를 토글하는 메서드
-    @objc func handleButtonToggleNotification() {
-        if !recentCountButton.isHidden {
-            recentCountButton.isHidden = true
-            selectedDeleteButton.isHidden = false
-        } else {
-            recentCountButton.isHidden = false
-            selectedDeleteButton.isHidden = true
         }
     }
 }

@@ -11,7 +11,7 @@ class HomeViewController: UIViewController {
     
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
-    var presentationCount :Int = 5
+    var presentationCount :Int = 20
     
     //막대 그래프 데이터
 //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
@@ -30,7 +30,7 @@ class HomeViewController: UIViewController {
     // 삭제모드 여부
     var isDeleteMode : Bool = false
     //삭제하려고 선택한 리스트 갯수
-    var selectDeleteCount : Int = 0
+    var selectDeleteCount : [Int] = []
     
     
     let tableView: UITableView = {
@@ -68,6 +68,8 @@ class HomeViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
+        
     }
     
     
@@ -88,6 +90,12 @@ class HomeViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
         ])
         
+    }
+    
+    // 버튼 상태를 토글하는 메서드
+    @objc func handleButtonToggleNotification() {
+        isDeleteMode.toggle()
+        tableView.reloadData()
     }
 }
 
@@ -153,6 +161,15 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            
+            if(isDeleteMode){
+                cell.bookmarkButton.isHidden = true
+                cell.deleteCheckButton.isHidden = false
+            }
+            else{
+                cell.bookmarkButton.isHidden = false
+                cell.deleteCheckButton.isHidden = true
+            }
             return cell
             
         default:

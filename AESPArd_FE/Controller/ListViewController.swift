@@ -12,7 +12,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //발표 폴더 이름
     var presentationFolderName :String = "협체발표"
     //발표연습 갯수
-    var practiceCount :Int = 5
+    var practiceCount :Int = 20
     
     //섹션 2
     //발표 연습 이름
@@ -25,6 +25,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //선 그래프 점수
     var scoreListData: [Double] = [82, 34, 67, 69, 89]
     
+    
+    // 삭제모드 여부
+    var isDeleteMode : Bool = false
+    //삭제하려고 선택한 리스트 갯수
+    var selectDeleteCount : [Int] = []
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -95,6 +100,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //삭제모드 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .listDeleteCheckNotification, object: nil)
     }
     
     deinit {
@@ -162,6 +170,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         transparentOverlay.isHidden = true // 투명 뷰 숨기기
     }
     
+    // 버튼 상태를 토글하는 메서드
+    @objc func handleButtonToggleNotification() {
+        isDeleteMode.toggle()
+        tableView.reloadData()
+    }
  
     //MARK: -Alert 함수
     // 이름 수정하기 Alert
@@ -281,7 +294,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .none
             
             cell.configure(practiceCount: practiceCount)
-            
+        
             return cell
             
         case 2:
@@ -296,6 +309,16 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
             //발표 연습 이름 라벨
             cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
+            
+            if(isDeleteMode){
+                cell.recentCountButton.isHidden = true
+                cell.selectedDeleteButton.isHidden = false
+            }
+            else{
+                cell.recentCountButton.isHidden = false
+                cell.selectedDeleteButton.isHidden = true
+            }
+            
             
             return cell
             
