@@ -3,7 +3,8 @@ import Foundation
 
 class NetworkManager {
     static let shared = NetworkManager()
-    private let baseURL = URLClass().baseURL
+    private let baseURL = "#"
+//    URLClass().baseURL
     
     // 외부에서 인스턴스 생성 막기!
     private init() {}
