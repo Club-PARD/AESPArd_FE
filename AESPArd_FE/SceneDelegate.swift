@@ -10,16 +10,30 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    var mainWindow: UIWindow?
+    var overlayWindow: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+
         
-        window = UIWindow(frame: UIScreen.main.bounds)
+        let mainWindow = UIWindow(windowScene: windowScene)
+        self.mainWindow = mainWindow
+        mainWindow.windowLevel = .normal
+        mainWindow.rootViewController = ViewController() // Your main app content
+        mainWindow.makeKeyAndVisible()
         
-        window?.rootViewController = ViewController()
-        window?.makeKeyAndVisible()
-        window?.windowScene = windowScene
+//        // Overlay window (excluded from recording)
+//        let overlayWindow = UIWindow(windowScene: windowScene)
+//        self.overlayWindow = overlayWindow
+//        overlayWindow.windowLevel = UIWindow.Level(UIWindow.Level.normal.rawValue + 1)
+//        overlayWindow.isOpaque = false
+//        overlayWindow.backgroundColor = .clear
+//        
+//        // Add UI elements to overlay window
+//        let overlayVC = CameraOverlayViewController()
+//        overlayWindow.rootViewController = overlayVC
+//        overlayWindow.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import AVFoundation
+import Photos
 
 class ViewController: UITabBarController {
     
@@ -31,7 +33,100 @@ class ViewController: UITabBarController {
         customizeTabBarAppearance() // 탭 바 모양 커스터마이징
         addShadowToTabBar() // 탭 바 그림자 추가
         
+        // 카메라 권한 확인
+        checkCameraPermission { [weak self] granted in
+            DispatchQueue.main.async {
+                if granted {
+                    // 권한 있음
+                } else {
+                    self?.showAlert(title: "카메라 사용 제한됨", message: "카메라 사용 권한이 필요합니다.")
+                }
+            }
+        }
+        
+        // 갤러리 접근 권한 확인
+        checkAndRequestPhotoLibraryAccess { [weak self] granted in
+            if granted {
+                // Proceed with accessing or saving to the Photo Library
+            } else {
+                // Handle the denial gracefully
+                self?.showAlert(title: "앨범 접근 제한됨", message: "앨범 접근 권한이 필요합니다.")
+            }
+        }
+
+        
+        
     }
+    
+    // MARK: - 권한 확인
+    
+    private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            // Permission already granted
+            completion(true)
+        case .notDetermined:
+            // Request permission
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                completion(granted)
+            }
+        case .denied, .restricted:
+            // Permission denied or restricted
+            completion(false)
+        @unknown default:
+            completion(false)
+        }
+    }
+    
+    
+    func checkAndRequestPhotoLibraryAccess(completion: @escaping (Bool) -> Void) {
+        let status = PHPhotoLibrary.authorizationStatus()
+        
+        switch status {
+        case .authorized:
+            // Access already granted
+            completion(true)
+        case .notDetermined:
+            // Request access
+            requestPhotoLibraryAccess { granted in
+                completion(granted)
+            }
+        case .denied, .restricted:
+            // Access denied or restricted
+            completion(false)
+        case .limited:
+            // Handle limited access if necessary
+            completion(true) // Assuming limited access is acceptable
+        @unknown default:
+            // Handle unforeseen cases
+            completion(false)
+        }
+    }
+    
+    
+    // Requests access to the Photo Library.
+    private func requestPhotoLibraryAccess(completion: @escaping (Bool) -> Void) {
+        PHPhotoLibrary.requestAuthorization { status in
+            DispatchQueue.main.async {
+                switch status {
+                case .authorized:
+                    completion(true)
+                case .limited:
+                    // Handle limited access if necessary
+                    completion(true) // Assuming limited access is acceptable
+                default:
+                    completion(false)
+                }
+            }
+        }
+    }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     
     // MARK: - 탭 바 설정
     func setTabBar() {
