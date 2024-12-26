@@ -14,7 +14,8 @@ class HomeViewController: UIViewController {
     var presentationCount :Int = 5
     
     //막대 그래프 데이터
-    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+//    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+    let graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
     var presentationName : String = "발표이름"

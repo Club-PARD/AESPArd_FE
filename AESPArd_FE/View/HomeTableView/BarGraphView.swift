@@ -31,9 +31,15 @@ class BarGraphView: UIView {
         
         // 막대 추가
         for (index, percentage) in percentages.enumerated() {
-            let barHeight = maxHeight * (percentage / 100)
+            var barHeight: CGFloat
+            if(percentage != 0){
+                barHeight = maxHeight * (percentage / 100)
+            }
+            else{
+                barHeight =  maxHeight * (100 / 100)
+            }
             let barView = UIView()
-            barView.backgroundColor = .gray
+            barView.backgroundColor = .white
             barView.frame = CGRect(
                 x: CGFloat(index) * (barWidth + spacing),
                 y: maxHeight - barHeight,
@@ -53,19 +59,21 @@ class BarGraphView: UIView {
             barView.layer.mask = shapeLayer
             
             // 세로 그라데이션 추가
-            let gradientLayer = CAGradientLayer()
-            gradientLayer.colors = [
-                UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1).cgColor,  // 위쪽 색
-                UIColor(red: 0.54, green: 0.68, blue: 1, alpha: 1).cgColor   // 아래쪽 색
-            ]
-            gradientLayer.locations = [0, 1]  // 그라데이션의 시작과 끝 위치
-            gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)  // 세로 방향 (위에서 아래로)
-            gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
-            
-            gradientLayer.bounds = barView.bounds
-            gradientLayer.position =  CGPoint(x: 12.5, y: barHeight/2)
-            
-            barView.layer.addSublayer(gradientLayer)
+            if percentage != 0 {
+                let gradientLayer = CAGradientLayer()
+                gradientLayer.colors = [
+                    UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1).cgColor,  // 위쪽 색
+                    UIColor(red: 0.54, green: 0.68, blue: 1, alpha: 1).cgColor   // 아래쪽 색
+                ]
+                gradientLayer.locations = [0, 1]  // 그라데이션의 시작과 끝 위치
+                gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)  // 세로 방향 (위에서 아래로)
+                gradientLayer.endPoint = CGPoint(x: 0.5, y: 1)
+                
+                gradientLayer.bounds = barView.bounds
+                gradientLayer.position =  CGPoint(x: 12.5, y: barHeight/2)
+                
+                barView.layer.addSublayer(gradientLayer)
+            }
             addSubview(barView)
             
             
