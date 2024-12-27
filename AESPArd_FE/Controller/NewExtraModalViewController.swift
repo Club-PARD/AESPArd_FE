@@ -36,11 +36,12 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     }()
     
     // 나가기 버튼
-    let exitButton: UIButton = {
-        let button = UIButton()
+    let exitButton: ExpandableButton = {
+        let button = ExpandableButton()
         button.setImage(UIImage(named: "X-iCon"), for: .normal)
         button.addTarget(self, action: #selector(exit), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.touchAreaInsets = UIEdgeInsets(top: 40, left: 40, bottom: 40, right: 40)
         return button
     }()
     
@@ -168,25 +169,6 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         // 키보드 표시 및 숨김 이벤트 등록
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-        
-        
-        // 버튼 컨테이너 추가해서 X 버튼 위에 투명하게 올려서 반응시킴 (수퍼뷰에 넣어야 제약 조건에 맞아요 뷰 계층 한 층 내려보려니까 제약 꼬여서 수퍼뷰에서 돌립니다..)
-        // 이거 exitButton setUI랑 계층 맞추니까 exitButton 위에 올리는거다보니 제약이 겹쳐서 제약오류나요
-        let buttonContainer = UIButton()
-            buttonContainer.translatesAutoresizingMaskIntoConstraints = false
-            buttonContainer.addTarget(self, action: #selector(exit), for: .touchUpInside) // 동일 액션 연결
-            buttonContainer.backgroundColor = .clear
-            modalView.addSubview(buttonContainer)
-        
-        // 버튼 컨테이너 제약조건 설정한건데 애초에 컨테이너가 수퍼뷰에 정의되어 있어서 수퍼뷰에서 제약도 설정해야함,,
-        NSLayoutConstraint.activate([
-            buttonContainer.topAnchor.constraint(equalTo: modalView.topAnchor, constant: 20), // 기존 top 제약
-            buttonContainer.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 20), // 기존 leading 제약
-            buttonContainer.widthAnchor.constraint(equalToConstant: 40),  // 터치 영역 크기
-            buttonContainer.heightAnchor.constraint(equalToConstant: 40)  // 터치 영역 크기
-        ])
-        
-        
         
         
     }
