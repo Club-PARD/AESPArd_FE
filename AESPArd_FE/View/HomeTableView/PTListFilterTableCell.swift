@@ -19,7 +19,7 @@ class PTListFilterTableCell: UITableViewCell {
     }()
     
     let searchButton: UIButton = {
-        let button = UIButton(type: .custom)
+        let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "searchIcon"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
@@ -118,12 +118,10 @@ class PTListFilterTableCell: UITableViewCell {
             listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             listCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
-            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 30),
             searchButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             searchButton.leadingAnchor.constraint(equalTo: listCountLabel.trailingAnchor, constant: 40),
-            
-//            searchButton.widthAnchor.constraint(equalToConstant: 20),
-            searchButton.heightAnchor.constraint(equalToConstant: 20),
+            searchButton.heightAnchor.constraint(equalToConstant: 40),
             
             recentButton.topAnchor.constraint(equalTo: listCountLabel.bottomAnchor, constant: 16),
             recentButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),

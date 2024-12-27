@@ -23,7 +23,7 @@ class HomeViewController: UIViewController {
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
-    var barVaue: Double = 0.84
+    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
     
     
     // 필터링 모드
@@ -137,6 +137,7 @@ class HomeViewController: UIViewController {
         let modalViewController = SearchViewController()
         modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
         self.definesPresentationContext = true // 현재 컨텍스트를 정의
+        
         self.present(modalViewController, animated: true)
     }
     
@@ -203,7 +204,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue[indexPath.row])
             
             if(isDeleteMode){
                 cell.bookmarkButton.isHidden = true

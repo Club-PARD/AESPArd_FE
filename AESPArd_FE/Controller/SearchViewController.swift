@@ -17,7 +17,7 @@ class SearchViewController: UIViewController {
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
-    var barVaue: Double = 0.84
+    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -31,7 +31,7 @@ class SearchViewController: UIViewController {
         
         self.navigationController?.isNavigationBarHidden = true
         
-        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
+//        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -50,6 +50,8 @@ class SearchViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
+        self.view.frame.origin.y = -448
+        
         setUI()
     }
     
@@ -66,6 +68,15 @@ class SearchViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // 애니메이션을 통해 448 포인트 아래에서 위로 올라오도록 설정
+        UIView.animate(withDuration: 0.5, animations: {
+            self.view.frame.origin.y = 0  // 화면 상단으로 이동
+        })
+    }
 }
 
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
@@ -79,7 +90,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
         
-        cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+        cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue[indexPath.row])
         
         return cell
     }
