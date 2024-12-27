@@ -14,12 +14,12 @@ class HomeViewController: UIViewController {
     var presentationCount :Int = 10
     
     //막대 그래프 데이터
-//    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+    //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
     let graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
     var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
-
+    
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
@@ -30,7 +30,7 @@ class HomeViewController: UIViewController {
     var filterMode : String = "recent"
     // 삭제모드 여부
     var isDeleteMode : Bool = false
-    //삭제하려고 선택한 리스트 
+    //삭제하려고 선택한 리스트
     var selectedDeleteId : [String] = []
     
     
@@ -74,14 +74,18 @@ class HomeViewController: UIViewController {
         
         //삭제할꺼 리스트 추가 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeleteNotification, object: nil)
+        
+        //검색버튼 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSearchNotification), name: .searchButtonNotification, object: nil)
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self, name: .deleteCheckNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .selectedDeleteNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .searchButtonNotification, object: nil)
     }
-
     
     func setUI(){
         
@@ -114,6 +118,7 @@ class HomeViewController: UIViewController {
         tableView.reloadData()
     }
     
+    //삭제 리스트 추가
     @objc func handleDeleteSelection(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let cellName = userInfo["cellName"] as? String else { return }
@@ -124,7 +129,15 @@ class HomeViewController: UIViewController {
             selectedDeleteId.append(cellName)
         }
         tableView.reloadData()
-//        print("Updated selectedDeleteId: \(selectedDeleteId)")
+        //        print("Updated selectedDeleteId: \(selectedDeleteId)")
+    }
+    
+    // 검색버튼 클릭 감지
+    @objc func handleSearchNotification() {
+        let modalViewController = SearchViewController()
+        modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+        self.definesPresentationContext = true // 현재 컨텍스트를 정의
+        self.present(modalViewController, animated: true)
     }
     
 }
