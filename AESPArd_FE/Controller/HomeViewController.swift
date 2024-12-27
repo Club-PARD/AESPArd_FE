@@ -9,15 +9,21 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
-    var presentationCount :Int = 5
+    var presentationCount :Int = 10
     
     //막대 그래프 데이터
-    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+    //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
+    let graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
-    var presentationName : String = "발표이름"
+    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
+    
     var ptDetailCount : Int = 4
     var presentationDate : Int = 1
     var ptDetailTotalScore : Int = 88
@@ -28,8 +34,8 @@ class HomeViewController: UIViewController {
     var filterMode : String = "recent"
     // 삭제모드 여부
     var isDeleteMode : Bool = false
-    //삭제하려고 선택한 리스트 갯수
-    var selectDeleteCount : Int = 0
+    //삭제하려고 선택한 리스트
+    var selectedDeleteId : [String] = []
     
     
     let tableView: UITableView = {
@@ -42,6 +48,18 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+       // 서버에서 user 정보 가져옴
+        networkManager.fetchUserById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let user):
+                // 여기서 Usr 모델에 받아온 데이터 집어 넣고 UI에 적용해주면 됨
+                print("Fetched users: \(user)")
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
@@ -67,8 +85,23 @@ class HomeViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
+        //삭제 모드인지 확인
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
+        
+        //삭제할꺼 리스트 추가 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeleteNotification, object: nil)
+        
+        //검색버튼 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSearchNotification), name: .searchButtonNotification, object: nil)
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .deleteCheckNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .selectedDeleteNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .searchButtonNotification, object: nil)
+    }
     
     func setUI(){
         
@@ -88,6 +121,41 @@ class HomeViewController: UIViewController {
         ])
         
     }
+    
+    // 버튼 상태를 토글하는 메서드
+    @objc func handleButtonToggleNotification() {
+        isDeleteMode.toggle()
+        
+        if !isDeleteMode {
+            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            selectedDeleteId.removeAll()
+        }
+        
+        tableView.reloadData()
+    }
+    
+    //삭제 리스트 추가
+    @objc func handleDeleteSelection(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let cellName = userInfo["cellName"] as? String else { return }
+        
+        if selectedDeleteId.contains(cellName) {
+            selectedDeleteId.removeAll { $0 == cellName }
+        } else {
+            selectedDeleteId.append(cellName)
+        }
+        tableView.reloadData()
+        //        print("Updated selectedDeleteId: \(selectedDeleteId)")
+    }
+    
+    // 검색버튼 클릭 감지
+    @objc func handleSearchNotification() {
+        let modalViewController = SearchViewController()
+        modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+        self.definesPresentationContext = true // 현재 컨텍스트를 정의
+        self.present(modalViewController, animated: true)
+    }
+    
 }
 
 // MARK: - 2. tableView extension 생성
@@ -151,7 +219,25 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName, ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            
+            if(isDeleteMode){
+                cell.bookmarkButton.isHidden = true
+                cell.deleteCheckButton.isHidden = false
+                
+                // 삭제 선택한 리스트 있는지 확인
+                if selectedDeleteId.contains(presentationName[indexPath.row]) {
+                    // 이미 선택된 경우 체크 표시
+                    cell.deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
+                } else {
+                    // 선택되지 않은 경우 X 표시
+                    cell.deleteCheckButton.setImage(UIImage(named: "check_X"), for: .normal)
+                }
+            }
+            else{
+                cell.bookmarkButton.isHidden = false
+                cell.deleteCheckButton.isHidden = true
+            }
             return cell
             
         default:
@@ -196,12 +282,24 @@ extension HomeViewController: UITabBarControllerDelegate {
         // 현재 선택된 탭이 HomeViewController일 때
         if let navController = viewController as? UINavigationController,
            let homeVC = navController.viewControllers.first as? HomeViewController {
+            
             // 모든 모달 창 닫기
-            homeVC.dismiss(animated: true) {
-                print("모든 모달 창이 닫혔습니다.")
-            }
+            dismissModalsRecursively(from: homeVC, isLastModal: true)
         }
         
         return true
     }
+    
+    private func dismissModalsRecursively(from viewController: UIViewController, isLastModal: Bool) {
+        // 현재 모달 창이 있으면
+        if let presentedVC = viewController.presentedViewController {
+            // 먼저 뒤의 모달 창을 닫음
+            dismissModalsRecursively(from: presentedVC, isLastModal: false)
+            
+            // 마지막 모달 창 여부에 따라 애니메이션 설정
+            presentedVC.dismiss(animated: isLastModal)
+        }
+    }
 }
+
+

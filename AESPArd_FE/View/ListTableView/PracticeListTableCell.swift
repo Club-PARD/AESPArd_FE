@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let selectedDeletePracticeNotification = Notification.Name("selectedDeletePracticeNotification")
+}
+
 class PracticeListTableCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
@@ -16,8 +20,6 @@ class PracticeListTableCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: "PracticeListTableCell")
         setUI()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .listDeleteCheckNotification, object: nil)
         
     }
     
@@ -163,17 +165,12 @@ class PracticeListTableCell: UITableViewCell {
         } else {
             selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
         }
-    }
-    
-    // 버튼 상태를 토글하는 메서드
-    @objc func handleButtonToggleNotification() {
-        if !recentCountButton.isHidden {
-            recentCountButton.isHidden = true
-            selectedDeleteButton.isHidden = false
-        } else {
-            recentCountButton.isHidden = false
-            selectedDeleteButton.isHidden = true
+        
+        
+        if let practiceName = practiceNameLabel.text {
+            NotificationCenter.default.post(name: .selectedDeletePracticeNotification, object: nil, userInfo: ["cellName": practiceName])
         }
+        
     }
 }
 

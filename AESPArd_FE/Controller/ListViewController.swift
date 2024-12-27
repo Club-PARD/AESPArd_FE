@@ -12,7 +12,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //발표 폴더 이름
     var presentationFolderName :String = "협체발표"
     //발표연습 갯수
-    var practiceCount :Int = 5
+    var practiceCount :Int = 20
     
     //섹션 2
     //발표 연습 이름
@@ -25,6 +25,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     //선 그래프 점수
     var scoreListData: [Double] = [82, 34, 67, 69, 89]
     
+    
+    // 삭제모드 여부
+    var isDeleteMode : Bool = false
+    //삭제하려고 선택한 리스트 
+    var selectedDeleteId : [String] = []
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -95,6 +100,12 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //삭제모드 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .listDeleteCheckNotification, object: nil)
+        
+        //삭제할꺼 리스트 추가 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeletePracticeNotification, object: nil)
     }
     
     deinit {
@@ -102,6 +113,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         NotificationCenter.default.removeObserver(self, name: .editPresentationNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: .editNameNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: .deletePresentationFolderNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .selectedDeletePracticeNotification, object: nil)
     }
     
     private func setUI() {
@@ -162,6 +174,30 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         transparentOverlay.isHidden = true // 투명 뷰 숨기기
     }
     
+    // 버튼 상태를 토글하는 메서드
+    @objc func handleButtonToggleNotification() {
+        isDeleteMode.toggle()
+        
+        if !isDeleteMode {
+            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            selectedDeleteId.removeAll()
+        }
+        
+        tableView.reloadData()
+    }
+    
+    @objc func handleDeleteSelection(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let cellName = userInfo["cellName"] as? String else { return }
+        
+        if selectedDeleteId.contains(cellName) {
+            selectedDeleteId.removeAll { $0 == cellName }
+        } else {
+            selectedDeleteId.append(cellName)
+        }
+        tableView.reloadData()
+
+    }
  
     //MARK: -Alert 함수
     // 이름 수정하기 Alert
@@ -281,7 +317,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .none
             
             cell.configure(practiceCount: practiceCount)
-            
+        
             return cell
             
         case 2:
@@ -296,6 +332,25 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
             //발표 연습 이름 라벨
             cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
+            
+            if(isDeleteMode){
+                cell.recentCountButton.isHidden = true
+                cell.selectedDeleteButton.isHidden = false
+                
+                // 삭제 선택한 리스트 있는지 확인
+                if selectedDeleteId.contains("\(indexPath[1]+1)\(practiceName)") {
+                    // 이미 선택된 경우 체크 표시
+                    cell.selectedDeleteButton.setImage(UIImage(named: "check_O"), for: .normal)
+                } else {
+                    // 선택되지 않은 경우 X 표시
+                    cell.selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
+                }
+            }
+            else{
+                cell.recentCountButton.isHidden = false
+                cell.selectedDeleteButton.isHidden = true
+            }
+            
             
             return cell
             

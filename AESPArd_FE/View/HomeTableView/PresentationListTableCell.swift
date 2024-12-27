@@ -1,5 +1,9 @@
 import UIKit
 
+extension Notification.Name {
+    static let selectedDeleteNotification = Notification.Name("selectedDeleteNotification")
+}
+
 class PresentationListTableCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
@@ -9,13 +13,7 @@ class PresentationListTableCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: "PresentationListTableCell")
         setUI()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleButtonToggleNotification), name: .deleteCheckNotification, object: nil)
-    }
     
-    deinit {
-        // 옵저버 제거
-        NotificationCenter.default.removeObserver(self, name: .deleteCheckNotification, object: nil)
     }
     
     let ptName: UILabel = {
@@ -176,6 +174,7 @@ class PresentationListTableCell: UITableViewCell {
         } else {
             bookmarkButton.setImage(UIImage(named: "bookmark_X"), for: .normal)
         }
+        
     }
     
     //삭제하기 -> 리스트 체크 버튼
@@ -184,6 +183,10 @@ class PresentationListTableCell: UITableViewCell {
             deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
         } else {
             deleteCheckButton.setImage(UIImage(named: "check_X"), for: .normal)
+        }
+        
+        if let presentationName = ptName.text {
+            NotificationCenter.default.post(name: .selectedDeleteNotification, object: nil, userInfo: ["cellName": presentationName])
         }
     }
     
@@ -196,16 +199,5 @@ class PresentationListTableCell: UITableViewCell {
         ptCount.text = "\(ptDetailCount)개"
         ptDate.text = "발표세부정보설명 · \(presentationDate)일 전"
         circularProgressBar.value = barVaue
-    }
-    
-    // 버튼 상태를 토글하는 메서드
-    @objc func handleButtonToggleNotification() {
-        if !bookmarkButton.isHidden {
-            bookmarkButton.isHidden = true
-            deleteCheckButton.isHidden = false
-        } else {
-            bookmarkButton.isHidden = false
-            deleteCheckButton.isHidden = true
-        }
     }
 }
