@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		0C09B45D2D0FEF4500042B72 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 0C09B45C2D0FEF4500042B72 /* .gitignore */; };
+		0CE0011C2D1E57FC00EB27D0 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 0CE0011B2D1E57FC00EB27D0 /* CombineMoya */; };
+		0CE0011E2D1E57FC00EB27D0 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 0CE0011D2D1E57FC00EB27D0 /* Moya */; };
+		0CE001202D1E57FC00EB27D0 /* ReactiveMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 0CE0011F2D1E57FC00EB27D0 /* ReactiveMoya */; };
+		0CE001222D1E57FC00EB27D0 /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 0CE001212D1E57FC00EB27D0 /* RxMoya */; };
 		14D8572B2D1AEDB30041E9C9 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 14D8572A2D1AEDB30041E9C9 /* DGCharts */; };
 /* End PBXBuildFile section */
 
@@ -71,7 +75,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0CE001222D1E57FC00EB27D0 /* RxMoya in Frameworks */,
+				0CE0011C2D1E57FC00EB27D0 /* CombineMoya in Frameworks */,
+				0CE001202D1E57FC00EB27D0 /* ReactiveMoya in Frameworks */,
 				14D8572B2D1AEDB30041E9C9 /* DGCharts in Frameworks */,
+				0CE0011E2D1E57FC00EB27D0 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +142,10 @@
 			name = AESPArd_FE;
 			packageProductDependencies = (
 				14D8572A2D1AEDB30041E9C9 /* DGCharts */,
+				0CE0011B2D1E57FC00EB27D0 /* CombineMoya */,
+				0CE0011D2D1E57FC00EB27D0 /* Moya */,
+				0CE0011F2D1E57FC00EB27D0 /* ReactiveMoya */,
+				0CE001212D1E57FC00EB27D0 /* RxMoya */,
 			);
 			productName = AESPArd_FE;
 			productReference = 0C86D0A62D0FE81A00BE4FB4 /* AESPArd_FE.app */;
@@ -220,6 +232,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */,
+				0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0C86D0A72D0FE81A00BE4FB4 /* Products */;
@@ -303,7 +316,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QPXSR9M985;
+				DEVELOPMENT_TEAM = 4JXC27SJKM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
@@ -335,7 +348,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QPXSR9M985;
+				DEVELOPMENT_TEAM = 4JXC27SJKM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
@@ -595,6 +608,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
 		14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/danielgindi/Charts.git";
@@ -606,6 +627,26 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0CE0011B2D1E57FC00EB27D0 /* CombineMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = CombineMoya;
+		};
+		0CE0011D2D1E57FC00EB27D0 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
+		0CE0011F2D1E57FC00EB27D0 /* ReactiveMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = ReactiveMoya;
+		};
+		0CE001212D1E57FC00EB27D0 /* RxMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0CE0011A2D1E57FC00EB27D0 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = RxMoya;
+		};
 		14D8572A2D1AEDB30041E9C9 /* DGCharts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 14D857292D1AEDB30041E9C9 /* XCRemoteSwiftPackageReference "Charts" */;
