@@ -4,6 +4,10 @@ extension Notification.Name {
     static let deleteCheckNotification = Notification.Name("deleteCheckNotification")
 }
 
+extension Notification.Name {
+    static let searchButtonNotification = Notification.Name("searchButtonNotification")
+}
+
 class PTListFilterTableCell: UITableViewCell {
     
     let listCountLabel: UILabel = {
@@ -149,7 +153,8 @@ class PTListFilterTableCell: UITableViewCell {
     
     //검색 아이콘 클릭 메서드
     @objc func searchButtonTapped() {
-        print("Search button tapped!")
+        NotificationCenter.default.post(name:.searchButtonNotification, object: nil)
+        
     }
     
     //최신순 버튼 클릭 메서드
