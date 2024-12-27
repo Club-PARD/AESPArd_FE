@@ -63,6 +63,19 @@ class AnalyzingViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         fetchVideoAsset()
+        
+        configureAudioSessionForPlayback()
+    }
+    
+    private func configureAudioSessionForPlayback() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            // .playback ensures the app plays through speakers even if the iPhone is on silent mode
+            try session.setCategory(.playback, mode: .default, options: [])
+            try session.setActive(true)
+        } catch {
+            print("Error setting AVAudioSession category: \(error.localizedDescription)")
+        }
     }
     
     private func setupUI() {
@@ -256,9 +269,22 @@ class AnalyzingViewController: UIViewController {
             }
             
             // Proceed to extract audio
+//            self.convertAVAssetToWav(avAsset) { wavData in
+//                completion(wavData)
+//            }
             self.convertAVAssetToWav(avAsset) { wavData in
+                guard let wavData = wavData else {
+                    completion(nil)
+                    return
+                }
+                
+                // Log or check the file size here
+                print("Extracted WAV data size: \(wavData.count) bytes")
+                
+                // Continue with normal flow...
                 completion(wavData)
             }
+
         }
     }
     

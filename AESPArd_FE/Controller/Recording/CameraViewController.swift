@@ -8,9 +8,9 @@
 import UIKit
 import ARKit
 import SceneKit
-import AVFoundation // 카메라 권한 확인용
-import ReplayKit
-import Photos
+import AVFoundation // 카메라 권한을 위해서 씁니다
+import ReplayKit // 화면 녹화를 위한 프레임워크
+import Photos // 갤러리 접근 프레임워크
 
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
