@@ -50,7 +50,8 @@ class SearchViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
-        self.view.frame.origin.y = -448
+//        self.view.frame.origin.y = -448 //헤더 미포함
+        self.view.frame.origin.y = -388
         
         setUI()
     }
@@ -79,6 +80,7 @@ class SearchViewController: UIViewController {
     }
 }
 
+//MARK: -  테이블뷰
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return presentationCount 
@@ -97,6 +99,25 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
             return 88 // 박스 크기 80px + 아래 패딩 8px
+    }
+    
+    // 섹션에 대한 헤더 설정
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        // 0번 섹션에 대해서만 헤더 높이를 설정
+        if section == 0 {
+            return 60
+        }
+        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if section == 0 {
+            // HeaderTableCell을 0번 섹션의 헤더로 설정
+            let headerCell = SearchHeaderBarCell(style: .default, reuseIdentifier: "SearchHeaderBarCell")
+            headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 60) // 헤더의 높이를 40+20
+            return headerCell
+        }
+        return UIView() // 빈 뷰를 반환하여 간격 제거
     }
     
 }
