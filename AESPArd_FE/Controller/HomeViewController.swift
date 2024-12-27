@@ -253,12 +253,24 @@ extension HomeViewController: UITabBarControllerDelegate {
         // 현재 선택된 탭이 HomeViewController일 때
         if let navController = viewController as? UINavigationController,
            let homeVC = navController.viewControllers.first as? HomeViewController {
+            
             // 모든 모달 창 닫기
-            homeVC.dismiss(animated: true) {
-                print("모든 모달 창이 닫혔습니다.")
-            }
+            dismissModalsRecursively(from: homeVC, isLastModal: true)
         }
         
         return true
     }
+    
+    private func dismissModalsRecursively(from viewController: UIViewController, isLastModal: Bool) {
+        // 현재 모달 창이 있으면
+        if let presentedVC = viewController.presentedViewController {
+            // 먼저 뒤의 모달 창을 닫음
+            dismissModalsRecursively(from: presentedVC, isLastModal: false)
+            
+            // 마지막 모달 창 여부에 따라 애니메이션 설정
+            presentedVC.dismiss(animated: isLastModal)
+        }
+    }
 }
+
+
