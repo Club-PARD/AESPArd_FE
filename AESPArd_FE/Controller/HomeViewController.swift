@@ -51,7 +51,7 @@ class HomeViewController: UIViewController {
         networkManager.fetchUserById(userId: testId) { [weak self] result in
             switch result {
             case .success(let user):
-                // Update your UI / model
+                // 여기서 Usr 모델에 받아온 데이터 집어 넣고 UI에 적용해주면 됨
                 print("Fetched users: \(user)")
             case .failure(let error):
                 // Handle error
