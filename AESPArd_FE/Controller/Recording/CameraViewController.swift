@@ -345,7 +345,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
-
     
     
     private func startRecording() {

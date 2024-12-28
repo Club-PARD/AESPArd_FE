@@ -11,7 +11,7 @@ import UIKit
 
 class CameraOverlayView: UIView {
     
-    var isDebugMode: Bool = false
+    var isDebugMode: Bool = true
     
     var isInTime: Bool = false {
         didSet {
@@ -249,7 +249,7 @@ class CameraOverlayView: UIView {
             faceGuideImageView.widthAnchor.constraint(lessThanOrEqualTo: self.widthAnchor, multiplier: 0.8),
             
             descriptionLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            descriptionLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 48),
+            descriptionLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 100),
             descriptionLabel.widthAnchor.constraint(equalToConstant: 213),
             descriptionLabel.heightAnchor.constraint(equalToConstant: 50),
             
