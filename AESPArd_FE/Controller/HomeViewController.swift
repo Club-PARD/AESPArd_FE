@@ -9,6 +9,10 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
     var presentationCount :Int = 10
@@ -44,6 +48,18 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+       // 서버에서 user 정보 가져옴
+        networkManager.fetchUserById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let user):
+                // 여기서 Usr 모델에 받아온 데이터 집어 넣고 UI에 적용해주면 됨
+                print("Fetched users: \(user)")
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
