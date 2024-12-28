@@ -49,8 +49,13 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var minTime: Double = 5
     private var maxTime: Double = 10
     
-    private var isFullScreen: Bool = true
+    private var isFullScreen: Bool = false
     
+    
+    // MARK: - 카운팅 다운
+    
+    private var countdownTimer: Timer?
+    private var countdownValue: Int = 0
     
     // MARK: - Life Cycle
     
@@ -116,6 +121,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     private func removeOverlayWindow() {
         overlayWindow?.isHidden = true
+        overlayWindow?.isUserInteractionEnabled = false
         overlayWindow?.rootViewController = nil
         overlayWindow = nil
     }
@@ -147,6 +153,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         present(alert, animated: true)
     }
     
+    
     private func stopAllTimers() {
         lookTimer?.invalidate()
         lookTimer = nil
@@ -172,9 +179,43 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     @objc private func backButtonTapped() {
-        sceneView.scene.rootNode.cleanup()
-        stopAllTimers()
-        self.dismiss(animated: true, completion: nil)
+        if isRecording {
+            // 촬영중이면 현재 촬영중인 영상을 중지하고 영상을 취소시켜야함
+            recorder.stopRecording { [weak self] previewController, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    // Handle the error, possibly by informing the user
+                    self.showAlert(title: "Stop Recording Error", message: error.localizedDescription)
+                    return
+                }
+                
+                // Optionally, present the previewController or decide to discard
+                // Since you want to discard, proceed to call discardRecording
+                self.recorder.discardRecording {
+                    DispatchQueue.main.async {
+                       
+                        
+                        // Successfully discarded the recording
+                        print("Recording successfully discarded.")
+                        
+                        // Reset UI elements or states
+                        self.isRecording = false
+                        self.removeOverlayWindow()
+                        self.sceneView.scene.rootNode.cleanup()
+                        self.stopAllTimers()
+                        
+                        // Dismiss the view controller
+                        self.dismiss(animated: true, completion: nil)
+                    }
+                }
+            }
+        } else {
+            // 촬영중이 아니면 그냥 깨끗하게 만들고 뒤로 가면 됨
+            sceneView.scene.rootNode.cleanup()
+            stopAllTimers()
+            self.dismiss(animated: true, completion: nil)
+        }
     }
     
     
@@ -304,18 +345,33 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
+
+    
     
     private func startRecording() {
         guard recorder.isAvailable else {
-            showAlert(title: "Error", message: "Screen recording is not available.")
+            self.removeOverlayWindow()
+            let alert = UIAlertController(title: "카메라 허용 거부됨", message: "화면 녹화를 할 수 없습니다", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { action in
+                self.backButtonTapped()
+            })
+            )
+            present(alert, animated: true)
             return
         }
+        
         
         
         recorder.isMicrophoneEnabled = true
         recorder.startRecording { [weak self] error in
             if let error = error {
-                self?.showAlert(title: "Error", message: error.localizedDescription)
+                self?.removeOverlayWindow()
+                let alert = UIAlertController(title: "에러", message: error.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { action in
+                    self?.backButtonTapped()
+                })
+                )
+                self?.present(alert, animated: true)
             } else {
                 self?.isRecording = true
                 self?.recordingStartTime = Date()
@@ -410,7 +466,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                     self.navigateToAnalyzingViewController(with: identifier)
                 } else {
                     debugPrint("너, 취소한거야.")
-                    //self.navigateToHomeViewController()
+                    self.backButtonTapped()
                 }
             }
         }
@@ -449,41 +505,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             }
         }
     }
-    
-//    private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
-//        debugPrint("checkIfRecordingWasSaved called")
-//        
-//        // Request authorization to access Photos
-//        PHPhotoLibrary.requestAuthorization { status in
-//            DispatchQueue.main.async { // Ensure UI operations are on main thread
-//                switch status {
-//                case .authorized, .limited:
-//                    debugPrint("Authorization granted.")
-//                    
-//                    // Fetch the most recent video asset
-//                    let fetchOptions = PHFetchOptions()
-//                    fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-//                    fetchOptions.fetchLimit = 1
-//                    let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-//                    
-//                    debugPrint("Fetched assets.")
-//                    
-//                    if let asset = fetchResult.firstObject {
-//                        debugPrint("Latest video asset found with identifier: \(asset.localIdentifier)")
-//                        completion(true, asset.localIdentifier)
-//                    } else {
-//                        debugPrint("No video assets found.")
-//                        completion(false, nil)
-//                    }
-//                    
-//                default:
-//                    // If access is denied or restricted, assume the user canceled
-//                    debugPrint("Authorization denied or restricted.")
-//                    completion(false, nil)
-//                }
-//            }
-//        }
-//    }
     
     
     private func navigateToAnalyzingViewController(with identifier: String) {

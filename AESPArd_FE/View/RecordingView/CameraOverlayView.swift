@@ -131,6 +131,9 @@ class CameraOverlayView: UIView {
         return imageView
     }()
     
+    
+    // MARK: - 설명 UI
+    
     let faceGuideImageView : UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "FaceGuide"))
         imageView.contentMode = .scaleAspectFit  // 비율 유지
@@ -162,6 +165,7 @@ class CameraOverlayView: UIView {
         view.isHidden = false
         return view
     }()
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -289,6 +293,8 @@ class CameraOverlayView: UIView {
             self.layoutIfNeeded()
         }
     }
+    
+ 
     
     override func layoutSubviews() {
         super.layoutSubviews()

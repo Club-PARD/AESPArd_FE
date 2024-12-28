@@ -51,6 +51,7 @@ class CameraOverlayViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateRecordingTimeLabelColor(_:)), name: .timeoutOccurred, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(coverScreen(_:)), name: .coverScreenSelected, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(checkIsRecording(_:)), name: .updateUIAfterRecording, object: nil)
+        
     }
     
     
@@ -102,5 +103,6 @@ class CameraOverlayViewController: UIViewController {
        
             self.overlayView.isFullScreen = true
     }
+    
     
 }
