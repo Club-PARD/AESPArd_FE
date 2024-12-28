@@ -5,6 +5,8 @@
 //  Created by KimDogyung on 12/26/24.
 //
 
+// 유저에게는 보이지만 화면 녹화시에는 안찍히는 ViewController layer
+
 import UIKit
 
 class CameraOverlayViewController: UIViewController {
@@ -46,6 +48,10 @@ class CameraOverlayViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateEyeTrackingTimeLabel(_:)), name: .updateEyeTrackingTime, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateGazePoint(_:)), name: .updateGazePoint, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updateStartStopButtonTitle(_:)), name: .updateStartStopButtonTitle, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateRecordingTimeLabelColor(_:)), name: .timeoutOccurred, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(coverScreen(_:)), name: .coverScreenSelected, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(checkIsRecording(_:)), name: .updateUIAfterRecording, object: nil)
+        
     }
     
     
@@ -80,5 +86,23 @@ class CameraOverlayViewController: UIViewController {
             }
         }
     }
+    
+    @objc private func checkIsRecording(_ notification: Notification) {
+        if let isRecording = notification.userInfo?["isRecording"] as? Bool {
+            self.overlayView.isRecording = isRecording
+        }
+    }
+    
+    @objc private func updateRecordingTimeLabelColor(_ notification: Notification) {
+        if let isInTime = notification.userInfo?["isInTime"] as? Bool {
+            self.overlayView.isInTime = isInTime
+        }
+    }
+    
+    @objc private func coverScreen(_ notification: Notification) {
+       
+            self.overlayView.isFullScreen = true
+    }
+    
     
 }

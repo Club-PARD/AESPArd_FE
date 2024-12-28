@@ -7,14 +7,38 @@
 
 import UIKit
 
+
+
 class CameraOverlayView: UIView {
     
-    var isDebugMode: Bool = false {
+    var isDebugMode: Bool = true
+    
+    var isInTime: Bool = false {
         didSet {
-            eyeTrackingTimeLabel.isHidden = !isDebugMode
-            aimImageView.isHidden = !isDebugMode
+            recordingTimeLabel.textColor = isInTime ? .black : .white
+            recordingTimeLabel.backgroundColor = isInTime ? .white : .red
         }
     }
+    
+    var isFullScreen: Bool = false {
+        didSet {
+            fullScreenCoverView.isHidden = !isFullScreen
+            fullScreenDescriptionLabel.isHidden = !isFullScreen
+        }
+    }
+    
+    
+    private var aimCenterXConstraint: NSLayoutConstraint?
+    private var aimCenterYConstraint: NSLayoutConstraint?
+    
+    
+    // 시선 동그라미가 중심에서 시작하게 하기 위해서 필요한 코드
+    var isRecording : Bool = false {
+        didSet{
+            updateAimConstraintsForRecording(isRecording)
+        }
+    }
+    
     
     let backButton: UIButton = {
         let button = UIButton()
@@ -52,7 +76,11 @@ class CameraOverlayView: UIView {
         let label = UILabel()
         label.text = "00:00"
         label.textColor = .white
-        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.backgroundColor = .red
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 4
+        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -60,10 +88,26 @@ class CameraOverlayView: UIView {
     // 화면 다 가릴때 쓰는 UIView
     private let fullScreenCoverView: UIView = {
         let view = UIView()
-        view.backgroundColor = .blue
+        view.backgroundColor = UIColor(red: 0.43, green: 0.44, blue: 0.47, alpha: 1)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isHidden = true
         return view
+    }()
+    
+    
+    let fullScreenDescriptionLabel : UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.text = "촬영 중 화면은 보이지 않지만,\n촬영이 끝난 후 리포트에선\n녹화 화면을 볼 수 있어요!"
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 14)
+        label.textColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
+        label.textAlignment = .center
+        label.backgroundColor = .white
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 20
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
     }()
     
     
@@ -73,7 +117,7 @@ class CameraOverlayView: UIView {
         let label = UILabel()
         label.text = "00:00"
         label.textColor = .white
-        label.font = UIFont.boldSystemFont(ofSize: 24)
+        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -87,6 +131,42 @@ class CameraOverlayView: UIView {
         return imageView
     }()
     
+    
+    // MARK: - 설명 UI
+    
+    let faceGuideImageView : UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "FaceGuide"))
+        imageView.contentMode = .scaleAspectFit  // 비율 유지
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = false
+        return imageView
+    }()
+    
+    let descriptionLabel : UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.text = "얼굴을 프레임에 맞추고\n중심의 점을 바라봐주세요"
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 14)
+        label.textColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
+        label.textAlignment = .center
+        label.backgroundColor = .white
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 20
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = false
+        return label
+    }()
+    
+    private let centerCircleView: UIView = {
+        let view = UIView()
+        view.layer.masksToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = UIColor.red
+        view.isHidden = false
+        return view
+    }()
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -99,6 +179,9 @@ class CameraOverlayView: UIView {
     
     private func setupView() {
         self.backgroundColor = .clear
+       
+        self.insertSubview(fullScreenCoverView, at: 0)  // Cover at bottom
+        self.insertSubview(fullScreenDescriptionLabel, at: 1)
         
         self.addSubview(backButton)
         
@@ -108,14 +191,26 @@ class CameraOverlayView: UIView {
         self.addSubview(eyeTrackingTimeLabel)
         self.addSubview(aimImageView)
         
+        self.addSubview(faceGuideImageView)
+        self.addSubview(descriptionLabel)
+        self.addSubview(centerCircleView)
+        
+        
+        // 1) Create constraints
+        aimCenterXConstraint = aimImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor)
+        aimCenterYConstraint = aimImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        
+        // 2) Activate center constraints initially
+        //    Because we want the aimImageView to start in the center
+        aimCenterXConstraint?.isActive = true
+        aimCenterYConstraint?.isActive = true
+        
+        
         NSLayoutConstraint.activate([
             
             // Back Button Constraints
             backButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
             backButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 12),
-//            backButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-//            backButton.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-
             
             startStopRecordingButton.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             startStopRecordingButton.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
@@ -124,21 +219,88 @@ class CameraOverlayView: UIView {
             startStopRecordingButton.heightAnchor.constraint(equalToConstant: 52),
             
             recordingTimeLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            recordingTimeLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 8),
+            recordingTimeLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 12),
+            recordingTimeLabel.widthAnchor.constraint(equalToConstant: 94),
+            recordingTimeLabel.heightAnchor.constraint(equalToConstant: 32),
             
             eyeTrackingTimeLabel.topAnchor.constraint(equalTo: recordingTimeLabel.bottomAnchor, constant: 8),
             eyeTrackingTimeLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             
             aimImageView.widthAnchor.constraint(equalToConstant: 30),
             aimImageView.heightAnchor.constraint(equalToConstant: 30),
-            aimImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            aimImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            
+            fullScreenCoverView.topAnchor.constraint(equalTo: self.topAnchor),
+            fullScreenCoverView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            fullScreenCoverView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            fullScreenCoverView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            
+            fullScreenDescriptionLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            fullScreenDescriptionLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            fullScreenDescriptionLabel.widthAnchor.constraint(equalToConstant: 213),
+            fullScreenDescriptionLabel.heightAnchor.constraint(equalToConstant: 67),
+            
+            // 녹화 시작하면 사라질 요소들
+            
+            // 얼굴 프레임
+            faceGuideImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -10),
+            faceGuideImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: 60),
+            faceGuideImageView.widthAnchor.constraint(lessThanOrEqualToConstant: 250),
+            // If you want to ensure it also can't exceed the view's width (useful on smaller screens)
+            faceGuideImageView.widthAnchor.constraint(lessThanOrEqualTo: self.widthAnchor, multiplier: 0.8),
+            
+            descriptionLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            descriptionLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 100),
+            descriptionLabel.widthAnchor.constraint(equalToConstant: 213),
+            descriptionLabel.heightAnchor.constraint(equalToConstant: 50),
+            
+            centerCircleView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            centerCircleView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            centerCircleView.widthAnchor.constraint(equalToConstant: 10), // Adjust size as needed
+            centerCircleView.heightAnchor.constraint(equalTo: centerCircleView.widthAnchor), // Maintain aspect ratio
+            
         ])
+        
+        
+        if isDebugMode {
+            eyeTrackingTimeLabel.isHidden = false
+            aimImageView.isHidden = false
+        } else {
+            eyeTrackingTimeLabel.isHidden = true
+            aimImageView.isHidden = true
+        }
         
     }
     
-    func toggleFullScreenCover(isHidden: Bool) {
-        fullScreenCoverView.isHidden = isHidden
+    private func updateAimConstraintsForRecording(_ recording: Bool) {
+        if recording {
+            aimCenterXConstraint?.isActive = false
+            aimCenterYConstraint?.isActive = false
+            
+            faceGuideImageView.isHidden = true
+            descriptionLabel.isHidden = true
+            centerCircleView.isHidden = true
+        } else {
+            aimCenterXConstraint?.isActive = true
+            aimCenterYConstraint?.isActive = true
+            
+            faceGuideImageView.isHidden = false
+            descriptionLabel.isHidden = false
+            centerCircleView.isHidden = false
+        }
+        
+        // Animate constraint changes if desired
+        UIView.animate(withDuration: 0.2) {
+            self.layoutIfNeeded()
+        }
+    }
+    
+ 
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        centerCircleView.layer.cornerRadius = centerCircleView.frame.width / 2
     }
     
 }
+
+

@@ -8,14 +8,14 @@
 import UIKit
 import ARKit
 import SceneKit
-import AVFoundation // 카메라 권한 확인용
-import ReplayKit
-import Photos
+import AVFoundation // 카메라 권한을 위해서 씁니다
+import ReplayKit // 화면 녹화를 위한 프레임워크
+import Photos // 갤러리 접근 프레임워크
 
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
     // MARK: - Overlay Window
-        private var overlayWindow: UIWindow?
+    private var overlayWindow: UIWindow?
     
     // MARK: - 시선추적 변수 선언
     
@@ -45,6 +45,18 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var isRecording = false
     
     
+    // 유저 시간 설정 값
+    private var minTime: Double = 5
+    private var maxTime: Double = 10
+    
+    private var isFullScreen: Bool = false
+    
+    
+    // MARK: - 카운팅 다운
+    
+    private var countdownTimer: Timer?
+    private var countdownValue: Int = 0
+    
     // MARK: - Life Cycle
     
     
@@ -64,15 +76,16 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 }
             }
         }
-        
+       
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            setupOverlayWindow()
+        super.viewWillAppear(animated)
+        setupOverlayWindow()
+       
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -108,6 +121,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     private func removeOverlayWindow() {
         overlayWindow?.isHidden = true
+        overlayWindow?.isUserInteractionEnabled = false
+        overlayWindow?.rootViewController = nil
         overlayWindow = nil
     }
     
@@ -138,6 +153,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         present(alert, animated: true)
     }
     
+    
     private func stopAllTimers() {
         lookTimer?.invalidate()
         lookTimer = nil
@@ -163,9 +179,43 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     @objc private func backButtonTapped() {
-        sceneView.scene.rootNode.cleanup()
-        stopAllTimers()
-        self.dismiss(animated: true, completion: nil)
+        if isRecording {
+            // 촬영중이면 현재 촬영중인 영상을 중지하고 영상을 취소시켜야함
+            recorder.stopRecording { [weak self] previewController, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    // Handle the error, possibly by informing the user
+                    self.showAlert(title: "Stop Recording Error", message: error.localizedDescription)
+                    return
+                }
+                
+                // Optionally, present the previewController or decide to discard
+                // Since you want to discard, proceed to call discardRecording
+                self.recorder.discardRecording {
+                    DispatchQueue.main.async {
+                       
+                        
+                        // Successfully discarded the recording
+                        print("Recording successfully discarded.")
+                        
+                        // Reset UI elements or states
+                        self.isRecording = false
+                        self.removeOverlayWindow()
+                        self.sceneView.scene.rootNode.cleanup()
+                        self.stopAllTimers()
+                        
+                        // Dismiss the view controller
+                        self.dismiss(animated: true, completion: nil)
+                    }
+                }
+            }
+        } else {
+            // 촬영중이 아니면 그냥 깨끗하게 만들고 뒤로 가면 됨
+            sceneView.scene.rootNode.cleanup()
+            stopAllTimers()
+            self.dismiss(animated: true, completion: nil)
+        }
     }
     
     
@@ -296,21 +346,39 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     
+    
     private func startRecording() {
         guard recorder.isAvailable else {
-            showAlert(title: "Error", message: "Screen recording is not available.")
+            self.removeOverlayWindow()
+            let alert = UIAlertController(title: "카메라 허용 거부됨", message: "화면 녹화를 할 수 없습니다", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { action in
+                self.backButtonTapped()
+            })
+            )
+            present(alert, animated: true)
             return
         }
+        
         
         
         recorder.isMicrophoneEnabled = true
         recorder.startRecording { [weak self] error in
             if let error = error {
-                self?.showAlert(title: "Error", message: error.localizedDescription)
+                self?.removeOverlayWindow()
+                let alert = UIAlertController(title: "에러", message: error.localizedDescription, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { action in
+                    self?.backButtonTapped()
+                })
+                )
+                self?.present(alert, animated: true)
             } else {
                 self?.isRecording = true
                 self?.recordingStartTime = Date()
                 self?.startRecordingTimer()
+                if self?.isFullScreen == true {
+                    NotificationCenter.default.post(name: .coverScreenSelected, object: nil)
+                }
+                NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": true])
                 NotificationCenter.default.post(name: .updateStartStopButtonTitle, object: nil, userInfo: ["title": "촬영 마치기"])
             }
         }
@@ -327,6 +395,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             
             self.isRecording = false
             stopAllTimers()
+            NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": false])
             NotificationCenter.default.post(name: .updateStartStopButtonTitle, object: nil, userInfo: ["title": "촬영 시작하기"])
             NotificationCenter.default.post(name: .updateEyeTrackingTime, object: nil, userInfo: ["time": "Time: 0.0s"])
             
@@ -359,6 +428,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             let timeString = String(format: "%02d:%02d", minutes, seconds)
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
             
+            if(elapsed < minTime || elapsed > maxTime){
+                NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
+            } else {
+                NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
+            }
+            
         }
     }
 
@@ -389,13 +464,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                     debugPrint("저장 확인됨 이제 다른 뷰로 넘어가기 전")
                     self.navigateToAnalyzingViewController(with: identifier)
                 } else {
-                    //self.navigateToHomeViewController()
+                    debugPrint("너, 취소한거야.")
+                    self.backButtonTapped()
                 }
             }
         }
     }
     
-    
+    // 녹환된 비디오 저장하고 불러올때 저장된지 지정한 시간이내면 진행함
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
         debugPrint("checkIfRecordingWasSaved 호출됨")
         // Request authorization to access Photos
@@ -411,7 +487,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                     debugPrint("가져옴")
                     if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
                         let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
-                        // If the asset was created within the last 10 seconds, assume it was saved
+                        // If the asset was created within the last 60 seconds, assume it was saved
                         if timeSinceRecordingStopped < 10 {
                             debugPrint("10초 이내")
                             completion(true, asset.localIdentifier)
