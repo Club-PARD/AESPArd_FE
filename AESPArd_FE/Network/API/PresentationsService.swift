@@ -12,6 +12,8 @@ import Foundation
 enum PresentationsService {
     case getPresentationLatestById(userId: String)
     case getPresentationFavoritesById(userId: String)
+    case patchToggleFavofiteById(presentationId: String)
+    case deleteSelectedPresentations(presentationIds: [String])
 }
 
 extension PresentationsService: TargetType {
@@ -25,6 +27,10 @@ extension PresentationsService: TargetType {
             return "/presentations/user/\(userId)/latest"
         case .getPresentationFavoritesById(let userId):
             return "/presentations/user/\(userId)/favorites"
+        case .patchToggleFavofiteById(let presentationId):
+            return "/presentations/\(presentationId)/toggle-favorite"
+        case .deleteSelectedPresentations:
+            return "/presentations/batch-delete"
         }
     }
     
@@ -34,6 +40,10 @@ extension PresentationsService: TargetType {
             return .get
         case .getPresentationFavoritesById:
             return .get
+        case .patchToggleFavofiteById:
+            return .patch
+        case .deleteSelectedPresentations:
+            return .delete
         }
     }
     
@@ -41,13 +51,21 @@ extension PresentationsService: TargetType {
         switch self {
         case .getPresentationLatestById:
             return .requestPlain
-    
+            
         case .getPresentationFavoritesById:
             return .requestPlain
+            
+        case .patchToggleFavofiteById:
+            return .requestPlain
+            
+        case .deleteSelectedPresentations(let presentationIds):
+            return .requestCustomJSONEncodable(presentationIds, encoder: JSONEncoder())
         }
+        
     }
     
     var headers: [String : String]? {
         return ["Content-Type": "application/json"]
     }
+    
 }

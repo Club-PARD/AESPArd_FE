@@ -90,5 +90,41 @@ final class NetworkManager {
         }
     }
     
+    
+    // MARK: - 중요도 토글
+    func patchPTToggleFavoriteById(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.patchToggleFavofiteById(presentationId: presentationId)) { result in
+            switch result {
+            case .success(let response):
+
+                if response.statusCode == 200 {
+                    completion(.success(())) // 성공적으로 완료되었을 경우
+                } else {
+//                    // 서버에서 오류를 반환한 경우
+//                    completion(.failure(NSError(domain: "com.example.app", code: response.statusCode, userInfo: nil)))
+                }
+            case .failure(let error):
+                // 요청 자체가 실패한 경우
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 선택한 발표 삭제
+    func deleteSelectedPresentation(presentationIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.deleteSelectedPresentations(presentationIds: presentationIds)) { result in
+            switch result {
+            case .success(let response):
+                if response.statusCode == 200 {
+                    completion(.success(())) // 성공적으로 완료되었을 경우
+                }
+            case .failure(let error):
+                // 요청 자체가 실패한 경우
+                completion(.failure(error))
+            }
+        }
+    }
+
+    
 }
 

@@ -40,6 +40,16 @@ class HomeViewController: UIViewController {
     var selectedDeleteId : [String] = []
     
     
+    // 필터 모드에 따라 데이터를 다시 로드
+    private func reloadDataBasedOnFilterMode() {
+        if filterMode == "recent" {
+            fetchPresentationList() // 최신순 데이터 요청
+        } else if filterMode == "favorite" {
+            fetchPresentationFavoriteList() // 중요도순 데이터 요청
+        }
+    }
+
+    
     let tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .clear
@@ -50,7 +60,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         fetchPresentationList()
         
         // 탭 바 컨트롤러의 delegate 설정
@@ -90,6 +100,9 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationList), name: .latestNotification, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationFavoriteList), name: .favoriteNotification, object: nil)
+        
+        //토글 patch시 중요도 순일 때
+        NotificationCenter.default.addObserver(self,selector: #selector(patchToggleAPI(notification:)), name: .updateFavoriteNotification, object: nil)
     }
     
     deinit {
@@ -102,7 +115,10 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .latestNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .favoriteNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .updateFavoriteNotification, object: nil)
     }
+    
     
     //MARK: -  API
     
@@ -111,13 +127,12 @@ class HomeViewController: UIViewController {
         networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
             switch result {
             case .success(let presentationLatest):
-                // 기존 리스트를 비우고 새로 받은 데이터로 업데이트
-                print("확인용- 최신", presentationLatest)
                 self?.ptList.removeAll()
                 self?.ptList = presentationLatest
                 DispatchQueue.main.async {
                     self?.tableView.reloadData()
                 }
+                self?.filterMode = "recent"
             case .failure(let error):
                 // 실패 시 에러 처리
                 print("Error fetching presentations: \(error)")
@@ -130,16 +145,31 @@ class HomeViewController: UIViewController {
         networkManager.fetchPresntaionFavoriteById(userId: testId) { [weak self] result in
             switch result {
             case .success(let presentationLatest):
-                // 기존 리스트를 비우고 새로 받은 데이터로 업데이트
-                print("확인용", presentationLatest)
                 self?.ptList.removeAll()
                 self?.ptList = presentationLatest
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-                }
+                self?.tableView.reloadData()
+            
+                self?.filterMode = "favorite"
             case .failure(let error):
                 // 실패 시 에러 처리
                 print("Error fetching presentations: \(error)")
+            }
+        }
+    }
+    
+    // 토글 patch
+    @objc func patchToggleAPI(notification: Notification) {
+        if let userInfo = notification.userInfo,
+           let ptId = userInfo["ptId"] as? String {
+            networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
+                switch result {
+                case .success():
+                    print("수정 성공")
+                    self?.reloadDataBasedOnFilterMode()
+                case .failure(let error):
+                    // 실패 시 에러 처리
+                    print("Error fetching presentations: \(error)")
+                }
             }
         }
     }
@@ -165,16 +195,34 @@ class HomeViewController: UIViewController {
         
     }
     
-    // 버튼 상태를 토글하는 메서드
+    // 삭제 버튼 상태를 토글하는 메서드
     @objc func handleButtonToggleNotification() {
         isDeleteMode.toggle()
         
         if !isDeleteMode {
-            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            if(selectedDeleteId.count>0){
+                deletePresenttaionAPI()
+            }
+            
             selectedDeleteId.removeAll()
+        }else{
         }
         
         tableView.reloadData()
+    }
+    
+    // 선택한 발표 리스트 삭제
+    func deletePresenttaionAPI() {
+    networkManager.deleteSelectedPresentation(presentationIds: selectedDeleteId){ [weak self] result in
+            switch result {
+            case .success():
+                print("삭제 성공")
+                self?.reloadDataBasedOnFilterMode()
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
     }
     
     //삭제 리스트 추가
@@ -256,6 +304,12 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             cell.configure(with: ptList.count)
+            if(selectedDeleteId.count  == 0){
+                cell.deleteButton.setTitle("삭제하기", for: .normal)
+            }
+            else{
+                cell.deleteButton.setTitle("\(selectedDeleteId.count)개 삭제하기", for: .normal)
+            }
             return cell
             
         case 2:
@@ -264,14 +318,14 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId)
+            cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId, filterMode: filterMode)
             
             if(isDeleteMode){
                 cell.bookmarkButton.isHidden = true
                 cell.deleteCheckButton.isHidden = false
                 
                 // 삭제 선택한 리스트 있는지 확인
-                if selectedDeleteId.contains(presentationName[indexPath.row]) {
+                if selectedDeleteId.contains(presentation.presentationId) {
                     // 이미 선택된 경우 체크 표시
                     cell.deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
                 } else {

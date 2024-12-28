@@ -72,6 +72,9 @@ class SearchViewController: UIViewController {
         self.view.frame.origin.y = -388
         
         setUI()
+        
+        //토글 patch
+        NotificationCenter.default.addObserver(self,selector: #selector(patchToggleAPI(notification:)), name: .updateFavoriteNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -198,6 +201,23 @@ class SearchViewController: UIViewController {
         })
     }
     
+    //MARK: - API
+    // 토글 patch
+    @objc func patchToggleAPI(notification: Notification) {
+        if let userInfo = notification.userInfo,
+           let ptId = userInfo["ptId"] as? String {
+            networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
+                switch result {
+                case .success():
+                    print("수정 성공")
+                case .failure(let error):
+                    // 실패 시 에러 처리
+                    print("Error fetching presentations: \(error)")
+                }
+            }
+        }
+    }
+    
 }
 
 //MARK: -  테이블뷰
@@ -212,7 +232,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
         // 셀에 데이터 설정 (필요한 설정 추가)
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
-        cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId)
+        cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId, filterMode: "recent")
         
         
         return cell
