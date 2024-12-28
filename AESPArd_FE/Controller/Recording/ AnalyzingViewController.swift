@@ -20,7 +20,22 @@ extension FixedWidthInteger {
 }
 
 class AnalyzingViewController: UIViewController {
-    var assetIdentifier: String? // 촬영한 비디오 고유 아이디
+    
+    private var newPresentation: NewPresentation?
+    private var assetIdentifier: String?
+    
+    // 생성자
+    init(newPresentation: NewPresentation){
+        super.init(nibName: nil, bundle: nil)
+        self.newPresentation = newPresentation
+        self.assetIdentifier = newPresentation.videoKey
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    //var assetIdentifier: String? // 촬영한 비디오 고유 아이디
     var videoAsset: PHAsset? // 비디오 담는 변수
     // AVAudioPlayer instance
     private var audioPlayer: AVAudioPlayer?
@@ -139,7 +154,7 @@ class AnalyzingViewController: UIViewController {
                 self.playAudioButton.isHidden = false // DEBUG
             }
             self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
-            self.uploadAudioData(wavData)
+            //self.uploadAudioViaMoya(wavData)
         }
     }
     
@@ -190,67 +205,30 @@ class AnalyzingViewController: UIViewController {
     }
     
     // MARK: - Audio Upload
-    private func uploadAudioData(_ data: Data) {
-        // Define your server URL
-        guard let url = URL(string: "https://yourserver.com/upload") else {
-            showAlert(title: "Error", message: "Invalid server URL.")
-            return
-        }
-        
-        // Create the URLRequest
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        // Define the boundary for multipart/form-data
-        let boundary = UUID().uuidString
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        
-        // Construct the HTTP body
-        var body = Data()
-        
-        // Add the audio file data
-        let filename = "extractedAudio.wav"
-        let mimeType = "audio/wav"
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
-        body.append(data)
-        body.append("\r\n".data(using: .utf8)!)
-        
-        // Close the multipart form
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        
-        // Set the body
-        request.httpBody = body
-        
-        // Optionally, set the Content-Length
-        request.setValue("\(body.count)", forHTTPHeaderField: "Content-Length")
-        
-        // Create the URLSession task
-        let session = URLSession.shared
-        let task = session.dataTask(with: request) { [weak self] responseData, response, error in
-            if let error = error {
-                self?.showAlert(title: "Upload Failed", message: error.localizedDescription)
+    private func uploadAudioViaMoya(_ wavData: Data) {
+            guard let presentation = newPresentation else {
+                showAlert(title: "Error", message: "No presentation data to send.")
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                self?.showAlert(title: "Upload Failed", message: "Invalid server response.")
-                return
-            }
-            
-            if (200...299).contains(httpResponse.statusCode) {
-                self?.showAlert(title: "Success", message: "Audio uploaded successfully!")
-            } else {
-                let statusCode = httpResponse.statusCode
-                let message = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-                self?.showAlert(title: "Upload Failed", message: "Server responded with status code \(statusCode): \(message)")
+            // Moya-based call
+            NetworkManager.shared.createPresentation(newPresentation: presentation, wavData: wavData) { [weak self] result in
+                guard let self = self else { return }
+                
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let returnedPresentation):
+                        // The server might return updated JSON
+                        self.showAlert(title: "Success",
+                                       message: "Presentation + audio uploaded!")
+                        
+                    case .failure(let error):
+                        self.showAlert(title: "Upload Error",
+                                       message: error.localizedDescription)
+                    }
+                }
             }
         }
-        
-        // Start the task
-        task.resume()
-    }
     
     // MARK: - Audio Extraction and Conversion
     private func extractAudio(from asset: PHAsset, completion: @escaping (Data?) -> Void) {
@@ -273,8 +251,6 @@ class AnalyzingViewController: UIViewController {
                     return
                 }
                 
-                // DEBUG: Log or check the file size here
-                //print("Extracted WAV data size: \(wavData.count) bytes")
                 
                 // Continue with normal flow...
                 completion(wavData)

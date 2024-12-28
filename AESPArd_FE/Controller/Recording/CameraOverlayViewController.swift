@@ -51,6 +51,12 @@ class CameraOverlayViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updateRecordingTimeLabelColor(_:)), name: .timeoutOccurred, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(coverScreen(_:)), name: .coverScreenSelected, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(checkIsRecording(_:)), name: .updateUIAfterRecording, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(setTimeLabelVisibility(_:)),
+            name: .setTimeLabelVisibility,
+            object: nil
+        )
         
     }
     
@@ -103,6 +109,15 @@ class CameraOverlayViewController: UIViewController {
        
             self.overlayView.isFullScreen = true
     }
-    
+   
+    @objc private func setTimeLabelVisibility(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let isVisible = userInfo["isVisible"] as? Bool else {
+            return
+        }
+        
+        self.overlayView.recordingTimeLabel.isHidden = !isVisible
+        
+    }
     
 }

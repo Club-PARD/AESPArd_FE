@@ -14,6 +14,24 @@ import Photos // 갤러리 접근 프레임워크
 
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
+    private var newPresentation: NewPresentation?
+    private var isShowingTimeSelected: Bool?
+    private var isShowingMeSelected: Bool?
+    
+    // 생성자
+    init(newPresentation: NewPresentation, isShowingTimeSelected: Bool, isShowingMeSelected: Bool){
+        self.newPresentation = newPresentation
+        self.isShowingTimeSelected = isShowingTimeSelected
+        self.isShowingMeSelected = isShowingMeSelected
+        self.newPresentation!.showMeOnScreen = isShowingMeSelected
+        self.newPresentation!.showTimeOnScreen = isShowingTimeSelected
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Overlay Window
     private var overlayWindow: UIWindow?
     
@@ -41,6 +59,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // 촬영 시간 타이머
     private var recordingStartTime: Date?
     private var recordingTimer: Timer?
+    private var totalRecordingTime: Double?
     
     private var isRecording = false
     
@@ -48,14 +67,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // 유저 시간 설정 값
     private var minTime: Double = 5
     private var maxTime: Double = 10
-    
-    private var isFullScreen: Bool = false
-    
-    
-    // MARK: - 카운팅 다운
-    
-    private var countdownTimer: Timer?
-    private var countdownValue: Int = 0
+
     
     // MARK: - Life Cycle
     
@@ -85,6 +97,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupOverlayWindow()
+        NotificationCenter.default.post(name: .setTimeLabelVisibility, object: nil, userInfo: ["isVisible": isShowingTimeSelected])
        
     }
     
@@ -375,7 +388,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 self?.isRecording = true
                 self?.recordingStartTime = Date()
                 self?.startRecordingTimer()
-                if self?.isFullScreen == true {
+                if self?.isShowingMeSelected == false {
                     NotificationCenter.default.post(name: .coverScreenSelected, object: nil)
                 }
                 NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": true])
@@ -393,6 +406,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 return
             }
             
+            newPresentation!.eyeTrackingPercentage = calculateEyeTrackingTime()
             self.isRecording = false
             stopAllTimers()
             NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": false])
@@ -414,6 +428,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     
+    // MARK: - 시선 비율 계산 함수
+    
+    private func calculateEyeTrackingTime() -> Int {
+        var result = totalLookTime / totalRecordingTime!
+        return Int(result.rounded())
+    }
+    
+    
     // MARK: - 화면 녹화 타이머
     private func startRecordingTimer() {
         
@@ -424,6 +446,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             let elapsed = Date().timeIntervalSince(startTime)
             let minutes = Int(elapsed) / 60
             let seconds = Int(elapsed) % 60
+            
+            totalRecordingTime = elapsed
             
             let timeString = String(format: "%02d:%02d", minutes, seconds)
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
@@ -473,23 +497,19 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // 녹환된 비디오 저장하고 불러올때 저장된지 지정한 시간이내면 진행함
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
-        debugPrint("checkIfRecordingWasSaved 호출됨")
         // Request authorization to access Photos
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async { // Ensure UI operations are on main thread
                 if status == .authorized {
                     // Fetch the most recent video asset
-                    debugPrint("너 권한있어. 계속해.")
                     let fetchOptions = PHFetchOptions()
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                     fetchOptions.fetchLimit = 1
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-                    debugPrint("가져옴")
                     if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
                         let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
                         // If the asset was created within the last 60 seconds, assume it was saved
                         if timeSinceRecordingStopped < 10 {
-                            debugPrint("10초 이내")
                             completion(true, asset.localIdentifier)
                         } else {
                             completion(false, nil)
@@ -509,18 +529,15 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private func navigateToAnalyzingViewController(with identifier: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let analyzingVC = AnalyzingViewController()
-            analyzingVC.assetIdentifier = identifier
-            debugPrint("Navigating to AnalyzingViewController")
+            newPresentation!.videoKey = identifier
+            let analyzingVC = AnalyzingViewController(newPresentation: newPresentation!)
 
             if let navigationController = self.navigationController {
                 navigationController.pushViewController(analyzingVC, animated: true)
-                debugPrint("Pushed AnalyzingViewController onto the navigation stack")
             } else {
                 // This block should rarely execute now, but kept for safety
                 analyzingVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                 self.present(analyzingVC, animated: true, completion: nil)
-                debugPrint("Presented AnalyzingViewController modally")
             }
         }
     }

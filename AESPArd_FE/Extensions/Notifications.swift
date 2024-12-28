@@ -17,4 +17,5 @@ extension Notification.Name {
     static let timeoutOccurred = Notification.Name("TimeoutOccurred")
     static let coverScreenSelected = Notification.Name("CoverScreenSelected")
     static let updateUIAfterRecording = Notification.Name("UpdateUIAfterRecording")
+    static let setTimeLabelVisibility = Notification.Name("SetTimeLabelVisibility")
 }

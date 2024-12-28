@@ -9,12 +9,31 @@ import UIKit
 
 class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     
-    // 클백할 때 이거 변수 다시 설정하기
-    var inputText: String = ""
+    // Post에 사용하기 위한 함수
+    var presentationName: String?
+    var idealMinTime: Double?
+    var idealMaxTime: Double?
+    var newPresentation : NewPresentation
+    
+    // 화면 녹화 뷰컨트롤러에 전달할 설정 값들
+    var isShowingTimeSelected : Bool = true
+    var isShowingMeSelected: Bool = true
+    
+    
+    // 생성자
+    init(userId: String){
+        self.newPresentation = NewPresentation(userId: userId, presentationName: "", idealMinTime: 0.0, idealMaxTime: 0.0, eyeTrackingPercentage: 0, audioFilePath: "", videoKey: "", showTimeOnScreen: true, showMeOnScreen: true)
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    
     var isKeyboardVisible = false
     var modalViewBottomConstraint: NSLayoutConstraint!
-    var TimeSetting1: String = ""
-    var TimeSetting2: String = ""
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
     
@@ -45,8 +64,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         return button
     }()
     
-    let TimeSettingButtonView1 = FirstTimePickerInputView()
-    let TimeSettingButtonView2 = SecondTimePickerInputView()
+    let timeSettingButtonView1 = FirstTimePickerInputView()
+    let timeSettingButtonView2 = SecondTimePickerInputView()
     
     // 텍스트 필드
     let ptName: UITextField = {
@@ -130,7 +149,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         seePTtimeSwitch.onTintColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         seePTtimeSwitch.thumbTintColor = UIColor.white // 스위치 버튼 색상
         
-        //        seePTtimeSwitch.addTarget(self, action: #selector(switchToggled(_:)), for: .valueChanged)
+        seePTtimeSwitch.addTarget(self, action: #selector(toggleHideTime), for: .valueChanged)
         seePTtimeSwitch.translatesAutoresizingMaskIntoConstraints = false
         return seePTtimeSwitch
     }()
@@ -140,7 +159,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         seePtSceneSwitch.isOn = true
         seePtSceneSwitch.onTintColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         seePtSceneSwitch.thumbTintColor = UIColor.white
-        //       seePTtimeSwitch.addTarget(self, action: #selector(switchToggled(_:)), for: .valueChanged)
+        seePtSceneSwitch.addTarget(self, action: #selector(toggleHideScreen), for: .valueChanged)
         seePtSceneSwitch.translatesAutoresizingMaskIntoConstraints = false
         return seePtSceneSwitch
     }()
@@ -181,8 +200,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         modalView.addSubview(ptTime)
         modalView.addSubview(minimumPTTime)
         modalView.addSubview(maximumPTTime)
-        modalView.addSubview(TimeSettingButtonView1)
-        modalView.addSubview(TimeSettingButtonView2)
+        modalView.addSubview(timeSettingButtonView1)
+        modalView.addSubview(timeSettingButtonView2)
         modalView.addSubview(ifseeCameratime)
         modalView.addSubview(ifseeCameraScene)
         modalView.addSubview(seePTtimeSwitch)
@@ -236,20 +255,20 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             minimumPTTime.topAnchor.constraint(equalTo: ptTime.bottomAnchor, constant: 12),
             minimumPTTime.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
             
-            TimeSettingButtonView1.topAnchor.constraint(equalTo: minimumPTTime.bottomAnchor, constant: 8),
-            TimeSettingButtonView1.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
-            TimeSettingButtonView1.widthAnchor.constraint(equalToConstant: 108),
-            TimeSettingButtonView1.heightAnchor.constraint(equalToConstant: 35),
+            timeSettingButtonView1.topAnchor.constraint(equalTo: minimumPTTime.bottomAnchor, constant: 8),
+            timeSettingButtonView1.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
+            timeSettingButtonView1.widthAnchor.constraint(equalToConstant: 108),
+            timeSettingButtonView1.heightAnchor.constraint(equalToConstant: 35),
             
             maximumPTTime.topAnchor.constraint(equalTo: minimumPTTime.topAnchor),
             maximumPTTime.leadingAnchor.constraint(equalTo: minimumPTTime.trailingAnchor, constant: 124),
             
-            TimeSettingButtonView2.topAnchor.constraint(equalTo: maximumPTTime.bottomAnchor, constant: 8),
-            TimeSettingButtonView2.trailingAnchor.constraint(equalTo: modalView.trailingAnchor, constant: -98),
-            TimeSettingButtonView2.widthAnchor.constraint(equalToConstant: 108),
-            TimeSettingButtonView2.heightAnchor.constraint(equalToConstant: 35),
+            timeSettingButtonView2.topAnchor.constraint(equalTo: maximumPTTime.bottomAnchor, constant: 8),
+            timeSettingButtonView2.trailingAnchor.constraint(equalTo: modalView.trailingAnchor, constant: -98),
+            timeSettingButtonView2.widthAnchor.constraint(equalToConstant: 108),
+            timeSettingButtonView2.heightAnchor.constraint(equalToConstant: 35),
             
-            ifseeCameratime.topAnchor.constraint(equalTo: TimeSettingButtonView1.bottomAnchor, constant: 32.5),
+            ifseeCameratime.topAnchor.constraint(equalTo: timeSettingButtonView1.bottomAnchor, constant: 32.5),
             ifseeCameratime.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
             ifseeCameratime.widthAnchor.constraint(equalToConstant: 180),
             ifseeCameratime.heightAnchor.constraint(equalToConstant: 19),
@@ -295,14 +314,24 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func moveTocameraViewController() {
-        let cameraVC = CameraViewController()
+        let cameraVC = CameraViewController(newPresentation: newPresentation, isShowingTimeSelected: isShowingTimeSelected, isShowingMeSelected: isShowingMeSelected)
         cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
         guard let enteredText = ptName.text, !enteredText.isEmpty else {
                 print("텍스트 필드가 비어 있습니다.")
                 return
             }
-            print("입력된 텍스트: \(enteredText)")
+        // 발표제목 추가
+        newPresentation.presentationName = enteredText
+        // 최소시간 & 최대시간 값 가져옴
+        let selectedIdealMinTime = timeSettingButtonView1.selectedTime // From FirstTimePickerInputView
+        let selectedIdealMaxTime = timeSettingButtonView2.selectedTime // From SecondTimePickerInputView
+        
+        newPresentation.idealMinTime = selectedIdealMinTime
+        newPresentation.idealMaxTime = selectedIdealMaxTime
+        
+        // DEBUG
+        debugPrint(newPresentation)
     }
     
     // 키보드 완료 누르면 키보드 닫는거
@@ -340,6 +369,15 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         }, completion: nil)
         
         isKeyboardVisible = false
+    }
+    
+    // 촬영 시간 보이게 하는 토글에 따라 불린 값 변경
+    @objc func toggleHideTime(){
+        isShowingTimeSelected = !isShowingTimeSelected
+    }
+    
+    @objc func toggleHideScreen(){
+        isShowingMeSelected = !isShowingMeSelected
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
