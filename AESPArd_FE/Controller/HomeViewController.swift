@@ -12,6 +12,8 @@ class HomeViewController: UIViewController {
     // 클백 연결을 위한 NesworkManager 연결
     private let networkManager = NetworkManager.shared
     let testId : String = URLClass().testID
+    var ptList : [PresentationList]  = []//발표리스트 최신순
+    
     
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
@@ -25,7 +27,7 @@ class HomeViewController: UIViewController {
     var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
     
     var ptDetailCount : Int = 4
-    var presentationDate : Int = 1
+    var presentationDate : String = ""
     var ptDetailTotalScore : Int = 88
     var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
     
@@ -48,18 +50,8 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-       // 서버에서 user 정보 가져옴
-        networkManager.fetchUserById(userId: testId) { [weak self] result in
-            switch result {
-            case .success(let user):
-                // 여기서 Usr 모델에 받아온 데이터 집어 넣고 UI에 적용해주면 됨
-                print("Fetched users: \(user)")
-            case .failure(let error):
-                // Handle error
-                print("Error fetching users: \(error)")
-            }
-        }
+
+        fetchPresentationList()
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
@@ -93,6 +85,11 @@ class HomeViewController: UIViewController {
         
         //검색버튼 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleSearchNotification), name: .searchButtonNotification, object: nil)
+        
+        //최신순, 중요도순
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationList), name: .latestNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationFavoriteList), name: .favoriteNotification, object: nil)
     }
     
     deinit {
@@ -101,7 +98,53 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .selectedDeleteNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .searchButtonNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .latestNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .favoriteNotification, object: nil)
     }
+    
+    //MARK: -  API
+    
+    // 발표 리스트를 최신순
+    @objc func fetchPresentationList() {
+        networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                // 기존 리스트를 비우고 새로 받은 데이터로 업데이트
+                print("확인용- 최신", presentationLatest)
+                self?.ptList.removeAll()
+                self?.ptList = presentationLatest
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
+    }
+    
+    // 발표 리스트를 중요도순
+    @objc func fetchPresentationFavoriteList() {
+        networkManager.fetchPresntaionFavoriteById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                // 기존 리스트를 비우고 새로 받은 데이터로 업데이트
+                print("확인용", presentationLatest)
+                self?.ptList.removeAll()
+                self?.ptList = presentationLatest
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
+    }
+    
+    //MARK: -  제약조건
     
     func setUI(){
         
@@ -168,7 +211,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 2 {
-            return presentationCount // 마지막 섹션은 행은 발표 갯수만큼
+            return ptList.count // 마지막 섹션은 행은 발표 갯수만큼
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
@@ -212,15 +255,16 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(with: presentationCount)
+            cell.configure(with: ptList.count)
             return cell
             
         case 2:
             let cell = tableView.dequeueReusableCell(withIdentifier: "PresentationListTableCell", for: indexPath) as! PresentationListTableCell
+            let presentation = ptList[indexPath.row]
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue[indexPath.row])
+            cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId)
             
             if(isDeleteMode){
                 cell.bookmarkButton.isHidden = true

@@ -24,20 +24,46 @@ final class NetworkManager {
     private let userServiceProvider = MoyaProvider<UserService>(
         plugins: [
             // 디버깅하는데 도움주는 Moya 플러그인 나중에는 주석 처리 할 것
-            NetworkLoggerPlugin() // helpful for logging network requests
+//             NetworkLoggerPlugin() // helpful for logging network requests
         ]
     )
     
+    private let presentationServiceProvider = MoyaProvider<PresentationsService>(
+        plugins: [
+            // 디버깅하는데 도움주는 Moya 플러그인 나중에는 주석 처리 할 것
+//            NetworkLoggerPlugin() // helpful for logging network requests
+        ]
+    )
+
+    
     // MARK: - User 정보 불러오는 메소드
     
-    func fetchUserById(userId: String, completion: @escaping (Result<[User], Error>) -> Void) {
+    func fetchUserById(userId: String, completion: @escaping (Result<User, Error>) -> Void) {
         userServiceProvider.request(.getUserById(userId: userId)) { result in
             switch result {
             case .success(let response):
                 do {
-                    // Parse the JSON into [User]
+                    // 단일 User 객체로 디코딩
                     let user = try JSONDecoder().decode(User.self, from: response.data)
-                    completion(.success([user]))
+                    completion(.success(user))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    
+    //MARK: -  발표리스트 최신
+    func fetchPresentaionLatestById(userId: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.getPresentationLatestById(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
                 } catch {
                     completion(.failure(error))
                 }
@@ -47,6 +73,22 @@ final class NetworkManager {
         }
     }
     
+    //MARK: -  발표리스트 중요도순
+    func fetchPresntaionFavoriteById(userId: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.getPresentationFavoritesById(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
     
 }
 

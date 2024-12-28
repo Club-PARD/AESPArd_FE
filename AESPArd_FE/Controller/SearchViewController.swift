@@ -8,6 +8,10 @@
 import UIKit
 
 class SearchViewController: UIViewController {
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    var ptList : [PresentationList]  = []//발표리스트 최신순
     
     var presentationCount :Int = 10
     
@@ -15,7 +19,7 @@ class SearchViewController: UIViewController {
     var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
     
     var ptDetailCount : Int = 4
-    var presentationDate : Int = 1
+    var presentationDate : String = ""
     var ptDetailTotalScore : Int = 88
     var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
     
@@ -31,7 +35,19 @@ class SearchViewController: UIViewController {
         
         self.navigationController?.isNavigationBarHidden = true
         
-        //        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
+        //발표 리스트 최신순
+        networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                self?.ptList = presentationLatest
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -187,16 +203,17 @@ class SearchViewController: UIViewController {
 //MARK: -  테이블뷰
 extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presentationCount
+        return ptList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PresentationListTableCell", for: indexPath) as! PresentationListTableCell
+        let presentation = ptList[indexPath.row]
         // 셀에 데이터 설정 (필요한 설정 추가)
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
+        cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId)
         
-        cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue[indexPath.row])
         
         return cell
     }

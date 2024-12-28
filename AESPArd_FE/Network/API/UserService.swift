@@ -36,7 +36,7 @@ extension UserService: TargetType {
     var path: String {
         switch self {
         case .getUserById(let userId):
-            return "/users/\(userId)"
+            return "/users/\(userId)/name"
         // upateUser 예시용 쓰지마
         case .updateUser(let id, _, _):
             return "/users/\(id)"
@@ -67,42 +67,5 @@ extension UserService: TargetType {
     
     var headers: [String : String]? {
         return ["Content-Type": "application/json"]
-    }
-    
-    // MARK: - 테스트용 MockData
-    var sampleData: Data {
-        switch self {
-        case .getUserById:
-            return """
-            {
-              "userId": "1",
-              "userName": "unknown",
-              "email": "unknown@email.com",
-              "presentations": [
-                {
-                  "presentationId": "1",
-                  "user": "unknown",
-                  "presentationName": "First presentation",
-                  "createdAt": "2024-12-27T04:01:14.733Z",
-                  "updatedAt": "2024-12-27T04:01:14.734Z",
-                  "totalPractices": 0,
-                  "totalScore": 0,
-                  "toggleFavorite": true,
-                  "idealMaxTime": "string",
-                  "idealMinTime": "string"
-                }
-              ]
-            }
-            """.data(using: .utf8)!
-            
-        case .updateUser(let id, let name, let email):
-            return """
-            {
-              "id": \(id),
-              "name": "\(name)",
-              "email": "\(email)"
-            }
-            """.data(using: .utf8)!
-        }
     }
 }

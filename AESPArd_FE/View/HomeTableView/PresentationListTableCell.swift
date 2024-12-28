@@ -6,6 +6,9 @@ extension Notification.Name {
 
 class PresentationListTableCell: UITableViewCell {
     
+    var ptId : String = ""
+    var ptToggle : Bool = false
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -193,11 +196,20 @@ class PresentationListTableCell: UITableViewCell {
     //삭제하기 버튼 누를 시 체크박스 등장
     
     // 발표 정보 설정 메서드
-    func configure(presentationName: String, ptDetailCount: Int, presentationDate: Int, ptDetailTotalScore: Int, barVaue: Double) {
+    func configure(presentationName: String, ptDetailCount: Int, presentationDate: String, ptDetailTotalScore: Int, barVaue: Double, toggleFavorite:Bool, presentationId: String) {
         
         ptName.text = presentationName
         ptCount.text = "\(ptDetailCount)개"
-        ptDate.text = "발표세부정보설명 · \(presentationDate)일 전"
+        ptDate.text = "발표세부정보설명 · \(presentationDate)"
         circularProgressBar.value = barVaue
+        ptId = presentationId
+        ptToggle = toggleFavorite
+        
+        if(ptToggle){
+            bookmarkButton.setImage(UIImage(named: "bookmark_O"), for: .normal)
+        }
+        else{
+            bookmarkButton.setImage(UIImage(named: "bookmark_X"), for: .normal)
+        }
     }
 }
