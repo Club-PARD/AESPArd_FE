@@ -14,4 +14,8 @@ extension Notification.Name {
     static let updateEyeTrackingTime = Notification.Name("UpdateEyeTrackingTime")
     static let updateStartStopButtonTitle = Notification.Name("UpdateStartStopButtonTitle")
     static let updateGazePoint = Notification.Name("UpdateGazePoint")
+    static let timeoutOccurred = Notification.Name("TimeoutOccurred")
+    static let coverScreenSelected = Notification.Name("CoverScreenSelected")
+    //static let putGazePointAtCenter = Notification.Name("PutGazePointAtCenter")
+    static let updateUIAfterRecording = Notification.Name("UpdateUIAfterRecording")
 }

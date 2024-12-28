@@ -15,7 +15,7 @@ import Photos // 갤러리 접근 프레임워크
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
     // MARK: - Overlay Window
-        private var overlayWindow: UIWindow?
+    private var overlayWindow: UIWindow?
     
     // MARK: - 시선추적 변수 선언
     
@@ -45,6 +45,13 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var isRecording = false
     
     
+    // 유저 시간 설정 값
+    private var minTime: Double = 5
+    private var maxTime: Double = 10
+    
+    private var isFullScreen: Bool = true
+    
+    
     // MARK: - Life Cycle
     
     
@@ -64,15 +71,16 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 }
             }
         }
-        
+       
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            setupOverlayWindow()
+        super.viewWillAppear(animated)
+        setupOverlayWindow()
+       
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -312,6 +320,10 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 self?.isRecording = true
                 self?.recordingStartTime = Date()
                 self?.startRecordingTimer()
+                if self?.isFullScreen == true {
+                    NotificationCenter.default.post(name: .coverScreenSelected, object: nil)
+                }
+                NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": true])
                 NotificationCenter.default.post(name: .updateStartStopButtonTitle, object: nil, userInfo: ["title": "촬영 마치기"])
             }
         }
@@ -328,6 +340,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             
             self.isRecording = false
             stopAllTimers()
+            NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": false])
             NotificationCenter.default.post(name: .updateStartStopButtonTitle, object: nil, userInfo: ["title": "촬영 시작하기"])
             NotificationCenter.default.post(name: .updateEyeTrackingTime, object: nil, userInfo: ["time": "Time: 0.0s"])
             
@@ -359,6 +372,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             
             let timeString = String(format: "%02d:%02d", minutes, seconds)
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
+            
+            if(elapsed < minTime || elapsed > maxTime){
+                NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
+            } else {
+                NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
+            }
             
         }
     }
@@ -397,74 +416,74 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
-//    
-//    private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
-//        debugPrint("checkIfRecordingWasSaved 호출됨")
-//        // Request authorization to access Photos
-//        PHPhotoLibrary.requestAuthorization { status in
-//            DispatchQueue.main.async { // Ensure UI operations are on main thread
-//                if status == .authorized {
-//                    // Fetch the most recent video asset
-//                    debugPrint("너 권한있어. 계속해.")
-//                    let fetchOptions = PHFetchOptions()
-//                    fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-//                    fetchOptions.fetchLimit = 1
-//                    let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-//                    debugPrint("가져옴")
-//                    if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
-//                        let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
-//                        // If the asset was created within the last 60 seconds, assume it was saved
-//                        if timeSinceRecordingStopped < 60 {
-//                            debugPrint("10초 이내")
-//                            completion(true, asset.localIdentifier)
-//                        } else {
-//                            completion(false, nil)
-//                        }
-//                    } else {
-//                        completion(false, nil)
-//                    }
-//                } else {
-//                    // If access is denied, assume the user canceled
-//                    completion(false, nil)
-//                }
-//            }
-//        }
-//    }
-    
+    // 녹환된 비디오 저장하고 불러올때 저장된지 지정한 시간이내면 진행함
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
-        debugPrint("checkIfRecordingWasSaved called")
-        
+        debugPrint("checkIfRecordingWasSaved 호출됨")
         // Request authorization to access Photos
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async { // Ensure UI operations are on main thread
-                switch status {
-                case .authorized, .limited:
-                    debugPrint("Authorization granted.")
-                    
+                if status == .authorized {
                     // Fetch the most recent video asset
+                    debugPrint("너 권한있어. 계속해.")
                     let fetchOptions = PHFetchOptions()
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                     fetchOptions.fetchLimit = 1
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
-                    
-                    debugPrint("Fetched assets.")
-                    
-                    if let asset = fetchResult.firstObject {
-                        debugPrint("Latest video asset found with identifier: \(asset.localIdentifier)")
-                        completion(true, asset.localIdentifier)
+                    debugPrint("가져옴")
+                    if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
+                        let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
+                        // If the asset was created within the last 60 seconds, assume it was saved
+                        if timeSinceRecordingStopped < 10 {
+                            debugPrint("10초 이내")
+                            completion(true, asset.localIdentifier)
+                        } else {
+                            completion(false, nil)
+                        }
                     } else {
-                        debugPrint("No video assets found.")
                         completion(false, nil)
                     }
-                    
-                default:
-                    // If access is denied or restricted, assume the user canceled
-                    debugPrint("Authorization denied or restricted.")
+                } else {
+                    // If access is denied, assume the user canceled
                     completion(false, nil)
                 }
             }
         }
     }
+    
+//    private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
+//        debugPrint("checkIfRecordingWasSaved called")
+//        
+//        // Request authorization to access Photos
+//        PHPhotoLibrary.requestAuthorization { status in
+//            DispatchQueue.main.async { // Ensure UI operations are on main thread
+//                switch status {
+//                case .authorized, .limited:
+//                    debugPrint("Authorization granted.")
+//                    
+//                    // Fetch the most recent video asset
+//                    let fetchOptions = PHFetchOptions()
+//                    fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//                    fetchOptions.fetchLimit = 1
+//                    let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
+//                    
+//                    debugPrint("Fetched assets.")
+//                    
+//                    if let asset = fetchResult.firstObject {
+//                        debugPrint("Latest video asset found with identifier: \(asset.localIdentifier)")
+//                        completion(true, asset.localIdentifier)
+//                    } else {
+//                        debugPrint("No video assets found.")
+//                        completion(false, nil)
+//                    }
+//                    
+//                default:
+//                    // If access is denied or restricted, assume the user canceled
+//                    debugPrint("Authorization denied or restricted.")
+//                    completion(false, nil)
+//                }
+//            }
+//        }
+//    }
     
     
     private func navigateToAnalyzingViewController(with identifier: String) {

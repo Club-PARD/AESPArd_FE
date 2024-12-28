@@ -12,7 +12,6 @@ import AVFoundation
 
 // MARK: - FixedWidthInteger Extension
 // This extension adds a computed property to convert integers to Data in little endian format.
-// It must be declared at the top level, outside of any classes or other extensions.
 extension FixedWidthInteger {
     var littleEndianData: Data {
         var value = self.littleEndian
@@ -21,21 +20,32 @@ extension FixedWidthInteger {
 }
 
 class AnalyzingViewController: UIViewController {
-    var assetIdentifier: String?
-    var videoAsset: PHAsset?
+    var assetIdentifier: String? // 촬영한 비디오 고유 아이디
+    var videoAsset: PHAsset? // 비디오 담는 변수
+    // AVAudioPlayer instance
+    private var audioPlayer: AVAudioPlayer?
     
-    // UI Elements
-    private let extractAndUploadButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Extract & Upload Audio", for: .normal)
-        button.addTarget(self, action: #selector(extractAndUploadAudio), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = UIColor.systemBlue
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 10
-        return button
+    
+    let waitingLabel: UILabel = {
+        let label = UILabel()
+        label.text = "열심히 발표를 분석 중이에요!"
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
+//    private let extractAndUploadButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setTitle("Extract & Upload Audio", for: .normal)
+//        button.addTarget(self, action: #selector(extractAndUploadAudio), for: .touchUpInside)
+//        button.translatesAutoresizingMaskIntoConstraints = false
+//        button.backgroundColor = UIColor.systemBlue
+//        button.setTitleColor(.white, for: .normal)
+//        button.layer.cornerRadius = 10
+//        return button
+//    }()
+//
     private let playAudioButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Play Audio", for: .normal)
@@ -51,16 +61,15 @@ class AnalyzingViewController: UIViewController {
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.startAnimating()
         indicator.hidesWhenStopped = true
         return indicator
     }()
     
-    // AVAudioPlayer instance
-    private var audioPlayer: AVAudioPlayer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         setupUI()
         fetchVideoAsset()
         
@@ -68,43 +77,34 @@ class AnalyzingViewController: UIViewController {
     }
     
     private func configureAudioSessionForPlayback() {
-        let session = AVAudioSession.sharedInstance()
+        let session = AVAudioSession.sharedInstance() // Manages how audio is played/recorded.
         do {
             // .playback ensures the app plays through speakers even if the iPhone is on silent mode
-            try session.setCategory(.playback, mode: .default, options: [])
-            try session.setActive(true)
+            try session.setCategory(.playback, mode: .default, options: []) // audio can play even if the device is muted.
+            try session.setActive(true) // .setActive(true): Makes the session active immediately, finalizing these settings.
         } catch {
             print("Error setting AVAudioSession category: \(error.localizedDescription)")
         }
     }
     
     private func setupUI() {
-        // Add buttons and activity indicator to the view
-        view.addSubview(extractAndUploadButton)
-        view.addSubview(playAudioButton)
+        
+        view.addSubview(waitingLabel)
         view.addSubview(activityIndicator)
+        view.addSubview(playAudioButton)
         
         // Layout Extract & Upload Button
         NSLayoutConstraint.activate([
-            extractAndUploadButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            extractAndUploadButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            extractAndUploadButton.heightAnchor.constraint(equalToConstant: 60),
-            extractAndUploadButton.widthAnchor.constraint(equalToConstant: 250)
-        ])
-        
-        // Layout Play Audio Button
-        NSLayoutConstraint.activate([
-            playAudioButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            playAudioButton.topAnchor.constraint(equalTo: extractAndUploadButton.bottomAnchor, constant: 20),
-            playAudioButton.heightAnchor.constraint(equalToConstant: 60),
-            playAudioButton.widthAnchor.constraint(equalToConstant: 250)
-        ])
-        
-        // Layout Activity Indicator
-        NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.topAnchor.constraint(equalTo: playAudioButton.bottomAnchor, constant: 30)
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            waitingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            waitingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 30),
+            
+            playAudioButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            playAudioButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
         ])
+        
     }
     
     private func fetchVideoAsset() {
@@ -113,10 +113,12 @@ class AnalyzingViewController: UIViewController {
             return
         }
         
+        // Photos framework가 PHAsset 써서 아이디랑 맞는 어셋 불러옴
         let assets = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil)
+        // 불러온 어셋들 중 첫번째 어셋 근데 어차피 하나만 불러옴
         if let asset = assets.firstObject {
             self.videoAsset = asset
-            // Optionally, display the video or perform other actions
+            extractAndUploadAudio()
         } else {
             showAlert(title: "Error", message: "Video not found.")
         }
@@ -127,20 +129,14 @@ class AnalyzingViewController: UIViewController {
             showAlert(title: "Error", message: "No video asset available.")
             return
         }
-        extractAndUploadButton.isEnabled = false
-        playAudioButton.isHidden = true
-        activityIndicator.startAnimating()
+        
         extractAudio(from: asset) { [weak self] data in
-            DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                self?.extractAndUploadButton.isEnabled = true
-            }
             guard let self = self, let wavData = data else {
                 self?.showAlert(title: "Error", message: "Failed to extract audio.")
                 return
             }
             DispatchQueue.main.async {
-                self.playAudioButton.isHidden = false
+                self.playAudioButton.isHidden = false // DEBUG
             }
             self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
             self.uploadAudioData(wavData)
@@ -258,9 +254,11 @@ class AnalyzingViewController: UIViewController {
     
     // MARK: - Audio Extraction and Conversion
     private func extractAudio(from asset: PHAsset, completion: @escaping (Data?) -> Void) {
+        // 비디오 데이타를 어떻게 불러올건지 설정
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true // Allows fetching from iCloud if needed
         
+        // 비디오 어셋을 비동기로 불러옴
         PHImageManager.default().requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, info in
             guard let self = self, let avAsset = avAsset else {
                 self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
@@ -268,18 +266,15 @@ class AnalyzingViewController: UIViewController {
                 return
             }
             
-            // Proceed to extract audio
-//            self.convertAVAssetToWav(avAsset) { wavData in
-//                completion(wavData)
-//            }
+            // 영상에서 오디오를 가져오는데 성공하면 wav파일로 변환 시작
             self.convertAVAssetToWav(avAsset) { wavData in
                 guard let wavData = wavData else {
                     completion(nil)
                     return
                 }
                 
-                // Log or check the file size here
-                print("Extracted WAV data size: \(wavData.count) bytes")
+                // DEBUG: Log or check the file size here
+                //print("Extracted WAV data size: \(wavData.count) bytes")
                 
                 // Continue with normal flow...
                 completion(wavData)
@@ -289,14 +284,15 @@ class AnalyzingViewController: UIViewController {
     }
     
     private func convertAVAssetToWav(_ avAsset: AVAsset, completion: @escaping (Data?) -> Void) {
-        // Create an AVAssetReader to read audio samples
+        // Create an AVAssetReader instance to read audio samples
+        // AVAssetReader는 AVAsset으로부터 순차적으로 미디어 데이터를 읽거가 디코딩하는데 쓰임
         guard let assetReader = try? AVAssetReader(asset: avAsset) else {
             showAlert(title: "Error", message: "Unable to create AVAssetReader.")
             completion(nil)
             return
         }
         
-        // Get the audio track
+        // 오디오 트랙을 가져옴
         guard let audioTrack = avAsset.tracks(withMediaType: .audio).first else {
             showAlert(title: "Error", message: "No audio track found in the video.")
             completion(nil)
@@ -305,7 +301,7 @@ class AnalyzingViewController: UIViewController {
         
         // Define the output settings for PCM
         let outputSettings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+            AVFormatIDKey: Int(kAudioFormatLinearPCM), //uncompressed audio
             AVSampleRateKey: 44100,
             AVNumberOfChannelsKey: 2,
             AVLinearPCMBitDepthKey: 16,
@@ -314,26 +310,30 @@ class AnalyzingViewController: UIViewController {
             AVLinearPCMIsBigEndianKey: false
         ]
         
+        // AVAssetReaderTrackOutput: 하나의 오디오 트랙을 지정한 설정에 맞춰서 읽는 클래스, 의 인스턴스 생성
         let trackOutput = AVAssetReaderTrackOutput(track: audioTrack, outputSettings: outputSettings)
         
         if assetReader.canAdd(trackOutput) {
-            assetReader.add(trackOutput)
+            assetReader.add(trackOutput) // trackOutput에서 데이터를 읽어들임
         } else {
             showAlert(title: "Error", message: "Cannot add track output to AVAssetReader.")
             completion(nil)
             return
         }
         
-        // Start reading
+        // 지정한 설정대로 미디어 데이터를 읽기 시작함
         if assetReader.startReading() {
-            var audioData = Data()
+            var audioData = Data() // A flexible container for binary data
             
-            while let sampleBuffer = trackOutput.copyNextSampleBuffer(),
-                  let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) {
+            while let sampleBuffer = trackOutput.copyNextSampleBuffer(), // 다음 샘플 버퍼를 가져옴
+                  // 버퍼 있음
+                  let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) { // 버퍼 가져와서 넣음
                 let length = CMBlockBufferGetDataLength(blockBuffer)
-                var data = Data(count: length)
+                var data = Data(count: length) //This allocates memory to hold the incoming audio bytes.
                 
+                // Provides a mutable pointer to the raw bytes of the Data object, allowing direct memory manipulation.
                 data.withUnsafeMutableBytes { (bytes: UnsafeMutableRawBufferPointer) in
+                    // Copies a specified range of bytes from the blockBuffer into a destination memory location.
                     CMBlockBufferCopyDataBytes(blockBuffer, atOffset: 0, dataLength: length, destination: bytes.baseAddress!)
                 }
                 
@@ -363,9 +363,16 @@ class AnalyzingViewController: UIViewController {
     }
     
     private func createWavHeader(sampleRate: Int, channels: Int, bitsPerSample: Int, dataSize: Int) -> Data? {
+        //Determines the number of bytes processed per second.
         let byteRate = sampleRate * channels * bitsPerSample / 8
+        
+        //Specifies the number of bytes for one sample including all channels.
         let blockAlign = channels * bitsPerSample / 8
-        let totalDataLen = 36 + dataSize
+        
+        let totalDataLen = 36 + dataSize // Computes the total size of the WAV file minus the first 8 bytes.
+        // The WAV file header is 44 bytes long.
+        // totalDataLen represents the size of the file starting after the first 8 bytes (ChunkID and ChunkSize), hence 44 - 8 = 36.
+        // Adding dataSize gives the total size needed for the WAV header and audio data.
         
         var header = Data(capacity: 44)
         
