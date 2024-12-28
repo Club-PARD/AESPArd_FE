@@ -45,7 +45,7 @@ class EvaluationModalView: UIViewController {
         label.font = UIFont(name: "Pretendard-Medium", size: 14)
         label.textColor = UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1)
         label.textAlignment = .left
-        label.text = "Pree는 발표 연습 결과를 총점 100점 만점으로 평가합니다. \n총 점수는 다음 6가지 항목의 점수를 더하여 산출됩니다."
+        label.text = "pree는 발표 연습 결과를 총점 100점 만점으로 평가합니다. \n총 점수는 다음 6가지 항목의 점수를 더하여 산출됩니다."
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -98,17 +98,6 @@ class EvaluationModalView: UIViewController {
 
     let infoView4: InfoView = {
         let view = InfoView(
-            title: "시선 처리 비율 분석",
-            description: "카메라 응시 비율이 80% 미만일 경우, 1%당 5점 감점",
-            score: "20점 ",
-            ex: "ex. 75% 응시 시 25점 감점"
-        )
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let infoView5: InfoView = {
-        let view = InfoView(
             title: "발화 지연 표현 분석",
             description: "“음”, “어”와 같은 발화 지연 표현 1회당 5점 감점",
             score: "10점 ",
@@ -118,12 +107,23 @@ class EvaluationModalView: UIViewController {
         return view
     }()
     
-    let infoView6: InfoView = {
+    let infoView5: InfoView = {
         let view = InfoView(
             title: "불필요한 공백 분석",
             description: "3~4.9초의 공백인 경우, 1회당 2점 감점 \n5초 이상의 공백인 경우, 1회당 5점 감점",
             score: "10점 ",
             ex: "ex. 3.5초 공백 2번, 5초 공백 1번이면 9점 감점"
+        )
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    let infoView6: InfoView = {
+        let view = InfoView(
+            title: "시선 처리 비율 분석",
+            description: "화면 응시 비율이 80% 미만일 경우, 1%당 5점 감점",
+            score: "20점 ",
+            ex: "ex. 75% 응시 시 25점 감점"
         )
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -216,12 +216,12 @@ class EvaluationModalView: UIViewController {
             infoView5.topAnchor.constraint(equalTo: infoView4.bottomAnchor, constant: 8),
             infoView5.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             infoView5.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            infoView5.heightAnchor.constraint(equalToConstant: 97),
+            infoView5.heightAnchor.constraint(equalToConstant: 112),
             
             infoView6.topAnchor.constraint(equalTo: infoView5.bottomAnchor, constant: 8),
             infoView6.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             infoView6.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            infoView6.heightAnchor.constraint(equalToConstant: 112),
+            infoView6.heightAnchor.constraint(equalToConstant: 97),
             
             
             
