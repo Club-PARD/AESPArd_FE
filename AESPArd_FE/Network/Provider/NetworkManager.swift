@@ -209,6 +209,19 @@ final class NetworkManager {
             }
         }
     }
+    
+    // MARK: - 특정 사용자의 모든 발표 삭제 (My)
+    func deleteAllPresentation(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.deleteAllDeletePresentation(userId: userId)){ result in
+            switch result {
+            case .success(let response):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+                               
 
 }
 

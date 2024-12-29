@@ -1,9 +1,3 @@
-//
-//  UserService.swift
-//  AESPArd_FE
-//
-//  Created by KimDogyung on 12/27/24.
-//
 
 import Moya
 import Foundation
@@ -14,6 +8,7 @@ enum PresentationsService {
     case getPresentationFavoritesById(userId: String)
     case patchToggleFavofiteById(presentationId: String)
     case deleteSelectedPresentations(presentationIds: [String])
+    case deleteAllDeletePresentation(userId: String)
 }
 
 extension PresentationsService: TargetType {
@@ -31,6 +26,8 @@ extension PresentationsService: TargetType {
             return "/presentations/\(presentationId)/toggle-favorite"
         case .deleteSelectedPresentations:
             return "/presentations/batch-delete"
+        case .deleteAllDeletePresentation(let userId):
+            return "/presentations/\(userId)/all-delete"
         }
     }
     
@@ -43,6 +40,8 @@ extension PresentationsService: TargetType {
         case .patchToggleFavofiteById:
             return .patch
         case .deleteSelectedPresentations:
+            return .delete
+        case .deleteAllDeletePresentation:
             return .delete
         }
     }
@@ -60,6 +59,9 @@ extension PresentationsService: TargetType {
             
         case .deleteSelectedPresentations(let presentationIds):
             return .requestCustomJSONEncodable(presentationIds, encoder: JSONEncoder())
+        
+        case .deleteAllDeletePresentation:
+            return .requestPlain
         }
         
     }

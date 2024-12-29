@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let didResetService = Notification.Name("didResetService")
+}
+
 class MyViewController : UIViewController {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -112,7 +116,6 @@ class MyViewController : UIViewController {
     }
     
     //MARK: - API
-    //user
     @objc func getUserNameNEmailAPI() {
         networkManager.getUserNameNEmailById(userId: testId) { [weak self] result in
             switch result {
@@ -127,7 +130,19 @@ class MyViewController : UIViewController {
                     self?.setupNameButtonTitle() // 데이터 수신 후 버튼 업데이트
                 }
             case .failure(let error):
-                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
+    //사비스 초기화
+    @objc func deleteUserAllPresenttionAPI() {
+        networkManager.deleteAllPresentation(userId: testId) { result in
+            switch result {
+            case .success:
+                print("성공!")
+                NotificationCenter.default.post(name: .didResetService, object: nil)
+            case .failure(let error):
                 print("Error fetching users: \(error)")
             }
         }
@@ -246,6 +261,7 @@ class MyViewController : UIViewController {
         let resetAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
             print("서비스 초기화 작업 수행") // 여기에서 초기화 로직 추가
             // 예를 들어, 데이터를 삭제하거나 초기 상태로 되돌리는 작업
+            self.deleteUserAllPresenttionAPI()
         }
         
         // 취소 버튼
