@@ -103,8 +103,6 @@ final class NetworkManager {
         }
     }
     
-   // MARK: - 새로운 발표 생성
-    
     // MARK: - 중요도 토글
     func patchPTToggleFavoriteById(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         presentationServiceProvider.request(.patchToggleFavofiteById(presentationId: presentationId)) { result in
@@ -113,10 +111,7 @@ final class NetworkManager {
 
                 if response.statusCode == 200 {
                     completion(.success(())) // 성공적으로 완료되었을 경우
-                } else {
-//                    // 서버에서 오류를 반환한 경우
-//                    completion(.failure(NSError(domain: "com.example.app", code: response.statusCode, userInfo: nil)))
-                }
+                } 
             case .failure(let error):
                 // 요청 자체가 실패한 경우
                 completion(.failure(error))
@@ -145,10 +140,16 @@ final class NetworkManager {
                 do {
                     let averages = try JSONDecoder().decode([Int].self, from: response.data)
                     completion(.success(averages))
+                } catch {
+                    completion(.failure(error))
                 }
+            case .failure(let error):
+                completion(.failure(error))
+            }
             }
         }
 
+   // MARK: - 새로운 발표 생성
     func createPresentation(
         newPresentation: NewPresentation,
         wavData: Data,
