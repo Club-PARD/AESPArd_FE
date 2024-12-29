@@ -11,7 +11,6 @@ import Foundation
 
 // User 모델
 struct User: Codable {
-    let userId: String?
     let userName: String?
     let email: String?
 }

@@ -9,8 +9,12 @@ import UIKit
 
 class MyViewController : UIViewController {
     
-    var userName: String? = "김규희"
-    var userAdress: String? = "gyuheekim@gmail.com"
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    
+    var userName: String? = ""
+    var userAdress: String? = ""
     var message: String? = "프로젝트 매니저 이지환 / sonforhj03@gmail.com"
 
 
@@ -95,6 +99,8 @@ class MyViewController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        getUserNameNEmailAPI()
+        
         self.navigationController?.isNavigationBarHidden = true
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
         
@@ -103,6 +109,28 @@ class MyViewController : UIViewController {
 
         centerButton.addTarget(self, action: #selector(centerButtonTapped), for: .touchUpInside)
         appResetButton.addTarget(self, action: #selector(appResetButtonTapped), for: .touchUpInside)
+    }
+    
+    //MARK: - API
+    //user
+    @objc func getUserNameNEmailAPI() {
+        networkManager.getUserNameNEmailById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let user):
+                guard let userName = user.userName, let userAddress = user.email else {
+                    print("유효하지 않은 사용자 데이터")
+                    return
+                }
+                DispatchQueue.main.async {
+                    self?.userName = userName
+                    self?.userAdress = userAddress
+                    self?.setupNameButtonTitle() // 데이터 수신 후 버튼 업데이트
+                }
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
     }
     
     func setUI() {
