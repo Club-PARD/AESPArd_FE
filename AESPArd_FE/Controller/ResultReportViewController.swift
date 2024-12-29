@@ -159,12 +159,12 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             practiceHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             videoPlayerView.topAnchor.constraint(equalTo: practiceHeaderView.bottomAnchor),
-            videoPlayerView.heightAnchor.constraint(equalToConstant: 316),
+            videoPlayerView.heightAnchor.constraint(equalToConstant: 225),
             videoPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             videoPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
             practiceTotalScoreView.topAnchor.constraint(equalTo: videoPlayerView.bottomAnchor),
-            practiceTotalScoreView.heightAnchor.constraint(equalToConstant: 100),
+            practiceTotalScoreView.heightAnchor.constraint(equalToConstant: 80),
             practiceTotalScoreView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             practiceTotalScoreView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             

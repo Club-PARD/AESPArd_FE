@@ -129,9 +129,8 @@ class HomeViewController: UIViewController {
             case .success(let presentationLatest):
                 self?.ptList.removeAll()
                 self?.ptList = presentationLatest
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-                }
+                self?.tableView.reloadData()
+                
                 self?.filterMode = "recent"
             case .failure(let error):
                 // 실패 시 에러 처리
@@ -201,6 +200,7 @@ class HomeViewController: UIViewController {
         
         if !isDeleteMode {
             if(selectedDeleteId.count>0){
+                print("선택한 배열", selectedDeleteId)
                 deletePresenttaionAPI()
             }
             
@@ -211,7 +211,8 @@ class HomeViewController: UIViewController {
         tableView.reloadData()
     }
     
-    // 선택한 발표 리스트 삭제
+    
+    // 선택한 발표 리스트 삭제 API
     func deletePresenttaionAPI() {
     networkManager.deleteSelectedPresentation(presentationIds: selectedDeleteId){ [weak self] result in
             switch result {

@@ -115,9 +115,7 @@ final class NetworkManager {
         presentationServiceProvider.request(.deleteSelectedPresentations(presentationIds: presentationIds)) { result in
             switch result {
             case .success(let response):
-                if response.statusCode == 200 {
                     completion(.success(())) // 성공적으로 완료되었을 경우
-                }
             case .failure(let error):
                 // 요청 자체가 실패한 경우
                 completion(.failure(error))
