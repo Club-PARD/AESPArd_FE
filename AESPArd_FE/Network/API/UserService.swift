@@ -12,7 +12,7 @@ import Foundation
 
 // MARK: - enum을 하나 선언해서 사용될 target들을 작성합니다. 어떤 target? 사용할 메소드라고 보면됨 get, post, delete....
 enum UserService {
-    case getUserById(userId: String)
+    case getUserNameById(userId: String)
     // updateUser 안씀. Moya 구조 파악하기 위해서 보라고 남겨둘게
     case updateUser(id: Int, name: String, email: String)
 }
@@ -35,8 +35,8 @@ extension UserService: TargetType {
     
     var path: String {
         switch self {
-        case .getUserById(let userId):
-            return "/users/\(userId)"
+        case .getUserNameById(let userId):
+            return "/users/\(userId)/name"
         // upateUser 예시용 쓰지마
         case .updateUser(let id, _, _):
             return "/users/\(id)"
@@ -45,7 +45,7 @@ extension UserService: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .getUserById:
+        case .getUserNameById:
             return .get
         // upateUser 예시용 쓰지마
         case .updateUser:
@@ -55,7 +55,7 @@ extension UserService: TargetType {
     
     var task: Task {
         switch self {
-        case .getUserById:
+        case .getUserNameById:
             return .requestPlain
             
         // upateUser 예시용 쓰지마
@@ -67,42 +67,5 @@ extension UserService: TargetType {
     
     var headers: [String : String]? {
         return ["Content-Type": "application/json"]
-    }
-    
-    // MARK: - 테스트용 MockData
-    var sampleData: Data {
-        switch self {
-        case .getUserById:
-            return """
-            {
-              "userId": "1",
-              "userName": "unknown",
-              "email": "unknown@email.com",
-              "presentations": [
-                {
-                  "presentationId": "1",
-                  "user": "unknown",
-                  "presentationName": "First presentation",
-                  "createdAt": "2024-12-27T04:01:14.733Z",
-                  "updatedAt": "2024-12-27T04:01:14.734Z",
-                  "totalPractices": 0,
-                  "totalScore": 0,
-                  "toggleFavorite": true,
-                  "idealMaxTime": "string",
-                  "idealMinTime": "string"
-                }
-              ]
-            }
-            """.data(using: .utf8)!
-            
-        case .updateUser(let id, let name, let email):
-            return """
-            {
-              "id": \(id),
-              "name": "\(name)",
-              "email": "\(email)"
-            }
-            """.data(using: .utf8)!
-        }
     }
 }

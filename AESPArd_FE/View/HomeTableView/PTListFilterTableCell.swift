@@ -8,6 +8,14 @@ extension Notification.Name {
     static let searchButtonNotification = Notification.Name("searchButtonNotification")
 }
 
+//최신순, 중요도순
+extension Notification.Name {
+    static let latestNotification = Notification.Name("latestNotification")
+}
+extension Notification.Name {
+    static let favoriteNotification = Notification.Name("favoriteNotification")
+}
+
 class PTListFilterTableCell: UITableViewCell {
     
     let listCountLabel: UILabel = {
@@ -19,7 +27,7 @@ class PTListFilterTableCell: UITableViewCell {
     }()
     
     let searchButton: UIButton = {
-        let button = UIButton(type: .custom)
+        let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "searchIcon"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
@@ -115,15 +123,13 @@ class PTListFilterTableCell: UITableViewCell {
         contentView.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
-            listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
             listCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
-            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: -10),
             searchButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             searchButton.leadingAnchor.constraint(equalTo: listCountLabel.trailingAnchor, constant: 40),
-            
-//            searchButton.widthAnchor.constraint(equalToConstant: 20),
-            searchButton.heightAnchor.constraint(equalToConstant: 20),
+            searchButton.heightAnchor.constraint(equalToConstant: 40),
             
             recentButton.topAnchor.constraint(equalTo: listCountLabel.bottomAnchor, constant: 16),
             recentButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
@@ -167,6 +173,8 @@ class PTListFilterTableCell: UITableViewCell {
         
         // 다른 버튼들이 클릭되었을 때 원래 상태로 돌아감
         resetOtherButtons(except: recentButton)
+        
+        NotificationCenter.default.post(name:.latestNotification, object: nil)
     }
     
     //중요도순 버튼 클릭 메서드
@@ -174,6 +182,8 @@ class PTListFilterTableCell: UITableViewCell {
         importButton.setTitleColor(UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), for: .normal)
         importButton.setImage(UIImage(named: "importanceStar-click"), for: .normal)
         resetOtherButtons(except: importButton)
+        
+        NotificationCenter.default.post(name:.favoriteNotification, object: nil)
     }
     
     //삭제 버튼 클릭 메서드

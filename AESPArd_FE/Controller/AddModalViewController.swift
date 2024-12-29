@@ -165,15 +165,17 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         })
     }
     
+    // MARK: - 여기 수정해야 함
     @objc func moveTocameraViewController() {
-        let cameraVC = CameraViewController()
+        let tempPresentation = NewPresentation(userId: "", presentationName: "String", idealMinTime: 0, idealMaxTime: 0, eyeTrackingPercentage: 0, videoKey: "", showTimeOnScreen: true, showMeOnScreen: true)
+        let cameraVC = CameraViewController(newPresentation: tempPresentation, isShowingTimeSelected: true, isShowingMeSelected:true)
         cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
     }
     
     @objc func moveToNewExtraModal() {
         let excludedView = backgroundOverlay // 제외할 뷰를 참조
-        let extraVC = NewExtraModalViewController()
+        let extraVC = NewExtraModalViewController(userId: URLClass().testID)
 
         // 기존 뷰 제거 처리
         for subview in view.subviews {

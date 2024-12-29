@@ -56,11 +56,11 @@ class PracticeTotalScoreView: UIView {
         totalScoreView.addSubview(totalScoreLabel)
         
         NSLayoutConstraint.activate([
-            scoreLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 45),
+            scoreLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 31),
             scoreLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -24),
             scoreLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
             
-            totalScoreView.topAnchor.constraint(equalTo: self.topAnchor, constant: 40),
+            totalScoreView.topAnchor.constraint(equalTo: self.topAnchor, constant: 23),
             totalScoreView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
             totalScoreView.heightAnchor.constraint(equalToConstant: 40),
             

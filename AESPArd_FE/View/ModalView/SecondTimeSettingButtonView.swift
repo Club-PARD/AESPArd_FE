@@ -273,4 +273,10 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
         attributedText.append(grayText)
         timeSetButton.setAttributedTitle(attributedText, for: .normal)
     }
+    
+    
+    // 서버에 데이터 보낼때는 초단위로 보내야해서 변환시켜줌
+    var selectedTime: Double {
+        return Double(secondminuteValue * 60) + Double(secondsecondValue)
+    }
 }
