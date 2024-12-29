@@ -47,6 +47,20 @@
 			);
 			target = 0C86D0A52D0FE81A00BE4FB4 /* AESPArd_FE */;
 		};
+		91D5128B2D20060500065BF8 /* Exceptions for "AESPArd_FE" folder in "AESPArd_FETests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Video/SplashVideo.mp4,
+			);
+			target = 0C86D0BB2D0FE81C00BE4FB4 /* AESPArd_FETests */;
+		};
+		91D5128C2D20060500065BF8 /* Exceptions for "AESPArd_FE" folder in "AESPArd_FEUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Video/SplashVideo.mp4,
+			);
+			target = 0C86D0C52D0FE81C00BE4FB4 /* AESPArd_FEUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -54,6 +68,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				0C86D0CE2D0FE81C00BE4FB4 /* Exceptions for "AESPArd_FE" folder in "AESPArd_FE" target */,
+				91D5128B2D20060500065BF8 /* Exceptions for "AESPArd_FE" folder in "AESPArd_FETests" target */,
+				91D5128C2D20060500065BF8 /* Exceptions for "AESPArd_FE" folder in "AESPArd_FEUITests" target */,
 			);
 			path = AESPArd_FE;
 			sourceTree = "<group>";

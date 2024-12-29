@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let mainWindow = UIWindow(windowScene: windowScene)
         self.mainWindow = mainWindow
         mainWindow.windowLevel = .normal
-        mainWindow.rootViewController = ViewController() // Your main app content
+        mainWindow.rootViewController = SplashViewController() // Your main app content
         mainWindow.makeKeyAndVisible()
         
 //        // Overlay window (excluded from recording)
