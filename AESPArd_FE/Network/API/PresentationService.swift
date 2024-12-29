@@ -11,6 +11,7 @@ import Foundation
 
 enum PresentationService {
     case postNewPresentation(newPresentation: NewPresentation, wavData: Data)
+    case postAudio(wavData: Data)
 }
 
 extension PresentationService: TargetType {
@@ -23,12 +24,16 @@ extension PresentationService: TargetType {
         switch self {
         case .postNewPresentation:
             return "/presentations/new-presentation-with-practice"
+        case .postAudio:
+            return  "/audio/upload"
         }
     }
     
     var method: Moya.Method {
         switch self {
         case .postNewPresentation:
+            return .post
+        case .postAudio:
             return .post
         }
     }
@@ -69,6 +74,11 @@ extension PresentationService: TargetType {
             
             // 3) Return an uploadMultipart task
             return .uploadMultipart(formData)
+            
+        case .postAudio(wavData: let wavData):
+            
+            var formData = MultipartFormData(provider: .data(wavData), name: "file", fileName: "auido.wav", mimeType: "audio/wav")
+            return .uploadMultipart([formData])
         }
     }
     
@@ -88,12 +98,13 @@ extension PresentationService: TargetType {
                   "idealMinTime": 5.0,
                   "idealMaxTime": 8.0,
                   "eyeTrackingPercentage": 80,
-                  "audioFilePath": "unusedInThisApproach",
                   "videoKey": "myVideoKey",
                   "showTimeOnScreen": true,
                   "showMeOnScreen": false
                 }
                 """.data(using: .utf8)!
+        case .postAudio:
+            return "".data(using: .utf8)!
         }
     }
 }

@@ -13,7 +13,6 @@ struct NewPresentation: Codable {
     var idealMinTime: Double
     var idealMaxTime: Double
     var eyeTrackingPercentage: Int
-    var audioFilePath: String
     var videoKey: String
     var showTimeOnScreen: Bool
     var showMeOnScreen: Bool

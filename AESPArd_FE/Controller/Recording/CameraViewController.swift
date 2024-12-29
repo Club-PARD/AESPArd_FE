@@ -25,6 +25,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         self.isShowingMeSelected = isShowingMeSelected
         self.newPresentation!.showMeOnScreen = isShowingMeSelected
         self.newPresentation!.showTimeOnScreen = isShowingTimeSelected
+        self.minTime = newPresentation.idealMinTime
+        self.maxTime = newPresentation.idealMaxTime
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -65,8 +67,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     
     // 유저 시간 설정 값
-    private var minTime: Double = 5
-    private var maxTime: Double = 10
+    private var minTime: Double?
+    private var maxTime: Double?
 
     
     // MARK: - Life Cycle
@@ -88,6 +90,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 }
             }
         }
+        
+        debugPrint("                ")
+        debugPrint("                ")
+        debugPrint("                ")
+        debugPrint(newPresentation)
+        debugPrint("                ")
+        debugPrint("                ")
+        debugPrint("                ")
        
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
@@ -96,7 +106,11 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // 화면에는 보이지만 스크린 녹화에는 안보이는 화면 활성화
         setupOverlayWindow()
+        
+        // 촬영시간 타이머 보이게 할건지 안할건지 전달해주는 노티피케이션
         NotificationCenter.default.post(name: .setTimeLabelVisibility, object: nil, userInfo: ["isVisible": isShowingTimeSelected])
        
     }
@@ -127,7 +141,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         self.overlayWindow = newOverlayWindow
         newOverlayWindow.windowLevel = UIWindow.Level.alert + 1 // Ensure it's above the main window
         newOverlayWindow.isOpaque = false
-        newOverlayWindow.backgroundColor = .clear
+        newOverlayWindow.backgroundColor = .clear // 배경 투명하게 하면 밑에 있는 메인 윈도우가 보여짐
         newOverlayWindow.rootViewController = overlayVC
         newOverlayWindow.makeKeyAndVisible()
     }
@@ -348,6 +362,13 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
+    
+    // 얼마나 화면을 바라봤는지 비율 계산하는 함수
+    private func calculateEyeTrackingTime() -> Int {
+        var result = totalLookTime / totalRecordingTime!
+        return Int(result.rounded())
+    }
+    
     // MARK: - 화면 녹화 로직
     
     @objc private func toggleRecording() {
@@ -371,8 +392,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             present(alert, animated: true)
             return
         }
-        
-        
         
         recorder.isMicrophoneEnabled = true
         recorder.startRecording { [weak self] error in
@@ -428,13 +447,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     
-    // MARK: - 시선 비율 계산 함수
-    
-    private func calculateEyeTrackingTime() -> Int {
-        var result = totalLookTime / totalRecordingTime!
-        return Int(result.rounded())
-    }
-    
     
     // MARK: - 화면 녹화 타이머
     private func startRecordingTimer() {
@@ -452,7 +464,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             let timeString = String(format: "%02d:%02d", minutes, seconds)
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
             
-            if(elapsed < minTime || elapsed > maxTime){
+            if(elapsed < minTime! || elapsed > maxTime!){
+                debugPrint("                     ")
+                debugPrint("                     ")
+                debugPrint("설정한 시간 벗어남!!!! \(elapsed)")
+                debugPrint("                     ")
+                debugPrint("                     ")
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
             } else {
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
@@ -479,16 +496,16 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // MARK: - 프리뷰 창에서 다음 선택지 고르는 함수들
     
+    // 유저가 프리뷰창에서 취소를 눌렀는지 저장을 눌렀는지 확인하고 다음 행동을 지정
     private func determineUserActionAndNavigate() {
-        debugPrint("determineUserActionAndNavigate 호출됨")
         checkIfRecordingWasSaved { [weak self] wasSaved, assetIdentifier in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 if wasSaved, let identifier = assetIdentifier {
-                    debugPrint("저장 확인됨 이제 다른 뷰로 넘어가기 전")
+                    // 저장을 눌렀을 경우 다음 페이지로 넘어감
                     self.navigateToAnalyzingViewController(with: identifier)
                 } else {
-                    debugPrint("너, 취소한거야.")
+                    // 취소를 누르면 HomeViewController로 돌아감
                     self.backButtonTapped()
                 }
             }
@@ -499,12 +516,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
         // Request authorization to access Photos
         PHPhotoLibrary.requestAuthorization { status in
-            DispatchQueue.main.async { // Ensure UI operations are on main thread
+            DispatchQueue.main.async {
                 if status == .authorized {
-                    // Fetch the most recent video asset
+                    // 가장 최근 비디오 어셋을 가져옴
                     let fetchOptions = PHFetchOptions()
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-                    fetchOptions.fetchLimit = 1
+                    fetchOptions.fetchLimit = 1 // 1개만 가져옴
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
                     if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
                         let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
@@ -525,7 +542,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
-    
+    // 다음 페이지로 넘어간다
     private func navigateToAnalyzingViewController(with identifier: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

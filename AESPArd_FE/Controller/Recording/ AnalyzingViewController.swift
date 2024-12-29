@@ -43,7 +43,7 @@ class AnalyzingViewController: UIViewController {
     
     let waitingLabel: UILabel = {
         let label = UILabel()
-        label.text = "열심히 발표를 분석 중이에요!"
+        label.text = "리포트를 생성 중입니다"
         label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -114,7 +114,7 @@ class AnalyzingViewController: UIViewController {
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             waitingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            waitingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 30),
+            waitingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 50),
             
             playAudioButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             playAudioButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
@@ -145,7 +145,7 @@ class AnalyzingViewController: UIViewController {
             return
         }
         
-        extractAudio(from: asset) { [weak self] data in
+        extractAudio(from: asset) { [weak self] (data, isSilent) in
             guard let self = self, let wavData = data else {
                 self?.showAlert(title: "Error", message: "Failed to extract audio.")
                 return
@@ -153,8 +153,33 @@ class AnalyzingViewController: UIViewController {
             DispatchQueue.main.async {
                 self.playAudioButton.isHidden = false // DEBUG
             }
-            self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
-            //self.uploadAudioViaMoya(wavData)
+            if isSilent {
+                self.showAlert(title: "소리 없음", message: "발표가 녹음되지 않았습니다. 스크린 녹화와 마이크 녹음 모두 허용해주세요")
+            } else {
+                self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
+                //self.uploadAudioViaMoya(wavData)
+                //uploadOnlyAudio(wavData)
+            }
+        }
+    }
+    private func uploadOnlyAudio(_ wavData: Data) {
+        // Create the upload
+        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    if response.success {
+                        self.showAlert(title: "Success", message: response.message)
+                    } else {
+                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
+                    }
+                    
+                case .failure(let error):
+                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
+                }
+            }
         }
     }
     
@@ -172,7 +197,7 @@ class AnalyzingViewController: UIViewController {
             audioPlayer?.delegate = self
             audioPlayer?.prepareToPlay()
             // Optionally, autoplay for debugging
-            // audioPlayer?.play()
+            audioPlayer?.play()
         } catch {
             showAlert(title: "Playback Error", message: error.localizedDescription)
         }
@@ -231,7 +256,7 @@ class AnalyzingViewController: UIViewController {
         }
     
     // MARK: - Audio Extraction and Conversion
-    private func extractAudio(from asset: PHAsset, completion: @escaping (Data?) -> Void) {
+    private func extractAudio(from asset: PHAsset, completion: @escaping (Data?, Bool) -> Void) {
         // 비디오 데이타를 어떻게 불러올건지 설정
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true // Allows fetching from iCloud if needed
@@ -240,38 +265,42 @@ class AnalyzingViewController: UIViewController {
         PHImageManager.default().requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, info in
             guard let self = self, let avAsset = avAsset else {
                 self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
-                completion(nil)
+                completion(nil, true)
                 return
             }
             
+            
             // 영상에서 오디오를 가져오는데 성공하면 wav파일로 변환 시작
-            self.convertAVAssetToWav(avAsset) { wavData in
+            self.convertAVAssetToWav(avAsset) { wavData, isSilent in
                 guard let wavData = wavData else {
-                    completion(nil)
+                    completion(nil, true)
                     return
                 }
                 
+                // DEBUG: Log or check the file size here
+                //debugPrint("Extracted WAV data size: \(wavData.count) bytes")
+                
                 
                 // Continue with normal flow...
-                completion(wavData)
+                completion(wavData, isSilent)
             }
 
         }
     }
     
-    private func convertAVAssetToWav(_ avAsset: AVAsset, completion: @escaping (Data?) -> Void) {
+    private func convertAVAssetToWav(_ avAsset: AVAsset, completion: @escaping (Data?, Bool) -> Void) {
         // Create an AVAssetReader instance to read audio samples
         // AVAssetReader는 AVAsset으로부터 순차적으로 미디어 데이터를 읽거가 디코딩하는데 쓰임
         guard let assetReader = try? AVAssetReader(asset: avAsset) else {
             showAlert(title: "Error", message: "Unable to create AVAssetReader.")
-            completion(nil)
+            completion(nil, true)
             return
         }
         
         // 오디오 트랙을 가져옴
         guard let audioTrack = avAsset.tracks(withMediaType: .audio).first else {
             showAlert(title: "Error", message: "No audio track found in the video.")
-            completion(nil)
+            completion(nil, true)
             return
         }
         
@@ -293,13 +322,22 @@ class AnalyzingViewController: UIViewController {
             assetReader.add(trackOutput) // trackOutput에서 데이터를 읽어들임
         } else {
             showAlert(title: "Error", message: "Cannot add track output to AVAssetReader.")
-            completion(nil)
+            completion(nil, true)
             return
         }
+        
+        // 1) We'll define a threshold for "silence":
+        let silenceThreshold: Int16 = 200 // 이게 무음 오디오인지 판단하는 기준. 이것보다 크면 무음 아님
+        var noSilenceCount = 0 // 소리가 있는 오디오면 카운트업 됨
         
         // 지정한 설정대로 미디어 데이터를 읽기 시작함
         if assetReader.startReading() {
             var audioData = Data() // A flexible container for binary data
+            
+//            // 1) We'll define a threshold for "silence":
+//            let silenceThreshold: Int16 = 200
+//            var isSilent = true
+//            var noSilenceCount = 0
             
             while let sampleBuffer = trackOutput.copyNextSampleBuffer(), // 다음 샘플 버퍼를 가져옴
                   // 버퍼 있음
@@ -313,6 +351,24 @@ class AnalyzingViewController: UIViewController {
                     CMBlockBufferCopyDataBytes(blockBuffer, atOffset: 0, dataLength: length, destination: bytes.baseAddress!)
                 }
                 
+//                 2) Check the amplitude in this chunk
+//                    We'll interpret the chunk as an array of 16-bit samples
+//                 오디오 파일에 진짜 사운드가 들어이있는지 확인
+                let sampleCount = length / MemoryLayout<Int16>.size
+                data.withUnsafeBytes { (samples: UnsafeRawBufferPointer) in
+                    let int16Pointer = samples.bindMemory(to: Int16.self)
+                    
+                    for i in 0..<sampleCount {
+                        let sample = int16Pointer[i]
+                        // If any sample exceeds our threshold, it's not silent
+                        if abs(sample) > silenceThreshold {
+                            noSilenceCount += 1
+                            break
+                        }
+                    }
+                }
+                
+                
                 audioData.append(data)
             }
             
@@ -322,7 +378,7 @@ class AnalyzingViewController: UIViewController {
             // Create WAV header
             guard let wavHeader = createWavHeader(sampleRate: 44100, channels: 2, bitsPerSample: 16, dataSize: audioData.count) else {
                 showAlert(title: "Error", message: "Failed to create WAV header.")
-                completion(nil)
+                completion(nil, true)
                 return
             }
             
@@ -331,10 +387,16 @@ class AnalyzingViewController: UIViewController {
             wavData.append(wavHeader)
             wavData.append(audioData)
             
-            completion(wavData)
+            if(noSilenceCount > 0) {
+                completion(wavData, false)
+            } else {
+                completion(wavData, true)
+            }
+            
+//            completion(wavData, )
         } else {
             showAlert(title: "Error", message: "Failed to start reading audio track.")
-            completion(nil)
+            completion(nil, true)
         }
     }
     

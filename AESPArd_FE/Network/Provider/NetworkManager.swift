@@ -77,5 +77,25 @@ final class NetworkManager {
             }
         }
     }
+    
+    func uploadAudio(
+        wavData: Data,
+        completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
+    ) {
+        presentationProvider.request(.postAudio(wavData: wavData)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    // Define UploadAudioResponse based on your server's response structure
+                    let uploadResponse = try JSONDecoder().decode(UploadAudioResponse.self, from: response.data)
+                    completion(.success(uploadResponse))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }
 

@@ -22,7 +22,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     
     // 생성자
     init(userId: String){
-        self.newPresentation = NewPresentation(userId: userId, presentationName: "", idealMinTime: 0.0, idealMaxTime: 0.0, eyeTrackingPercentage: 0, audioFilePath: "", videoKey: "", showTimeOnScreen: true, showMeOnScreen: true)
+        self.newPresentation = NewPresentation(userId: userId, presentationName: "", idealMinTime: 0.0, idealMaxTime: 0.0, eyeTrackingPercentage: 0,  videoKey: "", showTimeOnScreen: true, showMeOnScreen: true)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -314,15 +314,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func moveTocameraViewController() {
-        let cameraVC = CameraViewController(newPresentation: newPresentation, isShowingTimeSelected: isShowingTimeSelected, isShowingMeSelected: isShowingMeSelected)
-        cameraVC.modalPresentationStyle = .custom
-        present(cameraVC, animated: true, completion: nil)
-        guard let enteredText = ptName.text, !enteredText.isEmpty else {
-                print("텍스트 필드가 비어 있습니다.")
-                return
-            }
         // 발표제목 추가
-        newPresentation.presentationName = enteredText
+        newPresentation.presentationName = ptName.text!
         // 최소시간 & 최대시간 값 가져옴
         let selectedIdealMinTime = timeSettingButtonView1.selectedTime // From FirstTimePickerInputView
         let selectedIdealMaxTime = timeSettingButtonView2.selectedTime // From SecondTimePickerInputView
@@ -330,8 +323,15 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         newPresentation.idealMinTime = selectedIdealMinTime
         newPresentation.idealMaxTime = selectedIdealMaxTime
         
-        // DEBUG
-        debugPrint(newPresentation)
+        let cameraVC = CameraViewController(newPresentation: newPresentation, isShowingTimeSelected: isShowingTimeSelected, isShowingMeSelected: isShowingMeSelected)
+        cameraVC.modalPresentationStyle = .custom
+        present(cameraVC, animated: true, completion: nil)
+        guard let enteredText = ptName.text, !enteredText.isEmpty else {
+                print("텍스트 필드가 비어 있습니다.")
+                return
+        }
+       
+        
     }
     
     // 키보드 완료 누르면 키보드 닫는거
