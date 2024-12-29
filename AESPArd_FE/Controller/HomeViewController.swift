@@ -20,8 +20,7 @@ class HomeViewController: UIViewController {
     var presentationCount :Int = 10
     
     //막대 그래프 데이터
-    //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
-    let graphData: [CGFloat] = [10,20,0,0,0,0]
+    var graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
     var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
@@ -48,7 +47,7 @@ class HomeViewController: UIViewController {
             fetchPresentationFavoriteList() // 중요도순 데이터 요청
         }
     }
-
+    
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -61,6 +60,8 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        getUserNameAPI()
+        getRecordsAverageAPI()
         fetchPresentationList()
         
         // 탭 바 컨트롤러의 delegate 설정
@@ -122,6 +123,37 @@ class HomeViewController: UIViewController {
     
     //MARK: -  API
     
+    //user
+    @objc func getUserNameAPI() {
+        networkManager.fetchUserById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let user):
+                guard let userName = user.userName else {
+                    print("User name is nil")
+                    return
+                }
+                self?.userName = userName
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
+    //막대그래프
+    @objc func getRecordsAverageAPI() {
+        networkManager.getRecordRecentAverage{ [weak self] result in
+            switch result {
+            case .success(let record):
+                print("제대로 왔나 \(record)")
+                self?.graphData = record.map { CGFloat($0) }
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
     // 발표 리스트를 최신순
     @objc func fetchPresentationList() {
         networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
@@ -147,7 +179,7 @@ class HomeViewController: UIViewController {
                 self?.ptList.removeAll()
                 self?.ptList = presentationLatest
                 self?.tableView.reloadData()
-            
+                
                 self?.filterMode = "favorite"
             case .failure(let error):
                 // 실패 시 에러 처리
@@ -214,7 +246,7 @@ class HomeViewController: UIViewController {
     
     // 선택한 발표 리스트 삭제 API
     func deletePresenttaionAPI() {
-    networkManager.deleteSelectedPresentation(presentationIds: selectedDeleteId){ [weak self] result in
+        networkManager.deleteSelectedPresentation(presentationIds: selectedDeleteId){ [weak self] result in
             switch result {
             case .success():
                 print("삭제 성공")

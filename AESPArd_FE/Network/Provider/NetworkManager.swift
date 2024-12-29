@@ -30,8 +30,11 @@ final class NetworkManager {
     
     private let presentationServiceProvider = MoyaProvider<PresentationsService>(
         plugins: [
-            // 디버깅하는데 도움주는 Moya 플러그인 나중에는 주석 처리 할 것
-//            NetworkLoggerPlugin() // helpful for logging network requests
+        ]
+    )
+    
+    private let recordsServiceProvider = MoyaProvider<RecordService>(
+        plugins: [
         ]
     )
 
@@ -39,13 +42,15 @@ final class NetworkManager {
     // MARK: - User 정보 불러오는 메소드
     
     func fetchUserById(userId: String, completion: @escaping (Result<User, Error>) -> Void) {
-        userServiceProvider.request(.getUserById(userId: userId)) { result in
+        userServiceProvider.request(.getUserNameById(userId: userId)) { result in
             switch result {
             case .success(let response):
                 do {
-                    // 단일 User 객체로 디코딩
-                    let user = try JSONDecoder().decode(User.self, from: response.data)
-                    completion(.success(user))
+                    if let userName = String(data: response.data, encoding: .utf8) {
+                        completion(.success(User(userId: nil, userName: userName, email: nil)))
+                    } else {
+                        throw NSError(domain: "InvalidResponse", code: -1, userInfo: nil)
+                    }
                 } catch {
                     completion(.failure(error))
                 }
@@ -123,6 +128,23 @@ final class NetworkManager {
         }
     }
 
+    // MARK: - 최근 5개 평균값 6개 (home)
+    func getRecordRecentAverage(completion: @escaping (Result<[Int], Error>) -> Void) {
+        recordsServiceProvider.request(.getRecordAverage) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let averages = try JSONDecoder().decode([Int].self, from: response.data)
+                    completion(.success(averages))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                // 네트워크 요청 실패 처리
+                completion(.failure(error))
+            }
+        }
+    }
     
 }
 
