@@ -105,7 +105,6 @@ final class NetworkManager {
     
    // MARK: - 새로운 발표 생성
     
-<<<<<<< HEAD
     // MARK: - 중요도 토글
     func patchPTToggleFavoriteById(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         presentationServiceProvider.request(.patchToggleFavofiteById(presentationId: presentationId)) { result in
@@ -146,7 +145,10 @@ final class NetworkManager {
                 do {
                     let averages = try JSONDecoder().decode([Int].self, from: response.data)
                     completion(.success(averages))
-=======
+                }
+            }
+        }
+
     func createPresentation(
         newPresentation: NewPresentation,
         wavData: Data,
@@ -159,22 +161,16 @@ final class NetworkManager {
                     // If server returns updated JSON for NewPresentation
                     let created = try JSONDecoder().decode(NewPresentation.self, from: response.data)
                     completion(.success(created))
->>>>>>> feature
                 } catch {
                     completion(.failure(error))
                 }
             case .failure(let error):
-<<<<<<< HEAD
                 // 네트워크 요청 실패 처리
-=======
->>>>>>> feature
                 completion(.failure(error))
             }
         }
     }
     
-<<<<<<< HEAD
-=======
     func uploadAudio(
         wavData: Data,
         completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
@@ -194,6 +190,5 @@ final class NetworkManager {
             }
         }
     }
->>>>>>> feature
 }
 
