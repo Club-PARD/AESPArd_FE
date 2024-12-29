@@ -205,11 +205,11 @@ class SearchViewController: UIViewController {
         searchBar.resignFirstResponder() // 키보드 숨기기
         tableView.reloadData()
         
+        self.view.frame.origin.y = 48
+        
         // 모달이 사라지는 애니메이션
         UIView.animate(withDuration: 0.5, animations: {
-            // 섹션 2 첫 번째 행으로 애니메이션
-            print(self.finalYPosition)
-            self.view.frame.origin.y = self.finalYPosition
+            self.view.frame.origin.y = self.finalYPosition + 48
         }, completion: { _ in
             // 애니메이션 완료 후 모달 닫기
             self.dismiss(animated: false, completion: nil)
