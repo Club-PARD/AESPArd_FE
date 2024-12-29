@@ -7,6 +7,9 @@
 
 import UIKit
 
+var TimeSetting1: String = ""
+var TimeSetting2: String = ""
+
 class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     
     // Post에 사용하기 위한 함수
@@ -163,6 +166,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         seePtSceneSwitch.translatesAutoresizingMaskIntoConstraints = false
         return seePtSceneSwitch
     }()
+    
+    
     
     
     

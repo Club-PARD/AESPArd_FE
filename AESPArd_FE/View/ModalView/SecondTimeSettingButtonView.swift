@@ -7,7 +7,6 @@
 
 import UIKit
 
-
 var secondminuteValue: Int = 7
 var secondsecondValue: Int = 0
 
@@ -222,7 +221,7 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
         guard let currentText = textField.text else { return false }
         let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
         
-        // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음 그니까 키패드는 쳐지는데 입력은 안된다고 보면 될듯?
+        // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음
         if let intValue = Int(newText), intValue >= 0 && intValue <= 59 {
             if textField == timeTextField1 {
                 secondminuteValue = intValue
@@ -230,9 +229,25 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
                 secondsecondValue = intValue
             }
             
-            updateTimeSetButtonText()
-            return true
+            // 최소시간이 최대시간보다 클 경우 입력을 막음
+            let minTimeInSeconds = firstminuteValue * 60 + firstsecondValue
+            let maxTimeInSeconds = secondminuteValue * 60 + secondsecondValue
+            
+            if maxTimeInSeconds < minTimeInSeconds {
+                // 최대시간이 최소시간보다 작으면 입력을 막고 텍스트 필드를 업데이트하지 않음
+                return false
+            } else {
+                // 유효한 값일 때만 버튼 텍스트 업데이트
+                updateTimeSetButtonText()
+                return true
+            }
         }
+
+        // 텍스트가 비어도 삭제를 허용하는 로직
+        if string.isEmpty && currentText.count == 1 {
+            return true // 한 자리가 남은 상태에서 삭제 가능
+        }
+        
         return false
     }
     

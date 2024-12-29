@@ -227,12 +227,30 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
                 firstsecondValue = intValue
             }
             
-            updateTimeSetButtonText()
-            return true
+            // 최소시간이 최대시간보다 클 경우 입력을 막음
+            let minTimeInSeconds = firstminuteValue * 60 + firstsecondValue
+            let maxTimeInSeconds = secondminuteValue * 60 + secondsecondValue
+            
+            if minTimeInSeconds > maxTimeInSeconds {
+                // 최소시간이 최대시간보다 크면 입력을 막고 텍스트 필드를 업데이트하지 않음
+                return false
+            } else {
+                // 유효한 값일 때만 버튼 텍스트 업데이트
+                updateTimeSetButtonText()
+                return true
+            }
         }
+
+        // 텍스트가 비어도 삭제를 허용하는 로직
+        if string.isEmpty && currentText.count == 1 {
+            return true // 한 자리가 남은 상태에서 삭제 가능
+        }
+        
         return false
     }
-    
+
+
+    // 버튼 텍스트 업데이트 메서드
     private func updateTimeSetButtonText() {
         let blueText = NSAttributedString(
             string: " \(String(format: "%02d", firstminuteValue)):\(String(format: "%02d", firstsecondValue))",

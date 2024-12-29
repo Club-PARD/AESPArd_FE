@@ -7,6 +7,7 @@
 
 import UIKit
 import AVKit
+import AuthenticationServices
 
 class SplashViewController: UIViewController {
 
@@ -15,31 +16,48 @@ class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupVideoBackground() // 비디오 재생 함수 호출
-        setupButton() // 버튼 추가 함수 호출
+        checkAppleIDState() // 로그인 상태 확인
         view.backgroundColor = UIColor(red: 44/255, green: 101/255, blue: 253/255, alpha: 1.0)
     }
 
     // 비디오 배경 설정
     private func setupVideoBackground() {
-        // 1. MP4 파일 경로 설정
         guard let path = Bundle.main.path(forResource: "SplashVideo", ofType: "mp4") else {
             print("비디오 파일을 찾을 수 없습니다.")
             return
         }
-        print("비디오 파일 경로: \(path)")
         let url = URL(fileURLWithPath: path)
-
-        // 2. AVPlayer 생성
         player = AVPlayer(url: url)
         let playerLayer = AVPlayerLayer(player: player)
-
-        // 3. 크기와 화면 맞춤 설정
         playerLayer.frame = view.bounds
         playerLayer.videoGravity = .resizeAspect
         view.layer.addSublayer(playerLayer)
-
-        // 4. 비디오 재생
         player?.play()
+    }
+
+    // 로그인 상태 확인
+    private func checkAppleIDState() {
+        guard let userIdentifier = UserDefaults.standard.string(forKey: "appleUserId") else {
+            setupButton()
+            return
+        }
+
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        appleIDProvider.getCredentialState(forUserID: userIdentifier) { [weak self] (credentialState, error) in
+            guard let self = self else { return }
+            switch credentialState {
+            case .authorized:
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    self.moveToNextView()
+                }
+            case .revoked, .notFound:
+                DispatchQueue.main.async {
+                    self.setupButton()
+                }
+            default:
+                break
+            }
+        }
     }
 
     // 버튼 추가 설정
@@ -52,7 +70,6 @@ class SplashViewController: UIViewController {
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(goToLogin), for: .touchUpInside)
 
-        // 버튼 위치 설정
         view.addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -66,14 +83,76 @@ class SplashViewController: UIViewController {
     }
 
     @objc private func goToLogin() {
-        player?.pause() // 비디오 정지
-        
-        // 디졸브 애니메이션 효과
-        let VC = ViewController() // 이동할 뷰 컨트롤러 인스턴스 생성
-        VC.modalPresentationStyle = .fullScreen // 전체 화면으로 표시
-        VC.modalTransitionStyle = .crossDissolve // 디졸브 효과 설정
-        
+        player?.pause()
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        authorizationController.performRequests()
+    }
+
+    // 다음 화면으로 이동
+    private func moveToNextView() {
+        player?.pause()
+        let VC = ViewController()
+        VC.modalPresentationStyle = .fullScreen
+        VC.modalTransitionStyle = .crossDissolve
         present(VC, animated: true, completion: nil)
     }
 
+    // UserInfo 저장 메서드
+    private func saveUserInfo(_ userInfo: UserInfo) {
+        let encoder = JSONEncoder()
+        if let encodedData = try? encoder.encode(userInfo) {
+            UserDefaults.standard.set(encodedData, forKey: "userInfo")
+            print("UserInfo 저장 완료")
+        } else {
+            print("UserInfo 저장 실패")
+        }
+    }
+}
+
+// 애플 로그인 처리
+extension SplashViewController: ASAuthorizationControllerDelegate {
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            let userIdentifier = appleIDCredential.user
+            UserDefaults.standard.set(userIdentifier, forKey: "appleUserId")
+
+            let firstName = appleIDCredential.fullName?.givenName ?? "없음"
+            let lastName = appleIDCredential.fullName?.familyName ?? "없음"
+            let email = appleIDCredential.email ?? "정보 없음"
+            let authorizationCode = String(data: appleIDCredential.authorizationCode ?? Data(), encoding: .utf8) ?? "코드 없음"
+            let identityToken = String(data: appleIDCredential.identityToken ?? Data(), encoding: .utf8) ?? "토큰 없음"
+
+            let userInfo = UserInfo(
+                userID: userIdentifier,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                authorizationCode: authorizationCode,
+                identityToken: identityToken
+            )
+
+            print("UserInfo 저장됨: \(userInfo)")
+            saveUserInfo(userInfo)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.moveToNextView()
+            }
+        }
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("애플 로그인 실패: \(error.localizedDescription)")
+    }
+}
+
+// 애플 로그인 화면 표시
+extension SplashViewController: ASAuthorizationControllerPresentationContextProviding {
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return self.view.window!
+    }
 }
