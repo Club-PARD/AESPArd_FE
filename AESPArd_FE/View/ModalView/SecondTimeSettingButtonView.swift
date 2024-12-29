@@ -7,14 +7,16 @@
 
 import UIKit
 
+
+var secondminuteValue: Int = 7
+var secondsecondValue: Int = 0
+
 class SecondTimePickerInputView: UIView, UITextFieldDelegate {
 
     private var isEditing = false // 상태를 나타내는 변수
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
 
-    private var minuteValue: Int = 7
-    private var secondValue: Int = 0
 
     // 시간 설정 버튼
     let timeSetButton: UIButton = {
@@ -223,9 +225,9 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
         // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음 그니까 키패드는 쳐지는데 입력은 안된다고 보면 될듯?
         if let intValue = Int(newText), intValue >= 0 && intValue <= 59 {
             if textField == timeTextField1 {
-                minuteValue = intValue
+                secondminuteValue = intValue
             } else if textField == timeTextField2 {
-                secondValue = intValue
+                secondsecondValue = intValue
             }
             
             updateTimeSetButtonText()
@@ -236,7 +238,7 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
     
     private func updateTimeSetButtonText() {
         let blueText = NSAttributedString(
-            string: " \(String(format: "%02d", minuteValue)):\(String(format: "%02d", secondValue))",
+            string: " \(String(format: "%02d", secondminuteValue)):\(String(format: "%02d", secondsecondValue))",
             attributes: [
                 .foregroundColor: UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1),
                 .font: UIFont(name: "Pretendard-Medium", size: 16)!
@@ -260,6 +262,6 @@ class SecondTimePickerInputView: UIView, UITextFieldDelegate {
     
     // 서버에 데이터 보낼때는 초단위로 보내야해서 변환시켜줌
     var selectedTime: Double {
-        return Double(minuteValue * 60) + Double(secondValue)
+        return Double(secondminuteValue * 60) + Double(secondsecondValue)
     }
 }

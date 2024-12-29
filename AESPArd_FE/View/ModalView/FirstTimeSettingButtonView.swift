@@ -7,14 +7,15 @@
 
 import UIKit
 
+var firstminuteValue: Int = 5
+var firstsecondValue: Int = 0
+
 class FirstTimePickerInputView: UIView, UITextFieldDelegate {
 
     private var isEditing = false // 상태를 나타내는 변수
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
 
-    private var minuteValue: Int = 5
-    private var secondValue: Int = 0
 
     // 시간 설정 버튼
     let timeSetButton: UIButton = {
@@ -221,9 +222,9 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음
         if let intValue = Int(newText), intValue >= 0 && intValue <= 59 {
             if textField == timeTextField1 {
-                minuteValue = intValue
+                firstminuteValue = intValue
             } else if textField == timeTextField2 {
-                secondValue = intValue
+                firstsecondValue = intValue
             }
             
             updateTimeSetButtonText()
@@ -234,7 +235,7 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
     
     private func updateTimeSetButtonText() {
         let blueText = NSAttributedString(
-            string: " \(String(format: "%02d", minuteValue)):\(String(format: "%02d", secondValue))",
+            string: " \(String(format: "%02d", firstminuteValue)):\(String(format: "%02d", firstsecondValue))",
             attributes: [
                 .foregroundColor: UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1),
                 .font: UIFont(name: "Pretendard-Medium", size: 16)!
@@ -257,6 +258,6 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
     
    // 서버에 데이터 보낼때는 초단위로 보내야해서 변환시켜줌
     var selectedTime: Double {
-        return Double(minuteValue * 60) + Double(secondValue)
+        return Double(firstminuteValue * 60) + Double(firstsecondValue)
     }
 }
