@@ -7,14 +7,15 @@
 
 import UIKit
 
+var firstminuteValue: Int = 5
+var firstsecondValue: Int = 0
+
 class FirstTimePickerInputView: UIView, UITextFieldDelegate {
 
     private var isEditing = false // 상태를 나타내는 변수
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
 
-    private var minuteValue: Int = 5
-    private var secondValue: Int = 0
 
     // 시간 설정 버튼
     let timeSetButton: UIButton = {
@@ -221,20 +222,38 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음
         if let intValue = Int(newText), intValue >= 0 && intValue <= 59 {
             if textField == timeTextField1 {
-                minuteValue = intValue
+                firstminuteValue = intValue
             } else if textField == timeTextField2 {
-                secondValue = intValue
+                firstsecondValue = intValue
             }
             
-            updateTimeSetButtonText()
-            return true
+            // 최소시간이 최대시간보다 클 경우 입력을 막음
+            let minTimeInSeconds = firstminuteValue * 60 + firstsecondValue
+            let maxTimeInSeconds = secondminuteValue * 60 + secondsecondValue
+            
+            if minTimeInSeconds > maxTimeInSeconds {
+                // 최소시간이 최대시간보다 크면 입력을 막고 텍스트 필드를 업데이트하지 않음
+                return false
+            } else {
+                // 유효한 값일 때만 버튼 텍스트 업데이트
+                updateTimeSetButtonText()
+                return true
+            }
         }
+
+        // 텍스트가 비어도 삭제를 허용하는 로직
+        if string.isEmpty && currentText.count == 1 {
+            return true // 한 자리가 남은 상태에서 삭제 가능
+        }
+        
         return false
     }
-    
+
+
+    // 버튼 텍스트 업데이트 메서드
     private func updateTimeSetButtonText() {
         let blueText = NSAttributedString(
-            string: " \(String(format: "%02d", minuteValue)):\(String(format: "%02d", secondValue))",
+            string: " \(String(format: "%02d", firstminuteValue)):\(String(format: "%02d", firstsecondValue))",
             attributes: [
                 .foregroundColor: UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1),
                 .font: UIFont(name: "Pretendard-Medium", size: 16)!
@@ -254,4 +273,5 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         attributedText.append(grayText)
         timeSetButton.setAttributedTitle(attributedText, for: .normal)
     }
+
 }

@@ -7,14 +7,15 @@
 
 import UIKit
 
+var TimeSetting1: String = ""
+var TimeSetting2: String = ""
+
 class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     
     // 클백할 때 이거 변수 다시 설정하기
     var inputText: String = ""
     var isKeyboardVisible = false
     var modalViewBottomConstraint: NSLayoutConstraint!
-    var TimeSetting1: String = ""
-    var TimeSetting2: String = ""
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
     
@@ -144,6 +145,8 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         seePtSceneSwitch.translatesAutoresizingMaskIntoConstraints = false
         return seePtSceneSwitch
     }()
+    
+    
     
     
     
