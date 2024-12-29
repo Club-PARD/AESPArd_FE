@@ -132,7 +132,7 @@ class ViewController: UITabBarController {
     func setTabBar() {
         // vc2는 필요 없지 않나 어차피?
         let vc1 = UINavigationController(rootViewController: HomeViewController())
-        let vc2 = UINavigationController(rootViewController: AddModalViewController()) // 중앙 버튼
+        let vc2 = UINavigationController(rootViewController: HomeViewController()) // 중앙 버튼
         let vc3 = UINavigationController(rootViewController: MyViewController())
         
         // 탭 바에 뷰 컨트롤러 추가

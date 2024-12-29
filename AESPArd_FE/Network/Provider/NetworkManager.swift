@@ -27,7 +27,7 @@ final class NetworkManager {
     private let userServiceProvider = MoyaProvider<UserService>(
         plugins: [
             // 디버깅하는데 도움주는 Moya 플러그인 나중에는 주석 처리 할 것
-            NetworkLoggerPlugin() // helpful for logging network requests
+//             NetworkLoggerPlugin() // helpful for logging network requests
         ]
     )
     private let presentationProvider = MoyaProvider<PresentationService>(
@@ -36,16 +36,47 @@ final class NetworkManager {
         ]
     )
     
+    private let presentationServiceProvider = MoyaProvider<PresentationsService>(
+        plugins: [
+        ]
+    )
+    
+    private let recordsServiceProvider = MoyaProvider<RecordService>(
+        plugins: [
+        ]
+    )
+
+    
     // MARK: - User 정보 불러오는 메소드
     
-    func fetchUserById(userId: String, completion: @escaping (Result<[User], Error>) -> Void) {
-        userServiceProvider.request(.getUserById(userId: userId)) { result in
+    func fetchUserById(userId: String, completion: @escaping (Result<User, Error>) -> Void) {
+        userServiceProvider.request(.getUserNameById(userId: userId)) { result in
             switch result {
             case .success(let response):
                 do {
-                    // Parse the JSON into [User]
-                    let user = try JSONDecoder().decode(User.self, from: response.data)
-                    completion(.success([user]))
+                    if let userName = String(data: response.data, encoding: .utf8) {
+                        completion(.success(User(userId: nil, userName: userName, email: nil)))
+                    } else {
+                        throw NSError(domain: "InvalidResponse", code: -1, userInfo: nil)
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    
+    //MARK: -  발표리스트 최신
+    func fetchPresentaionLatestById(userId: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.getPresentationLatestById(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
                 } catch {
                     completion(.failure(error))
                 }
@@ -55,8 +86,70 @@ final class NetworkManager {
         }
     }
     
-   // MARK: - 새로운 발표 생성
+    //MARK: -  발표리스트 중요도순
+    func fetchPresntaionFavoriteById(userId: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.getPresentationFavoritesById(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
     
+    // MARK: - 중요도 토글
+    func patchPTToggleFavoriteById(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.patchToggleFavofiteById(presentationId: presentationId)) { result in
+            switch result {
+            case .success(let response):
+
+                if response.statusCode == 200 {
+                    completion(.success(())) // 성공적으로 완료되었을 경우
+                } 
+            case .failure(let error):
+                // 요청 자체가 실패한 경우
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 선택한 발표 삭제
+    func deleteSelectedPresentation(presentationIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.deleteSelectedPresentations(presentationIds: presentationIds)) { result in
+            switch result {
+            case .success(let response):
+                    completion(.success(())) // 성공적으로 완료되었을 경우
+            case .failure(let error):
+                // 요청 자체가 실패한 경우
+                completion(.failure(error))
+            }
+        }
+    }
+
+    // MARK: - 최근 5개 평균값 6개 (home)
+    func getRecordRecentAverage(completion: @escaping (Result<[Int], Error>) -> Void) {
+        recordsServiceProvider.request(.getRecordAverage) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let averages = try JSONDecoder().decode([Int].self, from: response.data)
+                    completion(.success(averages))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+            }
+        }
+
+   // MARK: - 새로운 발표 생성
     func createPresentation(
         newPresentation: NewPresentation,
         wavData: Data,
@@ -73,6 +166,7 @@ final class NetworkManager {
                     completion(.failure(error))
                 }
             case .failure(let error):
+                // 네트워크 요청 실패 처리
                 completion(.failure(error))
             }
         }

@@ -12,22 +12,23 @@ class HomeViewController: UIViewController {
     // 클백 연결을 위한 NesworkManager 연결
     private let networkManager = NetworkManager.shared
     let testId : String = URLClass().testID
+    var ptList : [PresentationList]  = []//발표리스트 최신순
+    
     
     //클백 연결 시 해당 변수명 변경 필요
     var userName : String = "규희"
     var presentationCount :Int = 10
     
     //막대 그래프 데이터
-    //    let graphData: [CGFloat] = [82, 89, 68, 23, 100, 30]
-    let graphData: [CGFloat] = [10,20,0,0,0,0]
+    var graphData: [CGFloat] = [10,20,0,0,0,0]
     
     //발표 정보
     var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
     
     var ptDetailCount : Int = 4
-    var presentationDate : Int = 1
+    var presentationDate : String = ""
     var ptDetailTotalScore : Int = 88
-    var barVaue: Double = 0.84
+    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
     
     
     // 필터링 모드
@@ -37,6 +38,21 @@ class HomeViewController: UIViewController {
     //삭제하려고 선택한 리스트
     var selectedDeleteId : [String] = []
     
+    
+    // 필터 모드에 따라 데이터를 다시 로드
+    private func reloadDataBasedOnFilterMode() {
+        if filterMode == "recent" {
+            fetchPresentationList() // 최신순 데이터 요청
+        } else if filterMode == "favorite" {
+            fetchPresentationFavoriteList() // 중요도순 데이터 요청
+        }
+    }
+    
+    let header: HeaderLogoView = {
+        let view = HeaderLogoView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -49,17 +65,10 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       // 서버에서 user 정보 가져옴
-        networkManager.fetchUserById(userId: testId) { [weak self] result in
-            switch result {
-            case .success(let user):
-                // 여기서 Usr 모델에 받아온 데이터 집어 넣고 UI에 적용해주면 됨
-                print("Fetched users: \(user)")
-            case .failure(let error):
-                // Handle error
-                print("Error fetching users: \(error)")
-            }
-        }
+        getUserNameAPI()
+        getRecordsAverageAPI()
+        fetchPresentationList()
+        
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
@@ -93,6 +102,14 @@ class HomeViewController: UIViewController {
         
         //검색버튼 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleSearchNotification), name: .searchButtonNotification, object: nil)
+        
+        //최신순, 중요도순
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationList), name: .latestNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchPresentationFavoriteList), name: .favoriteNotification, object: nil)
+        
+        //토글 patch시 중요도 순일 때
+        NotificationCenter.default.addObserver(self,selector: #selector(patchToggleAPI(notification:)), name: .updateFavoriteNotification, object: nil)
     }
     
     deinit {
@@ -101,10 +118,103 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .selectedDeleteNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .searchButtonNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .latestNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .favoriteNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .updateFavoriteNotification, object: nil)
     }
+    
+    
+    //MARK: -  API
+    
+    //user
+    @objc func getUserNameAPI() {
+        networkManager.fetchUserById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let user):
+                guard let userName = user.userName else {
+                    print("User name is nil")
+                    return
+                }
+                self?.userName = userName
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
+    //막대그래프
+    @objc func getRecordsAverageAPI() {
+        networkManager.getRecordRecentAverage{ [weak self] result in
+            switch result {
+            case .success(let record):
+                self?.graphData = record.map { CGFloat($0) }
+            case .failure(let error):
+                // Handle error
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
+    // 발표 리스트를 최신순
+    @objc func fetchPresentationList() {
+        networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                self?.ptList.removeAll()
+                self?.ptList = presentationLatest
+                self?.tableView.reloadData()
+                
+                self?.filterMode = "recent"
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
+    }
+    
+    // 발표 리스트를 중요도순
+    @objc func fetchPresentationFavoriteList() {
+        networkManager.fetchPresntaionFavoriteById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                self?.ptList.removeAll()
+                self?.ptList = presentationLatest
+                self?.tableView.reloadData()
+                
+                self?.filterMode = "favorite"
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
+    }
+    
+    // 토글 patch
+    @objc func patchToggleAPI(notification: Notification) {
+        if let userInfo = notification.userInfo,
+           let ptId = userInfo["ptId"] as? String {
+            networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
+                switch result {
+                case .success():
+                    print("수정 성공")
+                    self?.reloadDataBasedOnFilterMode()
+                case .failure(let error):
+                    // 실패 시 에러 처리
+                    print("Error fetching presentations: \(error)")
+                }
+            }
+        }
+    }
+    
+    //MARK: -  제약조건
     
     func setUI(){
         
+        view.addSubview(header)
         view.addSubview(tableView)
         
         // 각 섹션별 셀 등록
@@ -114,7 +224,12 @@ class HomeViewController: UIViewController {
         
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.heightAnchor.constraint(equalToConstant: 48),
+            header.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: header.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
@@ -122,16 +237,36 @@ class HomeViewController: UIViewController {
         
     }
     
-    // 버튼 상태를 토글하는 메서드
+    // 삭제 버튼 상태를 토글하는 메서드
     @objc func handleButtonToggleNotification() {
         isDeleteMode.toggle()
         
         if !isDeleteMode {
-            //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            if(selectedDeleteId.count>0){
+                print("선택한 배열", selectedDeleteId)
+                deletePresenttaionAPI()
+            }
+            
             selectedDeleteId.removeAll()
+        }else{
         }
         
         tableView.reloadData()
+    }
+    
+    
+    // 선택한 발표 리스트 삭제 API
+    func deletePresenttaionAPI() {
+        networkManager.deleteSelectedPresentation(presentationIds: selectedDeleteId){ [weak self] result in
+            switch result {
+            case .success():
+                print("삭제 성공")
+                self?.reloadDataBasedOnFilterMode()
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
     }
     
     //삭제 리스트 추가
@@ -150,9 +285,19 @@ class HomeViewController: UIViewController {
     
     // 검색버튼 클릭 감지
     @objc func handleSearchNotification() {
-        let modalViewController = SearchViewController()
-        modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+        // 섹션 1의 첫 번째 셀의 위치를 계산
+        let section1FirstRowIndexPath = IndexPath(row: 0, section: 1)
+        let section1FirstRowY = tableView.rectForRow(at: section1FirstRowIndexPath).origin.y
+        
+        // 테이블뷰의 콘텐츠 오프셋을 고려하여 최종 위치 계산
+        let contentOffsetY = tableView.contentOffset.y
+        let finalYPosition = section1FirstRowY + (contentOffsetY * -1)
+        
+        // SearchViewController에 finalYPosition을 전달
+        let modalViewController = SearchViewController(finalYPosition: finalYPosition)
+        modalViewController.modalPresentationStyle = .overCurrentContext
         self.definesPresentationContext = true // 현재 컨텍스트를 정의
+        
         self.present(modalViewController, animated: true)
     }
     
@@ -167,29 +312,10 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 2 {
-            return presentationCount // 마지막 섹션은 행은 발표 갯수만큼
+            return ptList.count // 마지막 섹션은 행은 발표 갯수만큼
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
-    }
-    
-    // 섹션에 대한 헤더 설정
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        // 0번 섹션에 대해서만 헤더 높이를 설정
-        if section == 0 {
-            return 48.0 // HeaderTableCell의 높이
-        }
-        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section == 0 {
-            // HeaderTableCell을 0번 섹션의 헤더로 설정
-            let headerCell = HeaderTableCell(style: .default, reuseIdentifier: "HeaderTableCell")
-            headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
-            return headerCell
-        }
-        return UIView() // 빈 뷰를 반환하여 간격 제거
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -211,22 +337,29 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(with: presentationCount)
+            cell.configure(with: ptList.count)
+            if(selectedDeleteId.count  == 0){
+                cell.deleteButton.setTitle("삭제하기", for: .normal)
+            }
+            else{
+                cell.deleteButton.setTitle("\(selectedDeleteId.count)개 삭제하기", for: .normal)
+            }
             return cell
             
         case 2:
             let cell = tableView.dequeueReusableCell(withIdentifier: "PresentationListTableCell", for: indexPath) as! PresentationListTableCell
+            let presentation = ptList[indexPath.row]
             // 셀에 데이터 설정 (필요한 설정 추가)
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
-            cell.configure(presentationName: presentationName[indexPath.row], ptDetailCount: ptDetailCount, presentationDate: presentationDate, ptDetailTotalScore: ptDetailTotalScore, barVaue: barVaue)
+            cell.configure(presentationName: presentation.presentationName, ptDetailCount: presentation.totalPractices, presentationDate: presentation.updatedAtText, ptDetailTotalScore: presentation.totalPractices, barVaue: Double(presentation.totalScore) / 100.0, toggleFavorite: presentation.toggleFavorite, presentationId: presentation.presentationId, filterMode: filterMode)
             
             if(isDeleteMode){
                 cell.bookmarkButton.isHidden = true
                 cell.deleteCheckButton.isHidden = false
                 
                 // 삭제 선택한 리스트 있는지 확인
-                if selectedDeleteId.contains(presentationName[indexPath.row]) {
+                if selectedDeleteId.contains(presentation.presentationId) {
                     // 이미 선택된 경우 체크 표시
                     cell.deleteCheckButton.setImage(UIImage(named: "check_O"), for: .normal)
                 } else {
@@ -250,9 +383,9 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         // 각 섹션과 행에 대해 다르게 설정
         switch indexPath.section {
         case 0:
-            return 326 // 섹션 1의 셀 높이 - 중앙 그래프
+            return 326 + 40 // 섹션 1의 셀 높이 - 중앙 그래프
         case 1:
-            return 122 // 섹션 2의 셀 높이 - 발표 리스트 필터
+            return 122 - 40// 섹션 2의 셀 높이 - 발표 리스트 필터
         case 2:
             return 88 // 박스 크기 80px + 아래 패딩 8px
         default:

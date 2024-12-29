@@ -1,22 +1,16 @@
-//
-//  HeaderTableCell.swift
-//  AESPArd_FE
-//
-//  Created by 이유현 on 12/21/24.
-//
 
 import UIKit
 
-class HeaderTableCell: UITableViewCell {
+class HeaderLogoView: UIView {
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError()
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "HeaderTableCell")
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    
         setUI()
-        
     }
     
     func setUI(){
@@ -36,15 +30,15 @@ class HeaderTableCell: UITableViewCell {
             return imageView
         }()
         
-        contentView.addSubview(containerView) 
-        contentView.addSubview(headerLogoImageView)
+        self.addSubview(containerView)
+        self.addSubview(headerLogoImageView)
         
         //제약조건
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.topAnchor.constraint(equalTo: self.topAnchor),
+            containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             
             headerLogoImageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             headerLogoImageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),

@@ -4,7 +4,18 @@ extension Notification.Name {
     static let selectedDeleteNotification = Notification.Name("selectedDeleteNotification")
 }
 
+extension Notification.Name {
+    static let updateFavoriteNotification = Notification.Name("updateFavoriteNotification")
+}
+
 class PresentationListTableCell: UITableViewCell {
+    
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    
+    var ptId : String = ""
+    var ptToggle : Bool = false
+    var mode : String = ""
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -13,7 +24,7 @@ class PresentationListTableCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: "PresentationListTableCell")
         setUI()
-    
+        
     }
     
     let ptName: UILabel = {
@@ -56,7 +67,7 @@ class PresentationListTableCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "bookmark_X"), for: .normal)
         button.addTarget(self, action: #selector(bookmarkButtonTapped), for: .touchUpInside)
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         
         button.layer.cornerRadius = 20
         button.layer.masksToBounds = true
@@ -70,7 +81,7 @@ class PresentationListTableCell: UITableViewCell {
         button.setImage(UIImage(named: "check_X"), for: .normal)
         button.addTarget(self, action: #selector(deleteCheckButtonTapped), for: .touchUpInside)
         button.isHidden = true
-//        button.backgroundColor = .green
+        //        button.backgroundColor = .green
         button.layer.cornerRadius = 20
         button.layer.masksToBounds = true
         return button
@@ -175,6 +186,8 @@ class PresentationListTableCell: UITableViewCell {
             bookmarkButton.setImage(UIImage(named: "bookmark_X"), for: .normal)
         }
         
+        NotificationCenter.default.post(name: .updateFavoriteNotification, object: nil, userInfo: ["ptId": ptId])
+        
     }
     
     //삭제하기 -> 리스트 체크 버튼
@@ -186,18 +199,26 @@ class PresentationListTableCell: UITableViewCell {
         }
         
         if let presentationName = ptName.text {
-            NotificationCenter.default.post(name: .selectedDeleteNotification, object: nil, userInfo: ["cellName": presentationName])
+            NotificationCenter.default.post(name: .selectedDeleteNotification, object: nil, userInfo: ["cellName": ptId])
         }
     }
     
-    //삭제하기 버튼 누를 시 체크박스 등장
-    
     // 발표 정보 설정 메서드
-    func configure(presentationName: String, ptDetailCount: Int, presentationDate: Int, ptDetailTotalScore: Int, barVaue: Double) {
+    func configure(presentationName: String, ptDetailCount: Int, presentationDate: String, ptDetailTotalScore: Int, barVaue: Double, toggleFavorite:Bool, presentationId: String, filterMode: String) {
         
         ptName.text = presentationName
         ptCount.text = "\(ptDetailCount)개"
-        ptDate.text = "발표세부정보설명 · \(presentationDate)일 전"
+        ptDate.text = "발표세부정보설명 · \(presentationDate)"
         circularProgressBar.value = barVaue
+        ptId = presentationId
+        ptToggle = toggleFavorite
+        mode = filterMode
+        
+        if(ptToggle){
+            bookmarkButton.setImage(UIImage(named: "bookmark_O"), for: .normal)
+        }
+        else{
+            bookmarkButton.setImage(UIImage(named: "bookmark_X"), for: .normal)
+        }
     }
 }
