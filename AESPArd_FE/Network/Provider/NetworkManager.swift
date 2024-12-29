@@ -18,6 +18,9 @@ final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
     
+    
+    // MARK: - Provider 등록
+    
     // Create a MoyaProvider
     // Provider를 등록해주야 함. 만든 각각의 API에 대한 중계 유통업자임
     //private let authProvider = MoyaProvider<AuthService>()
@@ -25,6 +28,11 @@ final class NetworkManager {
         plugins: [
             // 디버깅하는데 도움주는 Moya 플러그인 나중에는 주석 처리 할 것
 //             NetworkLoggerPlugin() // helpful for logging network requests
+        ]
+    )
+    private let presentationProvider = MoyaProvider<PresentationService>(
+        plugins: [
+            NetworkLoggerPlugin() // Logs requests & responses (helpful in debug)
         ]
     )
     
@@ -95,7 +103,9 @@ final class NetworkManager {
         }
     }
     
+   // MARK: - 새로운 발표 생성
     
+<<<<<<< HEAD
     // MARK: - 중요도 토글
     func patchPTToggleFavoriteById(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         presentationServiceProvider.request(.patchToggleFavofiteById(presentationId: presentationId)) { result in
@@ -136,15 +146,54 @@ final class NetworkManager {
                 do {
                     let averages = try JSONDecoder().decode([Int].self, from: response.data)
                     completion(.success(averages))
+=======
+    func createPresentation(
+        newPresentation: NewPresentation,
+        wavData: Data,
+        completion: @escaping (Result<NewPresentation, Error>) -> Void
+    ) {
+        presentationProvider.request(.postNewPresentation(newPresentation: newPresentation, wavData: wavData)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    // If server returns updated JSON for NewPresentation
+                    let created = try JSONDecoder().decode(NewPresentation.self, from: response.data)
+                    completion(.success(created))
+>>>>>>> feature
                 } catch {
                     completion(.failure(error))
                 }
             case .failure(let error):
+<<<<<<< HEAD
                 // 네트워크 요청 실패 처리
+=======
+>>>>>>> feature
                 completion(.failure(error))
             }
         }
     }
     
+<<<<<<< HEAD
+=======
+    func uploadAudio(
+        wavData: Data,
+        completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
+    ) {
+        presentationProvider.request(.postAudio(wavData: wavData)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    // Define UploadAudioResponse based on your server's response structure
+                    let uploadResponse = try JSONDecoder().decode(UploadAudioResponse.self, from: response.data)
+                    completion(.success(uploadResponse))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+>>>>>>> feature
 }
 
