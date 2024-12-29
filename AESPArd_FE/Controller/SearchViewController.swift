@@ -81,7 +81,7 @@ class SearchViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
+        //        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
         
         UIView.animate(withDuration: 0.5, animations: {
             self.view.frame.origin.y = 0 // 화면 상단으로 이동
@@ -155,7 +155,7 @@ class SearchViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "x-close"), for: .normal)
         button.addTarget(self, action: #selector(searchBarCloseButtonTapped), for: .touchUpInside)
-//        button.frame = CGRect(x: 10, y: 10, width: 20, height: 20)
+        //        button.frame = CGRect(x: 10, y: 10, width: 20, height: 20)
         return button
     }()
     
@@ -223,6 +223,21 @@ class SearchViewController: UIViewController {
         }
     }
     
+    func searchPresentationsAPI(searchTerm: String) {
+        networkManager.searchPresentations(searchTerm: searchTerm) { [weak self] result in
+            switch result {
+            case .success(let presentations):
+                print("검색 성공: \(presentations)")
+                self?.ptList = presentations
+                self?.tableView.reloadData()
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error searching presentations: \(error)")
+            }
+        }
+    }
+
+    
 }
 
 //MARK: -  테이블뷰
@@ -270,5 +285,11 @@ extension SearchViewController: UISearchBarDelegate {
     // 검색 버튼 클릭
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // 키보드 숨기기
+        
+        // 입력된 텍스트 가져오기
+        if let searchTerm = searchBar.text, !searchTerm.isEmpty {
+            // 입력된 텍스트가 있을 때 searchPresentationsAPI 호출
+            searchPresentationsAPI(searchTerm: searchTerm)
+        }
     }
 }

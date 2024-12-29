@@ -221,6 +221,24 @@ final class NetworkManager {
             }
         }
     }
+    
+    //MARK: - 발표리스트 검색
+    func searchPresentations(searchTerm: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.searchPresentations(searchTerm: searchTerm)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
                                
 
 }
