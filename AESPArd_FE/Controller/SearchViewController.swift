@@ -25,16 +25,6 @@ class SearchViewController: UIViewController {
     let testId : String = URLClass().testID
     var ptList : [PresentationList]  = []//발표리스트 최신순
     
-    var presentationCount :Int = 10
-    
-    //발표 정보
-    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
-    
-    var ptDetailCount : Int = 4
-    var presentationDate : String = ""
-    var ptDetailTotalScore : Int = 88
-    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
-    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -47,7 +37,7 @@ class SearchViewController: UIViewController {
         
         self.navigationController?.isNavigationBarHidden = true
         
-        //발표 리스트 최신순
+        //발표 리스트 최신순 API
         networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
             switch result {
             case .success(let presentationLatest):

@@ -16,20 +16,10 @@ class HomeViewController: UIViewController {
     
     
     //클백 연결 시 해당 변수명 변경 필요
-    var userName : String = "규희"
-    var presentationCount :Int = 10
+    var userName : String = "프리"
     
     //막대 그래프 데이터
-    var graphData: [CGFloat] = [10,20,0,0,0,0]
-    
-    //발표 정보
-    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
-    
-    var ptDetailCount : Int = 4
-    var presentationDate : String = ""
-    var ptDetailTotalScore : Int = 88
-    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
-    
+    var graphData: [CGFloat] = [0,0,0,0,0,0]
     
     // 필터링 모드
     var filterMode : String = "recent"
