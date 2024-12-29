@@ -22,13 +22,30 @@ extension FixedWidthInteger {
 class AnalyzingViewController: UIViewController {
     
     private var newPresentation: NewPresentation?
+    private var newPractice: NewPractice?
     private var assetIdentifier: String?
+    private var audioData: Data? // Stores the extracted audio data
+    
+    private var isCreatingNewPresentation: Bool?
+    private var isCreatingNewPractice: Bool?
     
     // 생성자
     init(newPresentation: NewPresentation){
         super.init(nibName: nil, bundle: nil)
         self.newPresentation = newPresentation
         self.assetIdentifier = newPresentation.videoKey
+        isCreatingNewPresentation = true
+        isCreatingNewPractice = false
+        debugPrint(newPresentation)
+    }
+    
+    init(newPractice: NewPractice, assetIdentifier: String){
+        super.init(nibName: nil, bundle: nil)
+        self.newPractice = newPractice
+        self.assetIdentifier = assetIdentifier
+        isCreatingNewPresentation = false
+        isCreatingNewPractice = true
+        //debugPrint(newPresentation)
     }
     
     required init?(coder: NSCoder) {
@@ -88,7 +105,7 @@ class AnalyzingViewController: UIViewController {
         setupUI()
         fetchVideoAsset()
         
-        configureAudioSessionForPlayback()
+        //configureAudioSessionForPlayback()
     }
     
     private func configureAudioSessionForPlayback() {
@@ -230,30 +247,30 @@ class AnalyzingViewController: UIViewController {
     }
     
     // MARK: - Audio Upload
-    private func uploadAudioViaMoya(_ wavData: Data) {
-            guard let presentation = newPresentation else {
-                showAlert(title: "Error", message: "No presentation data to send.")
-                return
-            }
-            
-            // Moya-based call
-            NetworkManager.shared.createPresentation(newPresentation: presentation, wavData: wavData) { [weak self] result in
-                guard let self = self else { return }
-                
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let returnedPresentation):
-                        // The server might return updated JSON
-                        self.showAlert(title: "Success",
-                                       message: "Presentation + audio uploaded!")
-                        
-                    case .failure(let error):
-                        self.showAlert(title: "Upload Error",
-                                       message: error.localizedDescription)
-                    }
-                }
-            }
-        }
+//    private func uploadAudioViaMoya(_ wavData: Data) {
+//            guard let presentation = newPresentation else {
+//                showAlert(title: "Error", message: "No presentation data to send.")
+//                return
+//            }
+//            
+//            // Moya-based call
+//            NetworkManager.shared.createPresentation(newPresentation: presentation, wavData: wavData) { [weak self] result in
+//                guard let self = self else { return }
+//                
+//                DispatchQueue.main.async {
+//                    switch result {
+//                    case .success(let returnedPresentation):
+//                        // The server might return updated JSON
+//                        self.showAlert(title: "Success",
+//                                       message: "Presentation + audio uploaded!")
+//                        
+//                    case .failure(let error):
+//                        self.showAlert(title: "Upload Error",
+//                                       message: error.localizedDescription)
+//                    }
+//                }
+//            }
+//        }
     
     // MARK: - Audio Extraction and Conversion
     private func extractAudio(from asset: PHAsset, completion: @escaping (Data?, Bool) -> Void) {

@@ -2,9 +2,8 @@
 //  PresentationList.swift
 //  AESPArd_FE
 //
-//  Created by 이유현 on 12/28/24.
+//  Created by KimDogyung on 12/29/24.
 //
-
 
 import Foundation
 
@@ -15,4 +14,6 @@ struct PresentationList: Codable {
     let totalScore: Int
     let totalPractices: Int
     let updatedAtText: String
+    let showMeOnScreen: Bool
+    let showTimeOnScreen: Bool
 }

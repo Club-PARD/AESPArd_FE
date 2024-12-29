@@ -15,10 +15,15 @@ import Photos // 갤러리 접근 프레임워크
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
     private var newPresentation: NewPresentation?
+    private var newPractice: NewPractice?
     private var isShowingTimeSelected: Bool?
     private var isShowingMeSelected: Bool?
     
-    // 생성자
+    // 새로운 발표를 만드는지 연습을 만드는지에 따라 다음 페이지에 전달하는 값이 달라짐
+    private var isCreatingNewPresentation: Bool?
+    private var isCreatingNewPractice: Bool?
+    
+    // 새로운 발표 생성자
     init(newPresentation: NewPresentation, isShowingTimeSelected: Bool, isShowingMeSelected: Bool){
         self.newPresentation = newPresentation
         self.isShowingTimeSelected = isShowingTimeSelected
@@ -27,7 +32,21 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         self.newPresentation!.showTimeOnScreen = isShowingTimeSelected
         self.minTime = newPresentation.idealMinTime
         self.maxTime = newPresentation.idealMaxTime
+        isCreatingNewPresentation = true
+        isCreatingNewPractice = false
         super.init(nibName: nil, bundle: nil)
+    }
+    
+    // 기존 발표에 새로운 연습 생성자
+    init(newPractice: NewPractice, isShowingTimeSelected: Bool, isShowingMeSelected: Bool, minTime: Double, maxTime: Double){
+        super.init(nibName: nil, bundle: nil)
+        self.newPractice = newPractice
+        self.isShowingTimeSelected = isShowingTimeSelected
+        self.isShowingMeSelected = isShowingMeSelected
+        self.minTime = minTime
+        self.maxTime = maxTime
+        isCreatingNewPresentation = false
+        isCreatingNewPractice = true
     }
     
     required init?(coder: NSCoder) {
@@ -91,13 +110,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             }
         }
         
-        debugPrint("                ")
-        debugPrint("                ")
-        debugPrint("                ")
-        debugPrint(newPresentation)
-        debugPrint("                ")
-        debugPrint("                ")
-        debugPrint("                ")
        
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
@@ -111,7 +123,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         setupOverlayWindow()
         
         // 촬영시간 타이머 보이게 할건지 안할건지 전달해주는 노티피케이션
-        NotificationCenter.default.post(name: .setTimeLabelVisibility, object: nil, userInfo: ["isVisible": isShowingTimeSelected])
+        NotificationCenter.default.post(name: .setTimeLabelVisibility, object: nil, userInfo: ["isVisible": isShowingTimeSelected!])
        
     }
     
@@ -465,11 +477,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
             
             if(elapsed < minTime! || elapsed > maxTime!){
-                debugPrint("                     ")
-                debugPrint("                     ")
-                debugPrint("설정한 시간 벗어남!!!! \(elapsed)")
-                debugPrint("                     ")
-                debugPrint("                     ")
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
             } else {
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
@@ -546,8 +553,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private func navigateToAnalyzingViewController(with identifier: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            newPresentation!.videoKey = identifier
-            let analyzingVC = AnalyzingViewController(newPresentation: newPresentation!)
+            
+            let analyzingVC: AnalyzingViewController
+            if isCreatingNewPresentation! {
+                newPresentation!.videoKey = identifier
+                analyzingVC = AnalyzingViewController(newPresentation: newPresentation!)
+            } else {
+                analyzingVC = AnalyzingViewController(newPractice: newPractice!, assetIdentifier: identifier)
+            }
 
             if let navigationController = self.navigationController {
                 navigationController.pushViewController(analyzingVC, animated: true)

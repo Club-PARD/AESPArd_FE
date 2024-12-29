@@ -30,7 +30,7 @@ final class NetworkManager {
 //             NetworkLoggerPlugin() // helpful for logging network requests
         ]
     )
-    private let presentationProvider = MoyaProvider<PresentationService>(
+    private let newRresentationProvider = MoyaProvider<NewPresentationService>(
         plugins: [
             NetworkLoggerPlugin() // Logs requests & responses (helpful in debug)
         ]
@@ -152,31 +152,31 @@ final class NetworkManager {
    // MARK: - 새로운 발표 생성
     func createPresentation(
         newPresentation: NewPresentation,
-        wavData: Data,
         completion: @escaping (Result<NewPresentation, Error>) -> Void
     ) {
-        presentationProvider.request(.postNewPresentation(newPresentation: newPresentation, wavData: wavData)) { result in
+        newRresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
             switch result {
             case .success(let response):
                 do {
-                    // If server returns updated JSON for NewPresentation
+                    // Decode the response as Presentation (adjust based on your server's response)
                     let created = try JSONDecoder().decode(NewPresentation.self, from: response.data)
                     completion(.success(created))
                 } catch {
                     completion(.failure(error))
                 }
             case .failure(let error):
-                // 네트워크 요청 실패 처리
+                // Handle network request failure
                 completion(.failure(error))
             }
         }
     }
     
+    // MARK: - 오디오 파일 전송
     func uploadAudio(
         wavData: Data,
         completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
     ) {
-        presentationProvider.request(.postAudio(wavData: wavData)) { result in
+        newRresentationProvider.request(.postAudio(wavData: wavData)) { result in
             switch result {
             case .success(let response):
                 do {
