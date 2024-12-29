@@ -123,10 +123,10 @@ class PTListFilterTableCell: UITableViewCell {
         contentView.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
-            listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            listCountLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
             listCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             
-            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 30),
+            searchButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: -10),
             searchButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             searchButton.leadingAnchor.constraint(equalTo: listCountLabel.trailingAnchor, constant: 40),
             searchButton.heightAnchor.constraint(equalToConstant: 40),

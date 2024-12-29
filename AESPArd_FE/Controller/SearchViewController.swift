@@ -8,6 +8,18 @@
 import UIKit
 
 class SearchViewController: UIViewController {
+    
+    private var finalYPosition: CGFloat = 0.0
+    
+    init(finalYPosition: CGFloat) {
+        self.finalYPosition = finalYPosition
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // 클백 연결을 위한 NesworkManager 연결
     private let networkManager = NetworkManager.shared
     let testId : String = URLClass().testID
@@ -68,8 +80,7 @@ class SearchViewController: UIViewController {
             tableView.sectionHeaderTopPadding = 0
         }
         
-        //        self.view.frame.origin.y = -448 //헤더 미포함
-        self.view.frame.origin.y = -388
+        self.view.frame.origin.y =  self.finalYPosition * -1
         
         setUI()
         
@@ -80,9 +91,10 @@ class SearchViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // 애니메이션을 통해 388 포인트 아래에서 위로 올라오도록 설정
+//        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
+        
         UIView.animate(withDuration: 0.5, animations: {
-            self.view.frame.origin.y = 0  // 화면 상단으로 이동
+            self.view.frame.origin.y = 0 // 화면 상단으로 이동
         })
     }
     
@@ -195,9 +207,12 @@ class SearchViewController: UIViewController {
         
         // 모달이 사라지는 애니메이션
         UIView.animate(withDuration: 0.5, animations: {
-            self.view.frame.origin.y = 400 // 모달을 아래로 내리는 애니메이션
+            // 섹션 2 첫 번째 행으로 애니메이션
+            print(self.finalYPosition)
+            self.view.frame.origin.y = self.finalYPosition
         }, completion: { _ in
-            self.dismiss(animated: false, completion: nil) // 애니메이션 완료 후 모달 닫기
+            // 애니메이션 완료 후 모달 닫기
+            self.dismiss(animated: false, completion: nil)
         })
     }
     

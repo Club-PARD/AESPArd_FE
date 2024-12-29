@@ -48,6 +48,11 @@ class HomeViewController: UIViewController {
         }
     }
     
+    let header: HeaderLogoView = {
+        let view = HeaderLogoView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -63,6 +68,7 @@ class HomeViewController: UIViewController {
         getUserNameAPI()
         getRecordsAverageAPI()
         fetchPresentationList()
+        
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
@@ -145,7 +151,6 @@ class HomeViewController: UIViewController {
         networkManager.getRecordRecentAverage{ [weak self] result in
             switch result {
             case .success(let record):
-                print("제대로 왔나 \(record)")
                 self?.graphData = record.map { CGFloat($0) }
             case .failure(let error):
                 // Handle error
@@ -209,6 +214,7 @@ class HomeViewController: UIViewController {
     
     func setUI(){
         
+        view.addSubview(header)
         view.addSubview(tableView)
         
         // 각 섹션별 셀 등록
@@ -218,7 +224,12 @@ class HomeViewController: UIViewController {
         
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.heightAnchor.constraint(equalToConstant: 48),
+            header.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: header.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
@@ -274,8 +285,17 @@ class HomeViewController: UIViewController {
     
     // 검색버튼 클릭 감지
     @objc func handleSearchNotification() {
-        let modalViewController = SearchViewController()
-        modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
+        // 섹션 1의 첫 번째 셀의 위치를 계산
+        let section1FirstRowIndexPath = IndexPath(row: 0, section: 1)
+        let section1FirstRowY = tableView.rectForRow(at: section1FirstRowIndexPath).origin.y
+        
+        // 테이블뷰의 콘텐츠 오프셋을 고려하여 최종 위치 계산
+        let contentOffsetY = tableView.contentOffset.y
+        let finalYPosition = section1FirstRowY + (contentOffsetY * -1)
+        
+        // SearchViewController에 finalYPosition을 전달
+        let modalViewController = SearchViewController(finalYPosition: finalYPosition)
+        modalViewController.modalPresentationStyle = .overCurrentContext
         self.definesPresentationContext = true // 현재 컨텍스트를 정의
         
         self.present(modalViewController, animated: true)
@@ -296,25 +316,6 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
-    }
-    
-    // 섹션에 대한 헤더 설정
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        // 0번 섹션에 대해서만 헤더 높이를 설정
-        if section == 0 {
-            return 48.0 // HeaderTableCell의 높이
-        }
-        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section == 0 {
-            // HeaderTableCell을 0번 섹션의 헤더로 설정
-            let headerCell = HeaderTableCell(style: .default, reuseIdentifier: "HeaderTableCell")
-            headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
-            return headerCell
-        }
-        return UIView() // 빈 뷰를 반환하여 간격 제거
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -382,9 +383,9 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         // 각 섹션과 행에 대해 다르게 설정
         switch indexPath.section {
         case 0:
-            return 326 // 섹션 1의 셀 높이 - 중앙 그래프
+            return 326 + 40 // 섹션 1의 셀 높이 - 중앙 그래프
         case 1:
-            return 122 // 섹션 2의 셀 높이 - 발표 리스트 필터
+            return 122 - 40// 섹션 2의 셀 높이 - 발표 리스트 필터
         case 2:
             return 88 // 박스 크기 80px + 아래 패딩 8px
         default:
