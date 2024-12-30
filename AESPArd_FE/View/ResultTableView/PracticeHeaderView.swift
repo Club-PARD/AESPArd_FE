@@ -22,6 +22,7 @@ class PracticeHeaderView: UIView {
         setUI()
     }
     
+    
     let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false

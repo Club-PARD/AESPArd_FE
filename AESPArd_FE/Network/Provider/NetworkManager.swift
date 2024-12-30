@@ -45,6 +45,11 @@ final class NetworkManager {
         plugins: [
         ]
     )
+    
+    private let practiceServiceProvider = MoyaProvider<PracticeService>(
+        plugins: [
+        ]
+    )
 
     
     // MARK: - User 정보 불러오는 메소드
@@ -244,6 +249,22 @@ final class NetworkManager {
         }
     }
 
+    // MARK: - 연습 get
+    func getPracticeByPresentationId(presentationId: String, completion: @escaping (Result<[GetPractice], Error>) -> Void) {
+        practiceServiceProvider.request(.getPractice(presentationId: presentationId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let practice = try JSONDecoder().decode([GetPractice].self, from: response.data)
+                    completion(.success(practice))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
                                
 
 }

@@ -192,7 +192,6 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     // PracticeHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissPracticeViewController() {
         self.dismiss(animated: true, completion: nil)
-        print("2차")
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글

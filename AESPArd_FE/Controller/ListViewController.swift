@@ -9,8 +9,18 @@ import UIKit
 
 class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
-    //발표 폴더 이름
-    var presentationFolderName :String = "협체발표"
+    var presentationData: PresentationList
+    
+    // 초기화 메서드 정의
+    init(presentationData: PresentationList) {
+        self.presentationData = presentationData
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     //발표연습 갯수
     var practiceCount :Int = 20
     
@@ -30,6 +40,12 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     var isDeleteMode : Bool = false
     //삭제하려고 선택한 리스트 
     var selectedDeleteId : [String] = []
+    
+    let header: ListHeaderView = {
+        let view = ListHeaderView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     let tableView: UITableView = {
         let tableView = UITableView()
@@ -70,6 +86,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
         
+        header.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
         setUI()
@@ -87,6 +104,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             tableView.sectionHeaderTopPadding = 0
         }
         setUI()
+        header.headerLabel.text = presentationData.presentationName
         
         //edit 창 토글
         NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPresentationNotification, object: nil)
@@ -118,6 +136,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     private func setUI() {
         
+        view.addSubview(header)
         view.addSubview(tableView)
         view.addSubview(transparentOverlay) //edit창 이외 터치 이벤트 감지
         view.addSubview(editPresentationView)
@@ -129,7 +148,12 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            header.heightAnchor.constraint(equalToConstant: 48),
+            header.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            header.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: header.bottomAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -152,7 +176,6 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     // ListHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissViewController() {
         self.dismiss(animated: true, completion: nil)
-        print("2차")
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
@@ -207,10 +230,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         // 텍스트 필드 추가
         alertController.addTextField { textField in
-            //            textField.placeholder = "새로운 이름"
-            textField.text = self.presentationFolderName // 기존 이름을 텍스트 필드에 설정
-            //            textField.autocorrectionType = .no
-            //            textField.spellCheckingType = .no
+            textField.text = self.presentationData.presentationName // 기존 이름을 텍스트 필드에 설정
+
         }
         
         // 취소 버튼 추가
@@ -220,9 +241,6 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
-                // 새로운 이름을 presentationFolderName에 반영
-                //                self.presentationFolderName = newName
-                //                print("새로운 이름: \(self.presentationFolderName)")
             }
         }
         
@@ -270,29 +288,6 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
-    }
-    
-    // 섹션에 대한 헤더 설정
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        // 0번 섹션에 대해서만 헤더 높이를 설정
-        if section == 0 {
-            return 48.0 // HeaderTableCell의 높이
-        }
-        return 0.0 // 나머지 섹션은 헤더를 표시하지 않음
-    }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if section == 0 {
-            // ListHeaderTableCell을 0번 섹션의 헤더로 설정
-            let headerCell = ListHeaderTableCell(style: .default, reuseIdentifier: "ListHeaderTableCell")
-            headerCell.delegate = self  // 델리게이트 설정
-            headerCell.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: 48) // 헤더의 높이를 48로 설정
-            
-            //폴더 이름 데이터 전달
-            headerCell.configure(presentationFolderName: presentationFolderName)
-            return headerCell
-        }
-        return UIView() // 빈 뷰를 반환하여 간격 제거
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
