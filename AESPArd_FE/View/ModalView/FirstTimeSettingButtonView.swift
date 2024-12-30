@@ -7,8 +7,9 @@
 
 import UIKit
 
-var firstminuteValue: Int = 5
+var firstminuteValue: Int = 0
 var firstsecondValue: Int = 0
+var firstTotalTime: Int = (firstminuteValue * 60) + firstsecondValue
 
 class FirstTimePickerInputView: UIView, UITextFieldDelegate {
 
@@ -61,7 +62,10 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         textField.keyboardType = .numberPad
         textField.textColor = .black
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.placeholder = "05"
+        textField.attributedPlaceholder = NSAttributedString(
+               string: "5",
+               attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray]
+           )
         return textField
     }()
     
@@ -84,7 +88,10 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         textField.keyboardType = .numberPad
         textField.textColor = .black
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.placeholder = "00"
+        textField.attributedPlaceholder = NSAttributedString(
+               string: "00",
+               attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray]
+           )
         return textField
     }()
     
@@ -219,23 +226,18 @@ class FirstTimePickerInputView: UIView, UITextFieldDelegate {
         guard let currentText = textField.text else { return false }
         let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
         
+        if newText.count > 2{
+               return false
+           }
+        
         // 입력 값이 숫자가 아니거나 0~59 범위를 초과하면 입력 막음
         if let intValue = Int(newText), intValue >= 0 && intValue <= 59 {
             if textField == timeTextField1 {
                 firstminuteValue = intValue
+                updateTimeSetButtonText()
+                return true
             } else if textField == timeTextField2 {
                 firstsecondValue = intValue
-            }
-            
-            // 최소시간이 최대시간보다 클 경우 입력을 막음
-            let minTimeInSeconds = firstminuteValue * 60 + firstsecondValue
-            let maxTimeInSeconds = secondminuteValue * 60 + secondsecondValue
-            
-            if minTimeInSeconds > maxTimeInSeconds {
-                // 최소시간이 최대시간보다 크면 입력을 막고 텍스트 필드를 업데이트하지 않음
-                return false
-            } else {
-                // 유효한 값일 때만 버튼 텍스트 업데이트
                 updateTimeSetButtonText()
                 return true
             }

@@ -45,7 +45,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     let extraAddButton: UIButton = {
         let button = UIButton()
         button.setTitle(" 새로 추가하기", for: .normal)
-        button.setTitleColor(UIColor(red: 0.62, green: 0.62, blue: 0.65, alpha: 1), for: .normal)
+        button.setTitleColor(UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 14)
         button.setImage(UIImage(named: "Plus-iCon"), for: .normal)
         button.layer.cornerRadius = 10
