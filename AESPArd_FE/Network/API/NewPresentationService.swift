@@ -8,6 +8,7 @@
 import Moya
 import Foundation
 
+//MARK: - 촬영 종료 후 새로운 발표 혹은 연습 서버에 보낼 때 사용하는 서비스
 
 enum NewPresentationService {
     case postNewPresentation(newPresentation: NewPresentation)
