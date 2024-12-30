@@ -67,7 +67,7 @@ class PTListFilterTableCell: UITableViewCell {
     let importButton: UIButton = {
         let button = UIButton(type: .custom)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("중요도순", for: .normal)
+        button.setTitle("즐겨찾기", for: .normal)
         button.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 12)
         button.setImage(UIImage(named: "importanceStar"), for: .normal)
@@ -154,7 +154,7 @@ class PTListFilterTableCell: UITableViewCell {
     
     // 라벨 발표 갯수 텍스트 설정 메서드
     func configure(with presentationCount: Int) {
-        listCountLabel.text = "\(presentationCount)개의 발표 연습 목록이 있어요"
+        listCountLabel.text = "\(presentationCount)개의 발표 목록이 있어요"
     }
     
     //검색 아이콘 클릭 메서드
