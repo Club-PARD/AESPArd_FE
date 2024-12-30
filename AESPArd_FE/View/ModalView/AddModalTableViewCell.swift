@@ -19,6 +19,8 @@ class AddModalTableViewCell: UITableViewCell {
     var totalPractices: Int?
     
 
+    static let identifier = "AddModalTableViewCell"
+    
     // MARK: - 식별자
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

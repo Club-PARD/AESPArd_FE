@@ -71,8 +71,21 @@ final class NetworkManager {
     
     //MARK: - 모든 발표 리스트 불러오기 (모달창 전용)
     
-//    func fetchAllPresentationsForModal(userId: String, completion: @escaping (Result<[PresentationForModal]>, Error))
-
+    func getAllPresentationsForModal(userId: String, completion: @escaping (Result<[PresentationForModal], Error>) -> Void) {
+        presentationServiceProvider.request(.getAllPresentations(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationForModal].self, from: response.data)
+                    completion(.success(presentations))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
     
     //MARK: -  발표리스트 최신
     func fetchPresentaionLatestById(userId: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {

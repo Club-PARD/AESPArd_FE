@@ -8,6 +8,8 @@
 import Foundation
 
 struct NewPractice {
-    var presentationId: String
-    var eyeTrackingPercentage: Double
+    var presentationId: String?
+    var practiceName: String?
+    var videoKey: String?
+    var eyePercentage: Double?
 }
