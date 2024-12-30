@@ -9,6 +9,7 @@
 import UIKit
 import Photos
 import AVFoundation
+import NVActivityIndicatorView
 
 // MARK: - FixedWidthInteger Extension
 // This extension adds a computed property to convert integers to Data in little endian format.
@@ -20,7 +21,9 @@ extension FixedWidthInteger {
 }
 
 class AnalyzingViewController: UIViewController {
+   
     
+    // MARK: - 이전 뷰컨에서 받아오는 변수값들
     private var newPresentation: NewPresentation?
     private var newPractice: NewPractice?
     private var assetIdentifier: String?
@@ -29,7 +32,9 @@ class AnalyzingViewController: UIViewController {
     private var isCreatingNewPresentation: Bool?
     private var isCreatingNewPractice: Bool?
     
-    // 생성자
+    // MARK: - 생성자
+    
+    // 새발표용
     init(newPresentation: NewPresentation){
         super.init(nibName: nil, bundle: nil)
         self.newPresentation = newPresentation
@@ -39,55 +44,44 @@ class AnalyzingViewController: UIViewController {
         debugPrint(newPresentation)
     }
     
+    // 기존 발표의 새 연습용
     init(newPractice: NewPractice, assetIdentifier: String){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
         self.assetIdentifier = assetIdentifier
         isCreatingNewPresentation = false
         isCreatingNewPractice = true
-        //debugPrint(newPresentation)
+        debugPrint(newPresentation)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //var assetIdentifier: String? // 촬영한 비디오 고유 아이디
+    
+    // MARK: - 이 페이지에서 쓰이는 변수들
+    
     var videoAsset: PHAsset? // 비디오 담는 변수
     // AVAudioPlayer instance
     private var audioPlayer: AVAudioPlayer?
     
     
+    // MARK: - UI
+    
     let waitingLabel: UILabel = {
         let label = UILabel()
-        label.text = "리포트를 생성 중입니다"
-        label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
+        label.text = "리포트를 생성 중이에요..."
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 14)
+        label.textColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-//    private let extractAndUploadButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setTitle("Extract & Upload Audio", for: .normal)
-//        button.addTarget(self, action: #selector(extractAndUploadAudio), for: .touchUpInside)
-//        button.translatesAutoresizingMaskIntoConstraints = false
-//        button.backgroundColor = UIColor.systemBlue
-//        button.setTitleColor(.white, for: .normal)
-//        button.layer.cornerRadius = 10
-//        return button
-//    }()
-//
-    private let playAudioButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Play Audio", for: .normal)
-        button.addTarget(self, action: #selector(playAudioButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = UIColor.systemGreen
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 10
-        button.isHidden = true // Hidden until audio is extracted
-        return button
+    private let indicator: NVActivityIndicatorView = {
+        let indicator = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), padding: 0)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
     }()
     
     private let activityIndicator: UIActivityIndicatorView = {
@@ -98,47 +92,37 @@ class AnalyzingViewController: UIViewController {
         return indicator
     }()
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        setupUI()
-        fetchVideoAsset()
-        
-        //configureAudioSessionForPlayback()
-    }
-    
-    private func configureAudioSessionForPlayback() {
-        let session = AVAudioSession.sharedInstance() // Manages how audio is played/recorded.
-        do {
-            // .playback ensures the app plays through speakers even if the iPhone is on silent mode
-            try session.setCategory(.playback, mode: .default, options: []) // audio can play even if the device is muted.
-            try session.setActive(true) // .setActive(true): Makes the session active immediately, finalizing these settings.
-        } catch {
-            print("Error setting AVAudioSession category: \(error.localizedDescription)")
-        }
-    }
-    
     private func setupUI() {
         
         view.addSubview(waitingLabel)
-        view.addSubview(activityIndicator)
-        view.addSubview(playAudioButton)
-        
+        view.addSubview(indicator)
+
         // Layout Extract & Upload Button
         NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+    
+            indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            indicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
+            waitingLabel.topAnchor.constraint(equalTo: indicator.bottomAnchor, constant: 20),
             waitingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            waitingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 50),
-            
-            playAudioButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            playAudioButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
         ])
-        
+        indicator.startAnimating()
     }
     
+    // MARK: - 생성주기
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        setupUI()
+        fetchVideoAsset()
+    }
+    
+    
+    // MARK: - 함수들
+    
+    
+    // 갤러리에 저장된 비디오를 가져옴
     private func fetchVideoAsset() {
         guard let identifier = assetIdentifier else {
             showAlert(title: "Error", message: "No video identifier provided.")
@@ -150,13 +134,16 @@ class AnalyzingViewController: UIViewController {
         // 불러온 어셋들 중 첫번째 어셋 근데 어차피 하나만 불러옴
         if let asset = assets.firstObject {
             self.videoAsset = asset
-            extractAndUploadAudio()
+            extractAndUpload()
         } else {
             showAlert(title: "Error", message: "Video not found.")
         }
     }
     
-    @objc private func extractAndUploadAudio() {
+
+    
+    // 비디오에서 오디오로 변한하는 함수를 실행하고 결과값에 따라 서버로 전송 혹은 에러 처리하는 함수
+    private func extractAndUpload() {
         guard let asset = videoAsset else {
             showAlert(title: "Error", message: "No video asset available.")
             return
@@ -167,112 +154,22 @@ class AnalyzingViewController: UIViewController {
                 self?.showAlert(title: "Error", message: "Failed to extract audio.")
                 return
             }
-            DispatchQueue.main.async {
-                self.playAudioButton.isHidden = false // DEBUG
-            }
+            
             if isSilent {
-                self.showAlert(title: "소리 없음", message: "발표가 녹음되지 않았습니다. 스크린 녹화와 마이크 녹음 모두 허용해주세요")
+                let alert = UIAlertController(title: "소리 없음", message: "발표가 녹음되지 않았습니다. 스크린 녹화와 마이크 녹음 모두 허용해주세요", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {action in
+                    //self.goBackToHome()
+                    // 여기서 홈뷰컨으로 돌아가게 해야함
+                }))
+                self.present(alert, animated: true)
             } else {
-                self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
                 //self.uploadAudioViaMoya(wavData)
                 //uploadOnlyAudio(wavData)
             }
         }
     }
-    private func uploadOnlyAudio(_ wavData: Data) {
-        // Create the upload
-        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let response):
-                    if response.success {
-                        self.showAlert(title: "Success", message: response.message)
-                    } else {
-                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
-                    }
-                    
-                case .failure(let error):
-                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
-                }
-            }
-        }
-    }
     
-    @objc private func playAudioButtonTapped() {
-        guard let wavData = audioPlayer?.data else {
-            showAlert(title: "Error", message: "No audio data available to play.")
-            return
-        }
-        playAudio(from: wavData)
-    }
     
-    private func initializeAudioPlayer(with data: Data) {
-        do {
-            audioPlayer = try AVAudioPlayer(data: data)
-            audioPlayer?.delegate = self
-            audioPlayer?.prepareToPlay()
-            // Optionally, autoplay for debugging
-            audioPlayer?.play()
-        } catch {
-            showAlert(title: "Playback Error", message: error.localizedDescription)
-        }
-    }
-    
-    private func playAudio(from data: Data) {
-        do {
-            audioPlayer = try AVAudioPlayer(data: data)
-            audioPlayer?.delegate = self
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.play()
-            
-            // Update Play button state
-            DispatchQueue.main.async {
-                self.playAudioButton.setTitle("Playing...", for: .normal)
-                self.playAudioButton.isEnabled = false
-            }
-        } catch {
-            showAlert(title: "Playback Error", message: error.localizedDescription)
-        }
-    }
-    
-    private func showAlert(title: String, message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            self.present(alert, animated: true)
-        }
-    }
-    
-    // MARK: - Audio Upload
-//    private func uploadAudioViaMoya(_ wavData: Data) {
-//            guard let presentation = newPresentation else {
-//                showAlert(title: "Error", message: "No presentation data to send.")
-//                return
-//            }
-//            
-//            // Moya-based call
-//            NetworkManager.shared.createPresentation(newPresentation: presentation, wavData: wavData) { [weak self] result in
-//                guard let self = self else { return }
-//                
-//                DispatchQueue.main.async {
-//                    switch result {
-//                    case .success(let returnedPresentation):
-//                        // The server might return updated JSON
-//                        self.showAlert(title: "Success",
-//                                       message: "Presentation + audio uploaded!")
-//                        
-//                    case .failure(let error):
-//                        self.showAlert(title: "Upload Error",
-//                                       message: error.localizedDescription)
-//                    }
-//                }
-//            }
-//        }
-    
-    // MARK: - Audio Extraction and Conversion
     private func extractAudio(from asset: PHAsset, completion: @escaping (Data?, Bool) -> Void) {
         // 비디오 데이타를 어떻게 불러올건지 설정
         let options = PHVideoRequestOptions()
@@ -281,7 +178,10 @@ class AnalyzingViewController: UIViewController {
         // 비디오 어셋을 비동기로 불러옴
         PHImageManager.default().requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, info in
             guard let self = self, let avAsset = avAsset else {
-                self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
+                
+                DispatchQueue.main.async {
+                            self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
+                }
                 completion(nil, true)
                 return
             }
@@ -289,17 +189,16 @@ class AnalyzingViewController: UIViewController {
             
             // 영상에서 오디오를 가져오는데 성공하면 wav파일로 변환 시작
             self.convertAVAssetToWav(avAsset) { wavData, isSilent in
-                guard let wavData = wavData else {
-                    completion(nil, true)
-                    return
+                DispatchQueue.main.async {
+                    guard let wavData = wavData else {
+                        completion(nil, true)
+                        return
+                    }
+                    // DEBUG: Log or check the file size here
+                    //debugPrint("Extracted WAV data size: \(wavData.count) bytes")
+                    
+                    completion(wavData, isSilent)
                 }
-                
-                // DEBUG: Log or check the file size here
-                //debugPrint("Extracted WAV data size: \(wavData.count) bytes")
-                
-                
-                // Continue with normal flow...
-                completion(wavData, isSilent)
             }
 
         }
@@ -351,11 +250,6 @@ class AnalyzingViewController: UIViewController {
         if assetReader.startReading() {
             var audioData = Data() // A flexible container for binary data
             
-//            // 1) We'll define a threshold for "silence":
-//            let silenceThreshold: Int16 = 200
-//            var isSilent = true
-//            var noSilenceCount = 0
-            
             while let sampleBuffer = trackOutput.copyNextSampleBuffer(), // 다음 샘플 버퍼를 가져옴
                   // 버퍼 있음
                   let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) { // 버퍼 가져와서 넣음
@@ -392,25 +286,25 @@ class AnalyzingViewController: UIViewController {
             // Stop reading
             assetReader.cancelReading()
             
-            // Create WAV header
+            // WAV 파일의 헤더 생성
             guard let wavHeader = createWavHeader(sampleRate: 44100, channels: 2, bitsPerSample: 16, dataSize: audioData.count) else {
                 showAlert(title: "Error", message: "Failed to create WAV header.")
                 completion(nil, true)
                 return
             }
             
-            // Combine header and audio data
+            // 헤더랑 오디오 데이터 합치기
             var wavData = Data()
             wavData.append(wavHeader)
             wavData.append(audioData)
             
+            // 무음파일 여부에 따른 리턴
             if(noSilenceCount > 0) {
                 completion(wavData, false)
             } else {
                 completion(wavData, true)
             }
             
-//            completion(wavData, )
         } else {
             showAlert(title: "Error", message: "Failed to start reading audio track.")
             completion(nil, true)
@@ -452,39 +346,68 @@ class AnalyzingViewController: UIViewController {
         
         return header
     }
-}
-
-// MARK: - AVAudioPlayerDelegate
-extension AnalyzingViewController: AVAudioPlayerDelegate {
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        if flag {
-            showAlert(title: "Playback Finished", message: "Audio playback completed successfully.")
-        } else {
-            showAlert(title: "Playback Error", message: "Audio playback did not finish successfully.")
+    
+    
+    // MARK: - 서버 전달 함수들
+    
+    
+    // 오디오만 따로 전달
+    private func uploadAudio(_ wavData: Data) {
+        // Create the upload
+        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    if response.success {
+                        self.showAlert(title: "Success", message: response.message)
+                    } else {
+                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
+                    }
+                    
+                case .failure(let error):
+                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
+                }
+            }
         }
-        
-        // Reset Play button state
-        DispatchQueue.main.async {
-            self.playAudioButton.setTitle("Play Audio", for: .normal)
-            self.playAudioButton.isEnabled = true
-        }
-        
-        // Release the audio player
-        audioPlayer = nil
     }
     
-    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        if let error = error {
-            showAlert(title: "Playback Decode Error", message: error.localizedDescription)
+//    private func uploadPracticeAndAudio(_ newPractice: NewPractice, _ wavData: Data){
+//        NetworkManager.shared.uploadPracticeAndAudio(newPractice: newPractice, wavData: wavData, completion: <#T##(Result<UploadAudioResponse, any Error>) -> Void#>)
+//    }
+    
+    
+    // MARK: - 기타 함수
+    
+    private func showAlert(title: String, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(alert, animated: true)
         }
-        
-        // Reset Play button state
-        DispatchQueue.main.async {
-            self.playAudioButton.setTitle("Play Audio", for: .normal)
-            self.playAudioButton.isEnabled = true
-        }
-        
-        // Release the audio player
-        audioPlayer = nil
     }
+    
+    
+    // MARK: - 수정 필요
+//    private func goBackToHome() {
+//        // 1) Dismiss self
+//        self.dismiss(animated: true) { [weak self] in
+//            // 2) Switch to the Home tab
+//            guard let self = self else { return }
+//
+//            // Access the window's rootViewController (UITabBarController)
+//            if let tabBar = UIApplication.shared.windows.first?.rootViewController as? UITabBarController {
+//                // Home is presumably at index 0
+//                tabBar.selectedIndex = 0
+//
+//                // 3) If HomeViewController is in a navigation stack, pop it to root
+//                if let nav = tabBar.viewControllers?.first as? UINavigationController {
+//                    nav.popToRootViewController(animated: false)
+//                }
+//            }
+//        }
+//    }
+    
 }

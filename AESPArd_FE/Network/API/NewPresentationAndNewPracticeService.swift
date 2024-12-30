@@ -14,6 +14,7 @@ enum NewPresentationAndNewPracticeService {
     case postNewPresentation(newPresentation: NewPresentation)
     case postNewPractice(newPractice: NewPractice)
     case postAudio(wavData: Data)
+    case postPracticeAndAudio(practice: NewPractice, wavData: Data)
 }
 
 extension NewPresentationAndNewPracticeService: TargetType {
@@ -30,12 +31,14 @@ extension NewPresentationAndNewPracticeService: TargetType {
             return "/practices"
         case .postAudio:
             return  "/audio/upload"
+        case .postPracticeAndAudio:
+            return ""
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .postNewPresentation, .postNewPractice , .postAudio:
+        case .postNewPresentation, .postNewPractice , .postAudio, .postPracticeAndAudio:
             return .post
         }
     }
@@ -58,12 +61,35 @@ extension NewPresentationAndNewPracticeService: TargetType {
                 mimeType: "audio/wav"
             )
             return .uploadMultipart([formData])
+        case .postPracticeAndAudio(let newPractice, let wavData):
+            var multipartData: [MultipartFormData] = []
+            
+            // Convert the `NewPractice` model to JSON data
+            if let jsonData = try? JSONEncoder().encode(newPractice) {
+                let jsonMultipart = MultipartFormData(
+                    provider: .data(jsonData),
+                    name: "practice",
+                    mimeType: "application/json"
+                )
+                multipartData.append(jsonMultipart)
+            }
+            
+            // Add the audio file
+            let audioMultipart = MultipartFormData(
+                provider: .data(wavData),
+                name: "audio",
+                fileName: "audio.m4a",
+                mimeType: "audio/m4a"
+            )
+            multipartData.append(audioMultipart)
+            
+            return .uploadMultipart(multipartData)
         }
     }
     
     var headers: [String : String]? {
         switch self{
-        case .postAudio:
+        case .postAudio, .postPracticeAndAudio:
             return ["Content-Type": "multipart/form-data"]
         default:
             return ["Content-Type": "application/json"]

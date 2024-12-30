@@ -173,7 +173,7 @@ final class NetworkManager {
         }
 
    // MARK: - 새로운 발표 생성
-    func createPresentation(
+    func uploadPresentation(
         newPresentation: NewPresentation,
         completion: @escaping (Result<NewPresentation, Error>) -> Void
     ) {
@@ -195,7 +195,7 @@ final class NetworkManager {
     }
     
     // MARK: - 새로운 연습 생성
-    func createNewPractice(
+    func uploadNewPractice(
         newPractice: NewPractice,
         completion: @escaping (Result<NewPractice, Error>) -> Void
     ) {
@@ -233,6 +233,11 @@ final class NetworkManager {
                 completion(.failure(error))
             }
         }
+    }
+    
+    // MARK: - 새로운 발표 연습과 오디오 한번에 같이 보내는 함수
+    func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data, completion: @escaping (Result<UploadAudioResponse, Error>) -> Void){
+        
     }
     
     //MARK: - ID로 사용자 이름 및 이메일 조회 (My)
