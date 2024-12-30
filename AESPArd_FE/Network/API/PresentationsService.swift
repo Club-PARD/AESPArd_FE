@@ -12,7 +12,7 @@ enum PresentationsService {
     case getPresentationFavoritesById(userId: String)
     case patchToggleFavofiteById(presentationId: String)
     case deleteSelectedPresentations(presentationIds: [String])
-    case patchAllPresentations(userId: String)
+    case getAllPresentations(userId: String)
     case deleteAllDeletePresentation(userId: String)
     case searchPresentations(searchTerm: String)
 }
@@ -32,8 +32,8 @@ extension PresentationsService: TargetType {
             return "/presentations/\(presentationId)/toggle-favorite"
         case .deleteSelectedPresentations:
             return "/presentations/batch-delete"
-        case .patchAllPresentations:
-            return "/presentations/user/{userId}/all-presentations"
+        case .getAllPresentations(let userId):
+            return "/presentations/user/\(userId)/modal-list"
         case .deleteAllDeletePresentation(let userId):
             return "/presentations/\(userId)/all-delete"
         case .searchPresentations:
@@ -52,7 +52,7 @@ extension PresentationsService: TargetType {
             return .patch
         case .deleteSelectedPresentations:
             return .delete
-        case .patchAllPresentations:
+        case .getAllPresentations:
             return .get
         case .deleteAllDeletePresentation:
             return .delete
@@ -74,7 +74,7 @@ extension PresentationsService: TargetType {
             
         case .deleteSelectedPresentations(let presentationIds):
             return .requestCustomJSONEncodable(presentationIds, encoder: JSONEncoder())
-        case .patchAllPresentations:
+        case .getAllPresentations:
             return .requestPlain
         
         case .deleteAllDeletePresentation:
