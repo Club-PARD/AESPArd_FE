@@ -25,16 +25,6 @@ class SearchViewController: UIViewController {
     let testId : String = URLClass().testID
     var ptList : [PresentationList]  = []//발표리스트 최신순
     
-    var presentationCount :Int = 10
-    
-    //발표 정보
-    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
-    
-    var ptDetailCount : Int = 4
-    var presentationDate : String = ""
-    var ptDetailTotalScore : Int = 88
-    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
-    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -47,7 +37,7 @@ class SearchViewController: UIViewController {
         
         self.navigationController?.isNavigationBarHidden = true
         
-        //발표 리스트 최신순
+        //발표 리스트 최신순 API
         networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
             switch result {
             case .success(let presentationLatest):
@@ -91,7 +81,7 @@ class SearchViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-//        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
+        //        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
         
         UIView.animate(withDuration: 0.5, animations: {
             self.view.frame.origin.y = 0 // 화면 상단으로 이동
@@ -165,7 +155,7 @@ class SearchViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "x-close"), for: .normal)
         button.addTarget(self, action: #selector(searchBarCloseButtonTapped), for: .touchUpInside)
-//        button.frame = CGRect(x: 10, y: 10, width: 20, height: 20)
+        //        button.frame = CGRect(x: 10, y: 10, width: 20, height: 20)
         return button
     }()
     
@@ -205,11 +195,11 @@ class SearchViewController: UIViewController {
         searchBar.resignFirstResponder() // 키보드 숨기기
         tableView.reloadData()
         
+        self.view.frame.origin.y = 48
+        
         // 모달이 사라지는 애니메이션
         UIView.animate(withDuration: 0.5, animations: {
-            // 섹션 2 첫 번째 행으로 애니메이션
-            print(self.finalYPosition)
-            self.view.frame.origin.y = self.finalYPosition
+            self.view.frame.origin.y = self.finalYPosition + 48
         }, completion: { _ in
             // 애니메이션 완료 후 모달 닫기
             self.dismiss(animated: false, completion: nil)
@@ -232,6 +222,21 @@ class SearchViewController: UIViewController {
             }
         }
     }
+    
+    func searchPresentationsAPI(searchTerm: String) {
+        networkManager.searchPresentations(searchTerm: searchTerm) { [weak self] result in
+            switch result {
+            case .success(let presentations):
+                print("검색 성공: \(presentations)")
+                self?.ptList = presentations
+                self?.tableView.reloadData()
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error searching presentations: \(error)")
+            }
+        }
+    }
+
     
 }
 
@@ -280,5 +285,11 @@ extension SearchViewController: UISearchBarDelegate {
     // 검색 버튼 클릭
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // 키보드 숨기기
+        
+        // 입력된 텍스트 가져오기
+        if let searchTerm = searchBar.text, !searchTerm.isEmpty {
+            // 입력된 텍스트가 있을 때 searchPresentationsAPI 호출
+            searchPresentationsAPI(searchTerm: searchTerm)
+        }
     }
 }

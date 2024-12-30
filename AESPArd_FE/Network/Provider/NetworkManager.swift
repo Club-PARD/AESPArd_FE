@@ -55,7 +55,7 @@ final class NetworkManager {
             case .success(let response):
                 do {
                     if let userName = String(data: response.data, encoding: .utf8) {
-                        completion(.success(User(userId: nil, userName: userName, email: nil)))
+                        completion(.success(User(userName: userName, email: nil)))
                     } else {
                         throw NSError(domain: "InvalidResponse", code: -1, userInfo: nil)
                     }
@@ -191,5 +191,55 @@ final class NetworkManager {
             }
         }
     }
+    
+    //MARK: - ID로 사용자 이름 및 이메일 조회 (My)
+    func getUserNameNEmailById(userId: String, completion: @escaping (Result<User, Error>) -> Void) {
+        userServiceProvider.request(.getUserNameNEmailById(userId: userId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let user = try JSONDecoder().decode(User.self, from: response.data)
+                    completion(.success(user))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                print("error")
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 특정 사용자의 모든 발표 삭제 (My)
+    func deleteAllPresentation(userId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.deleteAllDeletePresentation(userId: userId)){ result in
+            switch result {
+            case .success(let response):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    //MARK: - 발표리스트 검색
+    func searchPresentations(searchTerm: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.searchPresentations(searchTerm: searchTerm)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let presentations = try JSONDecoder().decode([PresentationList].self, from: response.data)
+                    completion(.success(presentations))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+                               
+
 }
 
