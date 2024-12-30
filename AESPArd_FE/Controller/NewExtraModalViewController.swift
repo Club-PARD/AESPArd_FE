@@ -167,6 +167,17 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         return seePtSceneSwitch
     }()
     
+    // 에러 메세지
+    let timeErrorLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1)
+        label.font = UIFont(name: "Pretendard-Medium", size: 12)
+        label.textAlignment = .left
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     
     
     
@@ -189,7 +200,9 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
-        //        setupPanGesture() // 드래그 제스처 활성화
+        //setupPanGesture() // 드래그 제스처 활성화
+        setupTapGestureForOverlay()
+
         // 키보드 표시 및 숨김 이벤트 등록
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -211,6 +224,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         modalView.addSubview(ifseeCameraScene)
         modalView.addSubview(seePTtimeSwitch)
         modalView.addSubview(seePtSceneSwitch)
+        modalView.addSubview(timeErrorLabel)
         
         
         // Delegate 연결
@@ -273,7 +287,12 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             timeSettingButtonView2.widthAnchor.constraint(equalToConstant: 108),
             timeSettingButtonView2.heightAnchor.constraint(equalToConstant: 35),
             
-            ifseeCameratime.topAnchor.constraint(equalTo: timeSettingButtonView1.bottomAnchor, constant: 32.5),
+            timeErrorLabel.topAnchor.constraint(equalTo: timeSettingButtonView1.bottomAnchor, constant: 9.5),
+            timeErrorLabel.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
+            timeErrorLabel.widthAnchor.constraint(equalToConstant: 350),
+            timeErrorLabel.heightAnchor.constraint(equalToConstant: 14),
+            
+            ifseeCameratime.topAnchor.constraint(equalTo: timeErrorLabel.bottomAnchor, constant: 9),
             ifseeCameratime.leadingAnchor.constraint(equalTo: modalView.leadingAnchor, constant: 16),
             ifseeCameratime.widthAnchor.constraint(equalToConstant: 180),
             ifseeCameratime.heightAnchor.constraint(equalToConstant: 19),
@@ -319,23 +338,36 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func moveTocameraViewController() {
-        // 발표제목 추가
-        newPresentation.presentationName = ptName.text!
-        // 최소시간 & 최대시간 값 가져옴
-        let selectedIdealMinTime = timeSettingButtonView1.selectedTime // From FirstTimePickerInputView
-        let selectedIdealMaxTime = timeSettingButtonView2.selectedTime // From SecondTimePickerInputView
-        
-        newPresentation.idealMinTime = selectedIdealMinTime
-        newPresentation.idealMaxTime = selectedIdealMaxTime
-        
-        let cameraVC = CameraViewController(newPresentation: newPresentation, isShowingTimeSelected: isShowingTimeSelected, isShowingMeSelected: isShowingMeSelected)
-        cameraVC.modalPresentationStyle = .custom
-        present(cameraVC, animated: true, completion: nil)
-        guard let enteredText = ptName.text, !enteredText.isEmpty else {
-                print("텍스트 필드가 비어 있습니다.")
-                return
+        if firstTotalTime > secondTotalTime {
+            timeErrorLabel.text = "최소시간은 최대시간을 넘을 수 없어요"
+            timeErrorLabel.isHidden = false // 오류 메시지 보이게 함
+            return
         }
-       
+        else if secondTotalTime >= 1200 || firstTotalTime >= 1200 {
+            timeErrorLabel.text = "최대 설정시간은 20분이에요"
+            timeErrorLabel.isHidden = false
+            return
+        }
+
+        else {
+            // 발표제목 추가
+            newPresentation.presentationName = ptName.text!
+            // 최소시간 & 최대시간 값 가져옴
+            let selectedIdealMinTime = timeSettingButtonView1.selectedTime // From FirstTimePickerInputView
+            let selectedIdealMaxTime = timeSettingButtonView2.selectedTime // From SecondTimePickerInputView
+            
+            newPresentation.idealMinTime = selectedIdealMinTime
+            newPresentation.idealMaxTime = selectedIdealMaxTime
+            
+            let cameraVC = CameraViewController(newPresentation: newPresentation, isShowingTimeSelected: isShowingTimeSelected, isShowingMeSelected: isShowingMeSelected)
+            cameraVC.modalPresentationStyle = .custom
+            present(cameraVC, animated: true, completion: nil)
+            guard let enteredText = ptName.text, !enteredText.isEmpty else {
+                    print("텍스트 필드가 비어 있습니다.")
+                    return
+            }
+        }
+
         
     }
     
@@ -400,6 +432,11 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         
         // 기존 텍스트 필드 제약 조건 해제
         NSLayoutConstraint.deactivate(textFieldConstraints)
+    }
+    
+    func setupTapGestureForOverlay() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(exit))
+        view.addGestureRecognizer(tapGesture)
     }
 
 }
