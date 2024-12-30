@@ -89,7 +89,7 @@ class MyViewController : UIViewController {
     
     let appResetButton: ExpandableButton = {
         let button = ExpandableButton()
-        button.setTitle(" 앱 초기화", for: .normal)
+        button.setTitle(" 데이터 초기화", for: .normal)
         button.setImage(UIImage(named: "reset"), for: .normal)
         button.setTitleColor(UIColor(red: 0, green: 0.125, blue: 0.42, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 16)
@@ -182,8 +182,8 @@ class MyViewController : UIViewController {
             logoutButton.heightAnchor.constraint(equalToConstant: 20),
             
             appResetButton.topAnchor.constraint(equalTo: logoutButton.bottomAnchor, constant: 40),
-            appResetButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            appResetButton.widthAnchor.constraint(equalToConstant: 86),
+            appResetButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+            appResetButton.widthAnchor.constraint(equalToConstant: 120),
             appResetButton.heightAnchor.constraint(equalToConstant: 20)
             
 
@@ -252,8 +252,8 @@ class MyViewController : UIViewController {
     // 서비스 초기화 버튼 눌렀을 때 나타나는 알림화면
     @objc func appResetButtonTapped() {
         let alert = UIAlertController(
-            title: "서비스 초기화",
-            message: "서비스를 초기화 하시겠어요? \n이 작업은 되돌릴 수 없어요.",
+            title: "데이터 초기화",
+            message: "데이터를 초기화 하시겠어요? \n이 작업은 되돌릴 수 없어요.",
             preferredStyle: .alert
         )
         
