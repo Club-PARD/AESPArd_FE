@@ -282,7 +282,7 @@ final class NetworkManager {
         }
     }
 
-    // MARK: - 연습 get
+    // MARK: - 선택한 발표 연습 리스트 불러오기 (list)
     func getPracticeByPresentationId(presentationId: String, completion: @escaping (Result<[GetPractice], Error>) -> Void) {
         practiceServiceProvider.request(.getPractice(presentationId: presentationId)) { result in
             switch result {
@@ -290,6 +290,23 @@ final class NetworkManager {
                 do {
                     let practice = try JSONDecoder().decode([GetPractice].self, from: response.data)
                     completion(.success(practice))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 최근 점수 그래프에 들어가는거 (list)
+    func getRecentScoresByPresentationId(presentationId: String, completion: @escaping (Result<[Int], Error>) -> Void) {
+        practiceServiceProvider.request(.getRecentScores(presentationId: presentationId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let scores = try JSONDecoder().decode([Int].self, from: response.data)
+                    completion(.success(scores))
                 } catch {
                     completion(.failure(error))
                 }

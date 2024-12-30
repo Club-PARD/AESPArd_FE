@@ -5,6 +5,7 @@ import Foundation
 
 enum PracticeService {
     case getPractice(presentationId: String)
+    case getRecentScores(presentationId: String)
 }
 
 extension PracticeService: TargetType {
@@ -16,6 +17,8 @@ extension PracticeService: TargetType {
         switch self {
         case .getPractice:
             return "/practices"
+        case .getRecentScores:
+            return "/practices/recent-scores"
         }
     }
     
@@ -23,12 +26,19 @@ extension PracticeService: TargetType {
         switch self {
         case .getPractice:
             return .get
+        case .getRecentScores:
+            return .get
         }
     }
     
     var task: Task {
         switch self {
         case .getPractice(let presentationId):
+            return .requestParameters(
+                parameters: ["presentationId": presentationId],
+                encoding: URLEncoding.default
+            )
+        case .getRecentScores(let presentationId):
             return .requestParameters(
                 parameters: ["presentationId": presentationId],
                 encoding: URLEncoding.default

@@ -27,7 +27,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     }
     
     //선 그래프 점수
-    var scoreListData: [Double] = [82, 34, 67, 69, 89]
+    var scoreListData: [Double] = []
     
     
     // 삭제모드 여부
@@ -81,6 +81,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
         
         //api
+        getRecentScores()
         getPracticeData()
         
         header.delegate = self
@@ -177,6 +178,18 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
                 self?.tableView.reloadData()
             case .failure(let error):
                 print("Error fetching practices: \(error)")
+            }
+        }
+    }
+
+    @objc func getRecentScores() {
+        networkManager.getRecentScoresByPresentationId(presentationId: presentationData.presentationId) { [weak self] result in
+            switch result {
+            case .success(let scores):
+                self?.scoreListData = scores.map { Double($0) }
+                self?.tableView.reloadData()
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
             }
         }
     }
@@ -313,6 +326,26 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .none
             
             //데이터 전달
+            if scoreListData.count == 0 {
+                cell.talkLabel.text = "최근 데이터 결과가 없어요!"
+            } else {
+                let numberText: String
+                switch scoreListData.count {
+                case 1:
+                    numberText = "한"
+                case 2:
+                    numberText = "두"
+                case 3:
+                    numberText = "세"
+                case 4:
+                    numberText = "네"
+                case 5:
+                    numberText = "다섯"
+                default:
+                    numberText = "\(scoreListData.count)"
+                }
+                cell.talkLabel.text = "최근 \(numberText)개 데이터의 결과에요!"
+            }
             cell.chartView.scoreData = scoreListData
             cell.chartView.setNeedsLayout() // 데이터 전달 후 차트 새로고침
             return cell
