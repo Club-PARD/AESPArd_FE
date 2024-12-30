@@ -101,7 +101,6 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         setupPanGesture() // 드래그 제스처 활성화
         getAllPresentation()
         setupTapGestureForOverlay()
-        fetchPresentationList()
         tableView.delegate = self
         tableView.dataSource = self
     }
