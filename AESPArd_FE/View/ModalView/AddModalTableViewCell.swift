@@ -14,9 +14,10 @@ class AddModalTableViewCell: UITableViewCell {
     private let countLabel = UILabel()
     private let titleLabel = UILabel()
     private let detailLabel = UILabel()    
-    var ptName: String = "발표이름"
-    var ptDate: Int = 1
-    var ptDetailCount: Int = 4
+    var presentationName: String?
+    var updatedAtText: String?
+    var totalPractices: Int?
+    
 
     // MARK: - 식별자
 
@@ -33,7 +34,7 @@ class AddModalTableViewCell: UITableViewCell {
     // MARK: - UI 셋업
 
     private func setupUI() {
-        configure(title: "발표이름", detail: "발표세부정보설명 · \(ptDate)일 전", count: 4)
+        //configure(title: "발표이름", detail: "발표세부정보설명 · \(updatedAtText)일 전", count: 4)
         backgroundColor = .white
         selectionStyle = .none
 
@@ -90,9 +91,9 @@ class AddModalTableViewCell: UITableViewCell {
 
     // MARK: - 변수 정의
 
-    func configure(title: String, detail: String, count: Int) {
-          titleLabel.text = title
-          detailLabel.text = detail
-          countLabel.text = "\(count)개"
+    func configure(presentationName: String, updatedAtText: String, totalPractices: Int) {
+          titleLabel.text = presentationName
+          detailLabel.text = updatedAtText
+          countLabel.text = "\(totalPractices)개"
       }
 }

@@ -2,12 +2,17 @@
 import Moya
 import Foundation
 
-// MARK: - enum을 하나 선언해서 사용될 target들을 작성합니다. 어떤 target? 사용할 메소드라고 보면됨 get, post, delete....
+
+
+
+// MARK: - 홈페이지에&모달창에서 발표 리스트를 불러오거나 삭제 할때 사용하는 서비스
+
 enum PresentationsService {
     case getPresentationLatestById(userId: String)
     case getPresentationFavoritesById(userId: String)
     case patchToggleFavofiteById(presentationId: String)
     case deleteSelectedPresentations(presentationIds: [String])
+    case patchAllPresentations(userId: String)
     case deleteAllDeletePresentation(userId: String)
     case searchPresentations(searchTerm: String)
 }
@@ -27,6 +32,8 @@ extension PresentationsService: TargetType {
             return "/presentations/\(presentationId)/toggle-favorite"
         case .deleteSelectedPresentations:
             return "/presentations/batch-delete"
+        case .patchAllPresentations:
+            return "/presentations/user/{userId}/all-presentations"
         case .deleteAllDeletePresentation(let userId):
             return "/presentations/\(userId)/all-delete"
         case .searchPresentations:
@@ -45,6 +52,7 @@ extension PresentationsService: TargetType {
             return .patch
         case .deleteSelectedPresentations:
             return .delete
+        case .patchAllPresentations:
         case .deleteAllDeletePresentation:
             return .delete
         case .searchPresentations:
@@ -65,6 +73,8 @@ extension PresentationsService: TargetType {
             
         case .deleteSelectedPresentations(let presentationIds):
             return .requestCustomJSONEncodable(presentationIds, encoder: JSONEncoder())
+        case .patchAllPresentations:
+            return .requestPlain
         
         case .deleteAllDeletePresentation:
             return .requestPlain

@@ -8,13 +8,27 @@
 import UIKit
 
 class AddModalViewController: UIViewController, UIViewControllerTransitioningDelegate {
+    
+    private let networkManager = NetworkManager.shared
+    private let testId : String = URLClass().testID
+    private var presentationList : [PresentationList]  = []//발표리스트 최신순
 
-    // 클백할 때 이거 변수 다시 설정하기
-    var presentationName: String = "발표이름"
-    var presentationDate: Int = 1
-    var presentationDetailCount: Int = 4
+    // 서버에서 받아온 데이터 저장할 변수들
+    private var presentationName: String?
+    private var updatedAtText: String?
+    private var totalPractices: Int?
+    private var numberOfPresentations: Int?
+    
+    // 다음 페이지에 전달해야 하는 카메라 세팅값 변수 들
+    private var isShowingTimeSelected: Bool?
+    private var isShowingMeSelected: Bool?
+    private var minTime: Double?
+    private var maxTime: Double?
+    
+    // 서버에 전달할 새로운 연습의 인스턴스
+    private var newPractice: NewPractice?
+    
     private var previouslySelectedIndexPath: IndexPath?
-    var ptNumber: Int = 4
 
     
     // 발표 영상 촬영하기 버튼
@@ -74,18 +88,18 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     var initialPanLocation: CGPoint = .zero // 배경이 움직이는 기준이 되는 포인트
     
     let tableView: UITableView = {
-        let tableview = UITableView()
-        tableview.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableview.translatesAutoresizingMaskIntoConstraints = false
-        tableview.backgroundColor = .white
-        return tableview
+        let tableView = UITableView()
+        tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: "AddModalTableViewCell")
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .white
+        return tableView
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
         setupPanGesture() // 드래그 제스처 활성화
-        tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: "AddModalTableViewCell")
+        fetchPresentationList()
         tableView.delegate = self
         tableView.dataSource = self
     }
@@ -130,6 +144,23 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
                 ])
 
     }
+    
+    // MARK: - 서버 연결 함수
+    func fetchPresentationList() {
+        networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
+            switch result {
+            case .success(let presentationLatest):
+                self?.presentationList.removeAll()
+                self?.presentationList = presentationLatest
+                self?.numberOfPresentations = self?.presentationList.count
+                self?.tableView.reloadData()
+                
+            case .failure(let error):
+                // 실패 시 에러 처리
+                print("Error fetching presentations: \(error)")
+            }
+        }
+    }
 
     
     // 모달 뷰 애니메이션 설정
@@ -167,8 +198,8 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     
     // MARK: - 여기 수정해야 함
     @objc func moveTocameraViewController() {
-        let tempPresentation = NewPresentation(userId: "", presentationName: "String", idealMinTime: 0, idealMaxTime: 0, eyeTrackingPercentage: 0, videoKey: "", showTimeOnScreen: true, showMeOnScreen: true)
-        let cameraVC = CameraViewController(newPresentation: tempPresentation, isShowingTimeSelected: true, isShowingMeSelected:true)
+        
+        let cameraVC = CameraViewController(newPractice: newPractice!, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!)
         cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
     }
@@ -262,7 +293,7 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
     
     // 섹션 수
     func numberOfSections(in tableView: UITableView) -> Int {
-        return ptNumber // 하나의 섹션
+        return numberOfPresentations ?? 0 // 하나의 섹션
     }
     
     // 각 섹션의 행 수
@@ -271,14 +302,18 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "AddModalTableViewCell", for: indexPath)
-        cell.backgroundColor = .white
-        cell.selectionStyle = .none 
-        cell.layoutMargins = UIEdgeInsets.zero
-        cell.preservesSuperviewLayoutMargins = false
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddModalViewCell", for: indexPath) as? AddModalTableViewCell else {return UITableViewCell()}
+//        cell.backgroundColor = .white
+//        cell.selectionStyle = .none 
+//        cell.layoutMargins = UIEdgeInsets.zero
+//        cell.preservesSuperviewLayoutMargins = false
+        let presentation = presentationList[indexPath.section]
+        presentationName = presentation.presentationName
+        updatedAtText = presentation.updatedAtText
+        totalPractices = presentation.totalPractices
+        
+        cell.configure(presentationName: presentationName!, updatedAtText: updatedAtText!, totalPractices: totalPractices!)
         return cell
-        
-        
     }
     
     // 셀 높이 설정
@@ -303,6 +338,15 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         
         // 현재 선택된 IndexPath 저장
         previouslySelectedIndexPath = indexPath
+        
+        let selectedPresentation = presentationList[indexPath.section]
+        // MARK: - 수정해야함!!! 모델에 최소 최대 시간이 없음!!!!
+        newPractice!.presentationId = selectedPresentation.presentationId
+        self.isShowingMeSelected = selectedPresentation.showMeOnScreen
+        self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
+        // 최소 최대 어디 갔누
+//        self.minTime = selectedPresentation.idea
+        
         
         // 버튼 활성화
         addButton.isEnabled = true
