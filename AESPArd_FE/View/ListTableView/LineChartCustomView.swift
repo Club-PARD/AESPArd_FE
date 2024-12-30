@@ -6,16 +6,18 @@ class LineChartCustomView: UIView {
     private var myLineChart: LineChartView!
     
     var dayData: [String] = ["1번째", "2번째", "3번째", "4번째", "5번째"]
-    var scoreData: [Double] = [11, 22, 33, 44, 55] {
+    var scoreData: [Double] = [] {
         didSet {
-            // `dayData`를 새로 설정
-            dayData = (1...scoreData.count).map { "\($0)번째" }
-            
-            // 차트를 새로 고침
-            self.myLineChart.xAxis.valueFormatter = IndexAxisValueFormatter(values: dayData)
-            self.myLineChart.xAxis.setLabelCount(scoreData.count, force: true)
-            self.setLineData(lineChartView: self.myLineChart, lineChartDataEntries: self.entryData(values: self.scoreData))
-            self.setNeedsLayout() // 레이아웃 강제 갱신
+            if scoreData.count > 0 {
+                dayData = (1...scoreData.count).map { "\($0)번째" }
+
+                self.myLineChart.xAxis.valueFormatter = IndexAxisValueFormatter(values: dayData)
+                self.myLineChart.xAxis.setLabelCount(scoreData.count, force: true)
+                self.setLineData(lineChartView: self.myLineChart, lineChartDataEntries: self.entryData(values: self.scoreData))
+                self.setNeedsLayout()
+            } else {
+                self.myLineChart.clear()
+            }
         }
     }
     
@@ -45,7 +47,7 @@ class LineChartCustomView: UIView {
         // 기본 출력 텍스트
         self.myLineChart.noDataText = "출력 데이터가 없습니다."
         self.myLineChart.noDataFont = .systemFont(ofSize: 20)
-        self.myLineChart.noDataTextColor = .lightGray
+        self.myLineChart.noDataTextColor = .white
         self.myLineChart.backgroundColor = .white
         
         // X축 설정 (라벨 아래로)

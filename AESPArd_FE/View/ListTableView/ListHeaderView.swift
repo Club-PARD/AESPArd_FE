@@ -15,7 +15,7 @@ protocol ListHeaderTableCellDelegate: AnyObject {
     func dismissViewController()
 }
 
-class ListHeaderTableCell: UITableViewCell {
+class ListHeaderView: UIView {
     
     weak var delegate: ListHeaderTableCellDelegate?
     
@@ -23,10 +23,11 @@ class ListHeaderTableCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: "ListHeaderTableCell")
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+//
+//        self.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
         setUI()
-        
     }
     
     let containerView: UIView = {
@@ -64,16 +65,16 @@ class ListHeaderTableCell: UITableViewCell {
     
     func setUI(){
         
-        contentView.addSubview(containerView)
+        self.addSubview(containerView)
         containerView.addSubview(backButton)
         containerView.addSubview(headerLabel)
         containerView.addSubview(moreButton)
         
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            containerView.topAnchor.constraint(equalTo: self.topAnchor),
+            containerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             
             backButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             backButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
@@ -93,13 +94,7 @@ class ListHeaderTableCell: UITableViewCell {
     
     //뒤로가기 버튼 탭
     @objc func backButtonTapped() {
-        // delegate로 ListViewController의 dismissViewController 호출
             delegate?.dismissViewController()
-    }
-    
-    // 발표 정보 설정 메서드
-    func configure(presentationFolderName: String) {
-        headerLabel.text = "\(presentationFolderName)"
     }
     
     //수정 버튼 탭

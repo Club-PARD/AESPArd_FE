@@ -13,6 +13,8 @@ extension Notification.Name {
 
 class PracticeListTableCell: UITableViewCell {
     
+    var Id : String = ""
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -153,9 +155,19 @@ class PracticeListTableCell: UITableViewCell {
     }
     
     // 발표 연습 갯수 텍스트 설정 메서드
-    func configure( practiceDate: String, practiceScore: Double){
-        practiceDateLabel.text = "\(practiceDate)"
+    func configure( practiceDate: String, practiceScore: Double, practiceId: String){
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS" 
+        if let date = dateFormatter.date(from: practiceDate) {
+            // 날짜만 추출하기 위해 원하는 형식으로 변환
+            dateFormatter.dateFormat = "yyyy.MM.dd"
+            practiceDateLabel.text = dateFormatter.string(from: date)
+        } else {
+            practiceDateLabel.text = practiceDate
+        }
+        
         smallCircularProgressBar.value = practiceScore
+        Id = practiceId
     }
     
     //삭제하기 -> 리스트 체크 버튼
@@ -165,11 +177,7 @@ class PracticeListTableCell: UITableViewCell {
         } else {
             selectedDeleteButton.setImage(UIImage(named: "check_X"), for: .normal)
         }
-        
-        
-        if let practiceName = practiceNameLabel.text {
-            NotificationCenter.default.post(name: .selectedDeletePracticeNotification, object: nil, userInfo: ["cellName": practiceName])
-        }
+        NotificationCenter.default.post(name: .selectedDeletePracticeNotification, object: nil, userInfo: ["cellName": Id])
         
     }
 }

@@ -30,12 +30,12 @@ class LineGraphTableCell: UITableViewCell {
         return label
     }()
     
-    private let talkLabel: UILabel = {
+    let talkLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "Pretendard-Medium", size: 12)
         label.textColor = UIColor(red: 0.2, green: 0.439, blue: 1, alpha: 1)
-        label.text = "최근 다섯개 데이터의 결과에요!"
+//        label.text = "최근 다섯개 데이터의 결과에요!"
         return label
     }()
     
