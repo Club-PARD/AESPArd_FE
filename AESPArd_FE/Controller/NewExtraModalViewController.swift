@@ -200,8 +200,6 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
-        //setupPanGesture() // 드래그 제스처 활성화
-        setupTapGestureForOverlay()
 
         // 키보드 표시 및 숨김 이벤트 등록
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -343,7 +341,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             timeErrorLabel.isHidden = false // 오류 메시지 보이게 함
             return
         }
-        else if secondTotalTime >= 1200 || firstTotalTime >= 1200 {
+        else if secondTotalTime >= 1201 || firstTotalTime >= 1201 {
             timeErrorLabel.text = "최대 설정시간은 20분이에요"
             timeErrorLabel.isHidden = false
             return
@@ -434,9 +432,19 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
         NSLayoutConstraint.deactivate(textFieldConstraints)
     }
     
-    func setupTapGestureForOverlay() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(exit))
-        view.addGestureRecognizer(tapGesture)
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+
+        // 키보드가 비활성화 상태일 때만 동작
+        if !isKeyboardVisible {
+            let touchPoint = touch.location(in: self.view)
+
+            // 터치 영역 확인
+            if touchPoint.y < self.view.bounds.height / 2 {
+                exit()
+            }
+        }
     }
 
 }

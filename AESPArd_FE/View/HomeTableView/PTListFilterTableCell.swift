@@ -67,7 +67,7 @@ class PTListFilterTableCell: UITableViewCell {
     let importButton: UIButton = {
         let button = UIButton(type: .custom)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("중요도순", for: .normal)
+        button.setTitle("즐겨찾기", for: .normal)
         button.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 12)
         button.setImage(UIImage(named: "importanceStar"), for: .normal)
