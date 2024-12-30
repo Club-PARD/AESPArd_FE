@@ -239,7 +239,6 @@ class HomeViewController: UIViewController {
         
         if !isDeleteMode {
             if(selectedDeleteId.count>0){
-                print("선택한 배열", selectedDeleteId)
                 deletePresenttaionAPI()
             }
             

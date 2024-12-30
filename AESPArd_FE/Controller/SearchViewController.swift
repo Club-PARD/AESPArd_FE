@@ -235,9 +235,7 @@ class SearchViewController: UIViewController {
             networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
                 switch result {
                 case .success():
-                    print("수정 성공")
                 case .failure(let error):
-                    // 실패 시 에러 처리
                     print("Error fetching presentations: \(error)")
                 }
             }
@@ -248,7 +246,6 @@ class SearchViewController: UIViewController {
         networkManager.searchPresentations(searchTerm: searchTerm) { [weak self] result in
             switch result {
             case .success(let presentations):
-                print("검색 성공: \(presentations)")
                 self?.ptList = presentations
                 self?.tableView.reloadData()
             case .failure(let error):
