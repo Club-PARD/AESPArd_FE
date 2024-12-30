@@ -17,7 +17,7 @@ class MyViewController : UIViewController {
     private let networkManager = NetworkManager.shared
     let testId : String = URLClass().testID
     
-    var userName: String? = ""
+    var userName: String? = "사용자"
     var userAdress: String? = ""
     var message: String? = "프로젝트 매니저 이지환 / sonforhj03@gmail.com"
 
