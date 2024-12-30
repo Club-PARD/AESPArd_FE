@@ -94,11 +94,12 @@ class SearchViewController: UIViewController {
             self.view.frame.origin.y = 0
             self.view.layoutIfNeeded()
         }, completion: { _ in
-                self.closeButton.isHidden = false
-            })
+            self.closeButton.isHidden = false
+            self.searchBar.becomeFirstResponder()
+        })
     }
-
-
+    
+    
     
     let containerView: UIView = {
         let view = UIView()
@@ -190,7 +191,7 @@ class SearchViewController: UIViewController {
             
             searchBar.topAnchor.constraint(equalTo: containerView.topAnchor),
             searchBar.heightAnchor.constraint(equalToConstant: 40),
-//            searchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            //            searchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             
             closeButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
@@ -207,9 +208,9 @@ class SearchViewController: UIViewController {
         searchBar.text = ""
         searchBar.resignFirstResponder() // 키보드 숨기기
         tableView.reloadData()
-            
+        
         // 모달이 사라지면서 검색바 너비 줄이기
-        UIView.animate(withDuration: 0.5, animations: {
+        UIView.animate(withDuration: 0.4, animations: {
             // 검색바 너비 줄이기
             if let searchBarWidthConstraint = self.searchBar.constraints.first(where: { $0.firstAttribute == .width }) {
                 searchBarWidthConstraint.constant = 0 // 검색바 너비를 0으로 줄임
@@ -235,6 +236,7 @@ class SearchViewController: UIViewController {
             networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
                 switch result {
                 case .success():
+                    print("")
                 case .failure(let error):
                     print("Error fetching presentations: \(error)")
                 }
@@ -254,7 +256,7 @@ class SearchViewController: UIViewController {
             }
         }
     }
-
+    
     
 }
 
