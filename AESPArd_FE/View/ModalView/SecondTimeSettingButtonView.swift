@@ -7,9 +7,20 @@
 
 import UIKit
 
-var secondminuteValue: Int = 59
-var secondsecondValue: Int = 59
+var secondminuteValue: Int = 7 {
+    didSet {
+        updateSecondTotalTime()
+    }
+}
+var secondsecondValue: Int = 0 {
+    didSet {
+        updateSecondTotalTime()
+    }
+}
 var secondTotalTime: Int = (secondminuteValue * 60) + secondsecondValue
+func updateSecondTotalTime() {
+    secondTotalTime = (secondminuteValue * 60) + secondsecondValue
+}
 
 class SecondTimePickerInputView: UIView, UITextFieldDelegate {
 

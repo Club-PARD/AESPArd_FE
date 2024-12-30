@@ -7,9 +7,22 @@
 
 import UIKit
 
-var firstminuteValue: Int = 0
-var firstsecondValue: Int = 0
+var firstminuteValue: Int = 5 {
+    didSet {
+        updateFirstTotalTime()
+    }
+}
+var firstsecondValue: Int = 0 {
+    didSet {
+        updateFirstTotalTime()
+    }
+}
 var firstTotalTime: Int = (firstminuteValue * 60) + firstsecondValue
+
+func updateFirstTotalTime() {
+    firstTotalTime = (firstminuteValue * 60) + firstsecondValue
+}
+
 
 class FirstTimePickerInputView: UIView, UITextFieldDelegate {
 
