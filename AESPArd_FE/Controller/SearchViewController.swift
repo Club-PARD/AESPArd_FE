@@ -267,7 +267,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         dismissKeyboard()
         
-        let modalViewController = ListViewController()
+        let modalViewController = ListViewController(presentationData: ptList[indexPath.row])
         modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
         self.definesPresentationContext = true // 현재 컨텍스트를 정의
         self.present(modalViewController, animated: true)
