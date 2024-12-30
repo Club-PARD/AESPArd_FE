@@ -154,7 +154,7 @@ class PTListFilterTableCell: UITableViewCell {
     
     // 라벨 발표 갯수 텍스트 설정 메서드
     func configure(with presentationCount: Int) {
-        listCountLabel.text = "\(presentationCount)개의 발표 연습 목록이 있어요"
+        listCountLabel.text = "\(presentationCount)개의 발표 목록이 있어요"
     }
     
     //검색 아이콘 클릭 메서드

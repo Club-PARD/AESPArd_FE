@@ -153,7 +153,7 @@ class SearchViewController: UIViewController {
             // 플레이스홀더 속성 설정
             let placeholderColor = UIColor(red: 0.824, green: 0.827, blue: 0.835, alpha: 1)
             textField.attributedPlaceholder = NSAttributedString(
-                string: "연습 목록을 검색하세요",
+                string: "발표를 검색하세요",
                 attributes: [
                     .foregroundColor: placeholderColor,
                 ]
