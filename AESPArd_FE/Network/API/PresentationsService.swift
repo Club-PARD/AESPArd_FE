@@ -53,6 +53,7 @@ extension PresentationsService: TargetType {
         case .deleteSelectedPresentations:
             return .delete
         case .patchAllPresentations:
+            return .get
         case .deleteAllDeletePresentation:
             return .delete
         case .searchPresentations:

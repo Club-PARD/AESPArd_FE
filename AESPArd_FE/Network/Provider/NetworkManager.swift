@@ -71,7 +71,7 @@ final class NetworkManager {
     
     //MARK: - 모든 발표 리스트 불러오기 (모달창 전용)
     
-    func fetchAllPresentationsForModal(userId: String, completion: @escaping (Result<[PresentationForModal]>, Error))
+//    func fetchAllPresentationsForModal(userId: String, completion: @escaping (Result<[PresentationForModal]>, Error))
 
     
     //MARK: -  발표리스트 최신

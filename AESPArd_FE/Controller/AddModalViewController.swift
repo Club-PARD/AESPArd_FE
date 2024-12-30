@@ -342,8 +342,8 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         let selectedPresentation = presentationList[indexPath.section]
         // MARK: - 수정해야함!!! 모델에 최소 최대 시간이 없음!!!!
         newPractice!.presentationId = selectedPresentation.presentationId
-        self.isShowingMeSelected = selectedPresentation.showMeOnScreen
-        self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
+//        self.isShowingMeSelected = selectedPresentation.showMeOnScreen
+//        self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
         // 최소 최대 어디 갔누
 //        self.minTime = selectedPresentation.idea
         
