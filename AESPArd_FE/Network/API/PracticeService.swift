@@ -15,7 +15,7 @@ extension PracticeService: TargetType {
     var path: String {
         switch self {
         case .getPractice:
-            return "/practice"
+            return "/practices"
         }
     }
     

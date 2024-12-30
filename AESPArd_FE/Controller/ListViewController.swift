@@ -9,7 +9,12 @@ import UIKit
 
 class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    
     var presentationData: PresentationList
+    var practiceList : [GetPractice] = []
     
     // 초기화 메서드 정의
     init(presentationData: PresentationList) {
@@ -20,17 +25,6 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    //발표연습 갯수
-    var practiceCount :Int = 20
-    
-    //섹션 2
-    //발표 연습 이름
-    var practiceName : String = "번째 테이크"
-    //발표 연습 날짜
-    var practiceDate : String = "2023. 12. 20"
-    //발표 연습 점수
-    var practiceScore : Double =  0.84
     
     //선 그래프 점수
     var scoreListData: [Double] = [82, 34, 67, 69, 89]
@@ -85,6 +79,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         self.navigationController?.isNavigationBarHidden = true
         
         view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 1, alpha: 1)
+        
+        //api
+        getPracticeData()
         
         header.delegate = self
         tableView.delegate = self
@@ -171,7 +168,22 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         ])
     }
     
+    //MARK: - API
+    @objc func getPracticeData() {
+        networkManager.getPracticeByPresentationId(presentationId: presentationData.presentationId) { [weak self] result in
+            switch result {
+            case .success(let practices):
+                self?.practiceList = practices
+                self?.tableView.reloadData()
+            case .failure(let error):
+                print("Error fetching practices: \(error)")
+            }
+        }
+    }
+
     
+    
+    //MARK: - 버튼 메서드
     
     // ListHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissViewController() {
@@ -284,7 +296,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 2 {
-            return practiceCount // 마지막 섹션은 행은 발표 연습 갯수만큼
+            return practiceList.count // 마지막 섹션은 행은 발표 연습 갯수만큼
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
@@ -311,7 +323,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
-            cell.configure(practiceCount: practiceCount)
+            cell.configure(practiceCount: practiceList.count)
         
             return cell
             
@@ -321,19 +333,19 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
-            cell.configure(practiceDate:practiceDate, practiceScore:practiceScore)
+            cell.configure(practiceDate:practiceList[indexPath.row].createdAt, practiceScore: Double(practiceList[indexPath.row].totalScore) / 100.0, practiceId: practiceList[indexPath.row].id)
             
             //순서
             cell.recentCountButton.setTitle("\(indexPath[1]+1)", for: .normal)
             //발표 연습 이름 라벨
-            cell.practiceNameLabel.text = "\(indexPath[1]+1)\(practiceName)"
+            cell.practiceNameLabel.text = "\(practiceList[indexPath.row].practiceName)"
             
             if(isDeleteMode){
                 cell.recentCountButton.isHidden = true
                 cell.selectedDeleteButton.isHidden = false
                 
                 // 삭제 선택한 리스트 있는지 확인
-                if selectedDeleteId.contains("\(indexPath[1]+1)\(practiceName)") {
+                if selectedDeleteId.contains("\(practiceList[indexPath.row].id)") {
                     // 이미 선택된 경우 체크 표시
                     cell.selectedDeleteButton.setImage(UIImage(named: "check_O"), for: .normal)
                 } else {
