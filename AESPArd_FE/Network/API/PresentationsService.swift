@@ -1,5 +1,4 @@
 
-
 import Moya
 import Foundation
 
@@ -14,6 +13,8 @@ enum PresentationsService {
     case patchToggleFavofiteById(presentationId: String)
     case deleteSelectedPresentations(presentationIds: [String])
     case patchAllPresentations(userId: String)
+    case deleteAllDeletePresentation(userId: String)
+    case searchPresentations(searchTerm: String)
 }
 
 extension PresentationsService: TargetType {
@@ -33,6 +34,11 @@ extension PresentationsService: TargetType {
             return "/presentations/batch-delete"
         case .patchAllPresentations:
             return "/presentations/user/{userId}/all-presentations"
+        case .deleteAllDeletePresentation(let userId):
+            return "/presentations/\(userId)/all-delete"
+        case .searchPresentations:
+            return "/presentations/search"
+            
         }
     }
     
@@ -47,6 +53,9 @@ extension PresentationsService: TargetType {
         case .deleteSelectedPresentations:
             return .delete
         case .patchAllPresentations:
+        case .deleteAllDeletePresentation:
+            return .delete
+        case .searchPresentations:
             return .get
         }
     }
@@ -66,6 +75,12 @@ extension PresentationsService: TargetType {
             return .requestCustomJSONEncodable(presentationIds, encoder: JSONEncoder())
         case .patchAllPresentations:
             return .requestPlain
+        
+        case .deleteAllDeletePresentation:
+            return .requestPlain
+            
+        case .searchPresentations(let searchTerm):
+            return .requestParameters(parameters: ["searchTerm": searchTerm], encoding: URLEncoding.default)
         }
         
     }

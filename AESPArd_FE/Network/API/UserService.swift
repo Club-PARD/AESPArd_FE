@@ -13,6 +13,8 @@ import Foundation
 // MARK: - enum을 하나 선언해서 사용될 target들을 작성합니다. 어떤 target? 사용할 메소드라고 보면됨 get, post, delete....
 enum UserService {
     case getUserNameById(userId: String)
+    case getUserNameNEmailById(userId: String)
+    
     // updateUser 안씀. Moya 구조 파악하기 위해서 보라고 남겨둘게
     case updateUser(id: Int, name: String, email: String)
 }
@@ -37,6 +39,10 @@ extension UserService: TargetType {
         switch self {
         case .getUserNameById(let userId):
             return "/users/\(userId)/name"
+            
+        case .getUserNameNEmailById(let userId):
+            return "/users/\(userId)/details"
+            
         // upateUser 예시용 쓰지마
         case .updateUser(let id, _, _):
             return "/users/\(id)"
@@ -47,6 +53,9 @@ extension UserService: TargetType {
         switch self {
         case .getUserNameById:
             return .get
+        case .getUserNameNEmailById:
+            return .get
+        
         // upateUser 예시용 쓰지마
         case .updateUser:
             return .put
@@ -56,6 +65,8 @@ extension UserService: TargetType {
     var task: Task {
         switch self {
         case .getUserNameById:
+            return .requestPlain
+        case .getUserNameNEmailById:
             return .requestPlain
             
         // upateUser 예시용 쓰지마

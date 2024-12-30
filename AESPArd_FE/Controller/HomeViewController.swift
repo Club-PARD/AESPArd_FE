@@ -16,20 +16,10 @@ class HomeViewController: UIViewController {
     
     
     //클백 연결 시 해당 변수명 변경 필요
-    var userName : String = "규희"
-    var presentationCount :Int = 10
+    var userName : String = "사용자"
     
     //막대 그래프 데이터
-    var graphData: [CGFloat] = [10,20,0,0,0,0]
-    
-    //발표 정보
-    var presentationName : [String] = ["발표이름1", "발표이름2", "발표이름3", "발표이름4", "발표이름5", "발표이름6", "발표이름7", "발표이름8", "발표이름9", "발표이름10"]
-    
-    var ptDetailCount : Int = 4
-    var presentationDate : String = ""
-    var ptDetailTotalScore : Int = 88
-    var barVaue: [Double] = [0.84, 0.77, 0.33, 0.66, 0.55,0.44, 0.22, 0.66, 0.11, 0.24 ]
-    
+    var graphData: [CGFloat] = [0,0,0,0,0,0]
     
     // 필터링 모드
     var filterMode : String = "recent"
@@ -40,7 +30,7 @@ class HomeViewController: UIViewController {
     
     
     // 필터 모드에 따라 데이터를 다시 로드
-    private func reloadDataBasedOnFilterMode() {
+    @objc private func reloadDataBasedOnFilterMode() {
         if filterMode == "recent" {
             fetchPresentationList() // 최신순 데이터 요청
         } else if filterMode == "favorite" {
@@ -110,6 +100,9 @@ class HomeViewController: UIViewController {
         
         //토글 patch시 중요도 순일 때
         NotificationCenter.default.addObserver(self,selector: #selector(patchToggleAPI(notification:)), name: .updateFavoriteNotification, object: nil)
+        
+        //my에서 서비스 초기화
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadDataBasedOnFilterMode), name: .didResetService, object: nil)
     }
     
     deinit {
@@ -124,8 +117,9 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .favoriteNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .updateFavoriteNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .didResetService, object: nil)
     }
-    
     
     //MARK: -  API
     
@@ -139,6 +133,7 @@ class HomeViewController: UIViewController {
                     return
                 }
                 self?.userName = userName
+                self?.tableView.reloadData()
             case .failure(let error):
                 // Handle error
                 print("Error fetching users: \(error)")
@@ -152,6 +147,7 @@ class HomeViewController: UIViewController {
             switch result {
             case .success(let record):
                 self?.graphData = record.map { CGFloat($0) }
+                self?.tableView.reloadData()
             case .failure(let error):
                 // Handle error
                 print("Error fetching users: \(error)")
