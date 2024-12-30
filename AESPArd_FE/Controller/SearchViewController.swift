@@ -10,6 +10,7 @@ import UIKit
 class SearchViewController: UIViewController {
     
     private var finalYPosition: CGFloat = 0.0
+    private var searchBarWidthConstraint: NSLayoutConstraint?
     
     init(finalYPosition: CGFloat) {
         self.finalYPosition = finalYPosition
@@ -36,6 +37,9 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         
         self.navigationController?.isNavigationBarHidden = true
+        
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalToConstant: 0)
+        searchBarWidthConstraint?.isActive = true
         
         //발표 리스트 최신순 API
         networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
@@ -81,12 +85,21 @@ class SearchViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        //        self.view.frame.origin.y = self.finalYPosition // 섹션 1 첫 번째 셀 위치로 설정
-        
-        UIView.animate(withDuration: 0.5, animations: {
-            self.view.frame.origin.y = 0 // 화면 상단으로 이동
+        // 애니메이션 시작
+        UIView.animate(withDuration: 0.4, animations: {
+            if let searchBarWidthConstraint = self.searchBar.constraints.first(where: { $0.firstAttribute == .width }) {
+                searchBarWidthConstraint.constant = self.view.frame.width - 32
+            }
+            
+            self.view.frame.origin.y = 0
+            self.view.layoutIfNeeded()
+        }, completion: { _ in
+            self.closeButton.isHidden = false
+            self.searchBar.becomeFirstResponder()
         })
     }
+    
+    
     
     let containerView: UIView = {
         let view = UIView()
@@ -140,7 +153,7 @@ class SearchViewController: UIViewController {
             // 플레이스홀더 속성 설정
             let placeholderColor = UIColor(red: 0.824, green: 0.827, blue: 0.835, alpha: 1)
             textField.attributedPlaceholder = NSAttributedString(
-                string: "연습 목록을 검색하세요",
+                string: "발표를 검색하세요",
                 attributes: [
                     .foregroundColor: placeholderColor,
                 ]
@@ -156,6 +169,7 @@ class SearchViewController: UIViewController {
         button.setImage(UIImage(named: "x-close"), for: .normal)
         button.addTarget(self, action: #selector(searchBarCloseButtonTapped), for: .touchUpInside)
         //        button.frame = CGRect(x: 10, y: 10, width: 20, height: 20)
+        button.isHidden = true
         return button
     }()
     
@@ -177,7 +191,7 @@ class SearchViewController: UIViewController {
             
             searchBar.topAnchor.constraint(equalTo: containerView.topAnchor),
             searchBar.heightAnchor.constraint(equalToConstant: 40),
-            searchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            //            searchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             
             closeButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 10),
@@ -195,12 +209,20 @@ class SearchViewController: UIViewController {
         searchBar.resignFirstResponder() // 키보드 숨기기
         tableView.reloadData()
         
-        self.view.frame.origin.y = 48
-        
-        // 모달이 사라지는 애니메이션
-        UIView.animate(withDuration: 0.5, animations: {
+        // 모달이 사라지면서 검색바 너비 줄이기
+        UIView.animate(withDuration: 0.4, animations: {
+            // 검색바 너비 줄이기
+            if let searchBarWidthConstraint = self.searchBar.constraints.first(where: { $0.firstAttribute == .width }) {
+                searchBarWidthConstraint.constant = 0 // 검색바 너비를 0으로 줄임
+            }
+            
+            // 모달 뷰 위치 변경
             self.view.frame.origin.y = self.finalYPosition + 48
+            
+            // 레이아웃 업데이트
+            self.view.layoutIfNeeded()
         }, completion: { _ in
+            self.closeButton.isHidden = true
             // 애니메이션 완료 후 모달 닫기
             self.dismiss(animated: false, completion: nil)
         })
@@ -214,9 +236,8 @@ class SearchViewController: UIViewController {
             networkManager.patchPTToggleFavoriteById(presentationId: ptId) { [weak self] result in
                 switch result {
                 case .success():
-                    print("수정 성공")
+                    print("")
                 case .failure(let error):
-                    // 실패 시 에러 처리
                     print("Error fetching presentations: \(error)")
                 }
             }
@@ -227,7 +248,6 @@ class SearchViewController: UIViewController {
         networkManager.searchPresentations(searchTerm: searchTerm) { [weak self] result in
             switch result {
             case .success(let presentations):
-                print("검색 성공: \(presentations)")
                 self?.ptList = presentations
                 self?.tableView.reloadData()
             case .failure(let error):
@@ -236,7 +256,7 @@ class SearchViewController: UIViewController {
             }
         }
     }
-
+    
     
 }
 
