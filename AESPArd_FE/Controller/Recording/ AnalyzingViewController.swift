@@ -9,6 +9,7 @@
 import UIKit
 import Photos
 import AVFoundation
+import NVActivityIndicatorView
 
 // MARK: - FixedWidthInteger Extension
 // This extension adds a computed property to convert integers to Data in little endian format.
@@ -50,7 +51,7 @@ class AnalyzingViewController: UIViewController {
         self.assetIdentifier = assetIdentifier
         isCreatingNewPresentation = false
         isCreatingNewPractice = true
-        //debugPrint(newPresentation)
+        debugPrint(newPresentation)
     }
     
     required init?(coder: NSCoder) {
@@ -69,35 +70,19 @@ class AnalyzingViewController: UIViewController {
     
     let waitingLabel: UILabel = {
         let label = UILabel()
-        label.text = "리포트를 생성 중입니다"
-        label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
+        label.text = "리포트를 생성 중이에요..."
+        label.font = UIFont(name: "Pretendard-SemiBold", size: 14)
+        label.textColor = UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-//    private let extractAndUploadButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setTitle("Extract & Upload Audio", for: .normal)
-//        button.addTarget(self, action: #selector(extractAndUploadAudio), for: .touchUpInside)
-//        button.translatesAutoresizingMaskIntoConstraints = false
-//        button.backgroundColor = UIColor.systemBlue
-//        button.setTitleColor(.white, for: .normal)
-//        button.layer.cornerRadius = 10
-//        return button
-//    }()
-//
-//    private let playAudioButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setTitle("Play Audio", for: .normal)
-//        button.addTarget(self, action: #selector(playAudioButtonTapped), for: .touchUpInside)
-//        button.translatesAutoresizingMaskIntoConstraints = false
-//        button.backgroundColor = UIColor.systemGreen
-//        button.setTitleColor(.white, for: .normal)
-//        button.layer.cornerRadius = 10
-//        button.isHidden = true // Hidden until audio is extracted
-//        return button
-//    }()
+    private let indicator: NVActivityIndicatorView = {
+        let indicator = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), padding: 0)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
     
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
@@ -110,45 +95,28 @@ class AnalyzingViewController: UIViewController {
     private func setupUI() {
         
         view.addSubview(waitingLabel)
-        view.addSubview(activityIndicator)
-        view.backgroundColor = .clear
-//        view.addSubview(playAudioButton)
-        
+        view.addSubview(indicator)
+
         // Layout Extract & Upload Button
         NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+    
+            indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            indicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
+            waitingLabel.topAnchor.constraint(equalTo: indicator.bottomAnchor, constant: 20),
             waitingLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            waitingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 50),
-            
-//            playAudioButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-//            playAudioButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
         ])
-        
+        indicator.startAnimating()
     }
     
     // MARK: - 생성주기
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .white
         setupUI()
         fetchVideoAsset()
-        
-        //configureAudioSessionForPlayback()
     }
-    
-//    private func configureAudioSessionForPlayback() {
-//        let session = AVAudioSession.sharedInstance() // Manages how audio is played/recorded.
-//        do {
-//            // .playback ensures the app plays through speakers even if the iPhone is on silent mode
-//            try session.setCategory(.playback, mode: .default, options: []) // audio can play even if the device is muted.
-//            try session.setActive(true) // .setActive(true): Makes the session active immediately, finalizing these settings.
-//        } catch {
-//            print("Error setting AVAudioSession category: \(error.localizedDescription)")
-//        }
-//    }
     
     
     // MARK: - 함수들
@@ -195,34 +163,11 @@ class AnalyzingViewController: UIViewController {
                 }))
                 self.present(alert, animated: true)
             } else {
-//                self.initializeAudioPlayer(with: wavData) // Initialize AVAudioPlayer for playback
                 //self.uploadAudioViaMoya(wavData)
                 //uploadOnlyAudio(wavData)
             }
         }
     }
-    
-    
-    
-//    @objc private func playAudioButtonTapped() {
-//        guard let wavData = audioPlayer?.data else {
-//            showAlert(title: "Error", message: "No audio data available to play.")
-//            return
-//        }
-//        playAudio(from: wavData)
-//    }
-    
-//    private func initializeAudioPlayer(with data: Data) {
-//        do {
-//            audioPlayer = try AVAudioPlayer(data: data)
-//            audioPlayer?.delegate = self
-//            audioPlayer?.prepareToPlay()
-//            // Optionally, autoplay for debugging
-//            audioPlayer?.play()
-//        } catch {
-//            showAlert(title: "Playback Error", message: error.localizedDescription)
-//        }
-//    }
     
     
     private func extractAudio(from asset: PHAsset, completion: @escaping (Data?, Bool) -> Void) {
@@ -432,23 +377,6 @@ class AnalyzingViewController: UIViewController {
 //        NetworkManager.shared.uploadPracticeAndAudio(newPractice: newPractice, wavData: wavData, completion: <#T##(Result<UploadAudioResponse, any Error>) -> Void#>)
 //    }
     
-//    private func playAudio(from data: Data) {
-//        do {
-//            audioPlayer = try AVAudioPlayer(data: data)
-//            audioPlayer?.delegate = self
-//            audioPlayer?.prepareToPlay()
-//            audioPlayer?.play()
-//            
-//            // Update Play button state
-//            DispatchQueue.main.async {
-//                self.playAudioButton.setTitle("Playing...", for: .normal)
-//                self.playAudioButton.isEnabled = false
-//            }
-//        } catch {
-//            showAlert(title: "Playback Error", message: error.localizedDescription)
-//        }
-//    }
-    
     
     // MARK: - 기타 함수
     
@@ -483,38 +411,3 @@ class AnalyzingViewController: UIViewController {
 //    }
     
 }
-
-// MARK: - AVAudioPlayerDelegate
-//extension AnalyzingViewController: AVAudioPlayerDelegate {
-//    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-//        if flag {
-//            showAlert(title: "Playback Finished", message: "Audio playback completed successfully.")
-//        } else {
-//            showAlert(title: "Playback Error", message: "Audio playback did not finish successfully.")
-//        }
-//        
-//        // Reset Play button state
-//        DispatchQueue.main.async {
-//            self.playAudioButton.setTitle("Play Audio", for: .normal)
-//            self.playAudioButton.isEnabled = true
-//        }
-//        
-//        // Release the audio player
-//        audioPlayer = nil
-//    }
-//    
-//    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-//        if let error = error {
-//            showAlert(title: "Playback Decode Error", message: error.localizedDescription)
-//        }
-//        
-//        // Reset Play button state
-//        DispatchQueue.main.async {
-//            self.playAudioButton.setTitle("Play Audio", for: .normal)
-//            self.playAudioButton.isEnabled = true
-//        }
-//        
-//        // Release the audio player
-//        audioPlayer = nil
-//    }
-//}

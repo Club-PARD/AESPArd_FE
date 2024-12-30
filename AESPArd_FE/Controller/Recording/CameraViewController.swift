@@ -14,14 +14,17 @@ import Photos // 갤러리 접근 프레임워크
 
 class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPreviewViewControllerDelegate, ARSessionDelegate, ARSCNViewDelegate {
     
+    // MARK: - 이전 뷰컨에서 받아오는 데이터 값들
     private var newPresentation: NewPresentation?
     private var newPractice: NewPractice?
     private var isShowingTimeSelected: Bool?
     private var isShowingMeSelected: Bool?
     
-    // 새로운 발표를 만드는지 연습을 만드는지에 따라 다음 페이지에 전달하는 값이 달라짐
+    // 새로운 발표를 만드는지 혹은 연습을 만드는지에 따라 다음 페이지에 전달하는 값이 달라짐
     private var isCreatingNewPresentation: Bool?
     private var isCreatingNewPractice: Bool?
+    
+    //MARK: - 생성자
     
     // 새로운 발표 생성자
     init(newPresentation: NewPresentation, isShowingTimeSelected: Bool, isShowingMeSelected: Bool){
@@ -54,13 +57,15 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     // MARK: - Overlay Window
+    
+    // 유저에게는 보이지만 스크린 녹화에는 보이지 않는 뷰컨을 만들기 위한 선언
     private var overlayWindow: UIWindow?
     
     // MARK: - 시선추적 변수 선언
     
     // 시선추적 변수들
     private var sceneView: ARSCNView!
-    private let faceNode = SCNNode()
+    private let faceNode = SCNNode() // SCNNode: 3D 공간에서의 위치 정보를 가지는 클래스
     private let leftEye = EyeNode(color: .clear)
     private let rightEye = EyeNode(color: .clear)
     private let viewPlane = SCNNode(geometry: SCNPlane(width: 1, height: 1))
@@ -90,7 +95,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var maxTime: Double?
 
     
-    // MARK: - Life Cycle
+    // MARK: - 생성 주기
     
     
     override func viewDidLoad() {
@@ -148,16 +153,21 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // MARK: - Overlay Window Setup
     private func setupOverlayWindow() {
-        guard overlayWindow == nil else { return } // Prevent multiple overlays
+        guard overlayWindow == nil else { return } // 이미 생성된 overlay가 없는지 체크
         
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+        // connectedScenes: This property provides a set of all active UIScene objects that are currently connected to the app.
+        
+        //Using first
+        //connectedScenes.first: This picks the first available scene in the connectedScenes set. This is sufficient for single-window apps.
+        //In multi-window apps (e.g., on iPad), you may need to determine the specific scene you want to use.
         
         let overlayVC = CameraOverlayViewController()
         
         let newOverlayWindow = UIWindow(windowScene: windowScene)
         self.overlayWindow = newOverlayWindow
-        newOverlayWindow.windowLevel = UIWindow.Level.alert + 1 // Ensure it's above the main window
-        newOverlayWindow.isOpaque = false
+        newOverlayWindow.windowLevel = UIWindow.Level.alert + 1 // 메인 화면 위에 있도록 설정
+        newOverlayWindow.isOpaque = false   // window가 투명하게 렌더링 되도록 설정
         newOverlayWindow.backgroundColor = .clear // 배경 투명하게 하면 밑에 있는 메인 윈도우가 보여짐
         newOverlayWindow.rootViewController = overlayVC
         newOverlayWindow.makeKeyAndVisible()
@@ -171,7 +181,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         overlayWindow = nil
     }
     
-    // MARK: - Camera Authorization
+    // MARK: - 카메라 권한 확인 함수
     private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -270,12 +280,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // Setup ARKit Scene View
     private func setupSceneView() {
         sceneView = ARSCNView(frame: view.bounds)
-        sceneView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        sceneView.autoresizingMask = [.flexibleWidth, .flexibleHeight] // 화면 회전등의 이유로 부모뷰의 사이즈가 바뀔때에 동적으로 같이 바뀌도록 함
         sceneView.delegate = self
         sceneView.session.delegate = self
         view.addSubview(sceneView)
         
-        sceneView.scene.rootNode.addChildNode(faceNode)
+        sceneView.scene.rootNode.addChildNode(faceNode) // All AR content is added to this root node, forming a hierarchical structure.
         faceNode.addChildNode(leftEye)
         faceNode.addChildNode(rightEye)
         sceneView.scene.rootNode.addChildNode(viewPlane)
@@ -295,9 +305,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     
-    
-    
-    // Eye Tracking Logic
+    // 눈위치 잡는 함수
     func eyeTracking(using anchor: ARFaceAnchor) {
         leftEye.simdTransform = anchor.leftEyeTransform
         rightEye.simdTransform = anchor.rightEyeTransform
@@ -338,6 +346,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             if isLookingAway {
                 // Start edgeTimer if not already started
                 if edgeTimer == nil {
+                    // 1초 이상 시야가 벗어나면 시선추적 타이머 멈춤
                     edgeTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
                         guard let self = self else { return }
                         self.stopEyeTrackingTimer()
@@ -383,7 +392,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // 얼마나 화면을 바라봤는지 비율 계산하는 함수
     private func calculateEyeTrackingTime() -> Int {
-        var result = totalLookTime / totalRecordingTime!
+        var result = (totalLookTime / totalRecordingTime!) * 100
         return Int(result.rounded())
     }
     
@@ -396,7 +405,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             startRecording()
         }
     }
-    
     
     
     private func startRecording() {
@@ -464,9 +472,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
-    
-    
-    // MARK: - 화면 녹화 타이머
+    // 화면 녹화 타이머
     private func startRecordingTimer() {
         
         recordingTimer?.invalidate() // Cancel existing timer if any
