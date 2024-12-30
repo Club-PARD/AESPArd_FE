@@ -30,7 +30,7 @@ final class NetworkManager {
 //             NetworkLoggerPlugin() // helpful for logging network requests
         ]
     )
-    private let newRresentationProvider = MoyaProvider<NewPresentationService>(
+    private let newRresentationProvider = MoyaProvider<NewPresentationAndNewPracticeService>(
         plugins: [
             NetworkLoggerPlugin() // Logs requests & responses (helpful in debug)
         ]
@@ -184,6 +184,26 @@ final class NetworkManager {
                 }
             case .failure(let error):
                 // Handle network request failure
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 새로운 연습 생성
+    func createNewPractice(
+        newPractice: NewPractice,
+        completion: @escaping (Result<NewPractice, Error>) -> Void
+    ) {
+        newRresentationProvider.request(.postNewPractice(newPractice: newPractice)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let created = try JSONDecoder().decode(NewPractice.self, from: response.data)
+                    completion(.success(created))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
                 completion(.failure(error))
             }
         }

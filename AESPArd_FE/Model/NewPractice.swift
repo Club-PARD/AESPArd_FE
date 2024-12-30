@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NewPractice {
+struct NewPractice: Codable {
     var presentationId: String?
     var practiceName: String?
     var videoKey: String?
