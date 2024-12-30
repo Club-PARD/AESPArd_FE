@@ -10,12 +10,13 @@ import Foundation
 
 //MARK: - 촬영 종료 후 새로운 발표 혹은 연습 서버에 보낼 때 사용하는 서비스
 
-enum NewPresentationService {
+enum NewPresentationAndNewPracticeService {
     case postNewPresentation(newPresentation: NewPresentation)
+    case postNewPractice(newPractice: NewPractice)
     case postAudio(wavData: Data)
 }
 
-extension NewPresentationService: TargetType {
+extension NewPresentationAndNewPracticeService: TargetType {
     var baseURL: URL {
         // Adjust to your actual base URL
         return URL(string: URLClass().baseURL)!
@@ -25,6 +26,8 @@ extension NewPresentationService: TargetType {
         switch self {
         case .postNewPresentation:
             return "/presentations/new-presentation-with-practice"
+        case .postNewPractice:
+            return "/practices"
         case .postAudio:
             return  "/audio/upload"
         }
@@ -32,7 +35,7 @@ extension NewPresentationService: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postNewPresentation, .postAudio:
+        case .postNewPresentation, .postNewPractice , .postAudio:
             return .post
         }
     }
@@ -42,6 +45,9 @@ extension NewPresentationService: TargetType {
         case .postNewPresentation(let newPresentation):
             // Encode Presentation struct to JSON
             return .requestJSONEncodable(newPresentation)
+        
+        case .postNewPractice(let newPractice):
+            return .requestJSONEncodable(newPractice)
             
         case .postAudio(let wavData):
             // Create MultipartFormData for audio file

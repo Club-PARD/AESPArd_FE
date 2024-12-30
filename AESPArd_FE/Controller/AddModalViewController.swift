@@ -11,7 +11,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     
     private let networkManager = NetworkManager.shared
     private let testId : String = URLClass().testID
-    private var presentationList : [PresentationList]  = []//발표리스트 최신순
+    private var presentationList : [PresentationForModal]  = []//발표리스트 최신순
 
     // 서버에서 받아온 데이터 저장할 변수들
     private var presentationName: String?
@@ -26,7 +26,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     private var maxTime: Double?
     
     // 서버에 전달할 새로운 연습의 인스턴스
-    private var newPractice: NewPractice?
+    private var newPractice: NewPractice = NewPractice()
     
     private var previouslySelectedIndexPath: IndexPath?
 
@@ -59,9 +59,9 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     let extraAddButton: UIButton = {
         let button = UIButton()
         button.setTitle(" 새로 추가하기", for: .normal)
-        button.setTitleColor(UIColor(red: 0.62, green: 0.62, blue: 0.65, alpha: 1), for: .normal)
+        button.setTitleColor(UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 14)
-        button.setImage(UIImage(named: "Plus-iCon"), for: .normal)
+        button.setImage(UIImage(named: "sipja"), for: .normal)
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(moveToNewExtraModal), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -89,7 +89,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     
     let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: "AddModalTableViewCell")
+        tableView.register(AddModalTableViewCell.self, forCellReuseIdentifier: AddModalTableViewCell.identifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .white
         return tableView
@@ -99,7 +99,8 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         super.viewDidLoad()
         setUI()
         setupPanGesture() // 드래그 제스처 활성화
-        fetchPresentationList()
+        getAllPresentation()
+        setupTapGestureForOverlay()
         tableView.delegate = self
         tableView.dataSource = self
     }
@@ -146,8 +147,9 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     }
     
     // MARK: - 서버 연결 함수
-    func fetchPresentationList() {
-        networkManager.fetchPresentaionLatestById(userId: testId) { [weak self] result in
+    func getAllPresentation() {
+        
+        networkManager.getAllPresentationsForModal(userId: testId) { [weak self] result in
             switch result {
             case .success(let presentationLatest):
                 self?.presentationList.removeAll()
@@ -199,7 +201,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     // MARK: - 여기 수정해야 함
     @objc func moveTocameraViewController() {
         
-        let cameraVC = CameraViewController(newPractice: newPractice!, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!)
+        let cameraVC = CameraViewController(newPractice: newPractice, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!)
         cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
     }
@@ -302,7 +304,7 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "AddModalViewCell", for: indexPath) as? AddModalTableViewCell else {return UITableViewCell()}
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: AddModalTableViewCell.identifier, for: indexPath) as? AddModalTableViewCell else {return UITableViewCell()}
 //        cell.backgroundColor = .white
 //        cell.selectionStyle = .none 
 //        cell.layoutMargins = UIEdgeInsets.zero
@@ -340,12 +342,11 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         previouslySelectedIndexPath = indexPath
         
         let selectedPresentation = presentationList[indexPath.section]
-        // MARK: - 수정해야함!!! 모델에 최소 최대 시간이 없음!!!!
-        newPractice!.presentationId = selectedPresentation.presentationId
-//        self.isShowingMeSelected = selectedPresentation.showMeOnScreen
-//        self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
-        // 최소 최대 어디 갔누
-//        self.minTime = selectedPresentation.idea
+        newPractice.presentationId = selectedPresentation.presentationId
+        self.isShowingMeSelected = selectedPresentation.showMeOnScreen
+        self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
+        self.minTime = selectedPresentation.idealMinTime
+        self.maxTime = selectedPresentation.idealMaxTime
         
         
         // 버튼 활성화
@@ -365,5 +366,9 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
             addButton.isEnabled = false
             addButton.backgroundColor = UIColor(red: 0.82, green: 0.83, blue: 0.84, alpha: 1) // 비활성화 색상
         }
+    }
+    func setupTapGestureForOverlay() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(exit))
+        backgroundOverlay.addGestureRecognizer(tapGesture)
     }
 }
