@@ -59,9 +59,9 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     let extraAddButton: UIButton = {
         let button = UIButton()
         button.setTitle(" 새로 추가하기", for: .normal)
-        button.setTitleColor(UIColor(red: 0.62, green: 0.62, blue: 0.65, alpha: 1), for: .normal)
+        button.setTitleColor(UIColor(red: 0.2, green: 0.44, blue: 1, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 14)
-        button.setImage(UIImage(named: "Plus-iCon"), for: .normal)
+        button.setImage(UIImage(named: "sipja"), for: .normal)
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(moveToNewExtraModal), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -100,6 +100,8 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         setUI()
         setupPanGesture() // 드래그 제스처 활성화
         getAllPresentation()
+        setupTapGestureForOverlay()
+        fetchPresentationList()
         tableView.delegate = self
         tableView.dataSource = self
     }
@@ -365,5 +367,9 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
             addButton.isEnabled = false
             addButton.backgroundColor = UIColor(red: 0.82, green: 0.83, blue: 0.84, alpha: 1) // 비활성화 색상
         }
+    }
+    func setupTapGestureForOverlay() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(exit))
+        backgroundOverlay.addGestureRecognizer(tapGesture)
     }
 }
