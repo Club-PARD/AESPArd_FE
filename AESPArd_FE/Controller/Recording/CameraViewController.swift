@@ -109,7 +109,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 }
             }
         }
-        
+       
+//        debugPrint("            ")
+//        debugPrint("            ")
+//        debugPrint(newPresentation)
+//        debugPrint("            ")
+//        debugPrint("            ")
        
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
@@ -162,6 +167,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         overlayWindow?.isHidden = true
         overlayWindow?.isUserInteractionEnabled = false
         overlayWindow?.rootViewController = nil
+        overlayWindow?.backgroundColor = .black
         overlayWindow = nil
     }
     
@@ -496,6 +502,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             //self.setupOverlayWindow()
             
             // **Navigate to AnalyzingViewController**
+            
+//            debugPrint("previewControllerDidFinish 호출됨")
             self.determineUserActionAndNavigate()
         }
     }
@@ -505,14 +513,17 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // 유저가 프리뷰창에서 취소를 눌렀는지 저장을 눌렀는지 확인하고 다음 행동을 지정
     private func determineUserActionAndNavigate() {
+        debugPrint("버튼 눌림")
         checkIfRecordingWasSaved { [weak self] wasSaved, assetIdentifier in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 if wasSaved, let identifier = assetIdentifier {
+//                    debugPrint("저장 누름")
                     // 저장을 눌렀을 경우 다음 페이지로 넘어감
                     self.navigateToAnalyzingViewController(with: identifier)
                 } else {
                     // 취소를 누르면 HomeViewController로 돌아감
+//                    debugPrint("취소 누름")
                     self.backButtonTapped()
                 }
             }
@@ -521,19 +532,24 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // 녹환된 비디오 저장하고 불러올때 저장된지 지정한 시간이내면 진행함
     private func checkIfRecordingWasSaved(completion: @escaping (Bool, String?) -> Void) {
+//        debugPrint("checkIfRecordingWasSaved 함수 호출됨")
         // Request authorization to access Photos
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async {
                 if status == .authorized {
+//                    debugPrint("갤러리 권한 있음")
                     // 가장 최근 비디오 어셋을 가져옴
                     let fetchOptions = PHFetchOptions()
                     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
                     fetchOptions.fetchLimit = 1 // 1개만 가져옴
                     let fetchResult = PHAsset.fetchAssets(with: .video, options: fetchOptions)
                     if let asset = fetchResult.firstObject, let creationDate = asset.creationDate {
+//                        debugPrint("비디오 있음")
                         let timeSinceRecordingStopped = Date().timeIntervalSince(creationDate)
+//                        debugPrint(timeSinceRecordingStopped)
                         // If the asset was created within the last 60 seconds, assume it was saved
                         if timeSinceRecordingStopped < 10 {
+//                            debugPrint("10초내 생성된 비디오 확인됨")
                             completion(true, asset.localIdentifier)
                         } else {
                             completion(false, nil)
@@ -557,8 +573,10 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             let analyzingVC: AnalyzingViewController
             if isCreatingNewPresentation! {
                 newPresentation!.videoKey = identifier
+//                debugPrint("새로운 발표 생성 페이지로 가기")
                 analyzingVC = AnalyzingViewController(newPresentation: newPresentation!)
             } else {
+//                debugPrint("새로운 연습 생성 페이지로 가기")
                 analyzingVC = AnalyzingViewController(newPractice: newPractice!, assetIdentifier: identifier)
             }
 

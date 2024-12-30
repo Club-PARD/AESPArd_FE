@@ -9,7 +9,6 @@ import Foundation
 
 struct NewPractice: Codable {
     var presentationId: String?
-    var practiceName: String?
     var videoKey: String?
     var eyePercentage: Double?
 }
