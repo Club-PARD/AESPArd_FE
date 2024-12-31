@@ -240,7 +240,7 @@ class SearchViewController: UIViewController {
         animator.startAnimation()
         
         // 모달 닫기 지연
-        UIView.animate(withDuration: 1.0,
+        UIView.animate(withDuration: 0.3,
                        delay: 0.5,
                        options: [.curveEaseInOut],
                        animations: {
