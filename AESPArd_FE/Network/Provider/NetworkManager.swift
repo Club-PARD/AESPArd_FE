@@ -30,7 +30,7 @@ final class NetworkManager {
 //             NetworkLoggerPlugin() // helpful for logging network requests
         ]
     )
-    private let newRresentationProvider = MoyaProvider<NewPresentationAndNewPracticeService>(
+    private let newPresentationProvider = MoyaProvider<NewPresentationAndNewPracticeService>(
         plugins: [
             NetworkLoggerPlugin() // Logs requests & responses (helpful in debug)
         ]
@@ -173,33 +173,60 @@ final class NetworkManager {
         }
 
    // MARK: - 새로운 발표 생성
-    func createPresentation(
+//    func uploadPresentation(
+//        newPresentation: NewPresentation,
+//        completion: @escaping (Result<NewPresentation, Error>) -> Void
+//    ) {
+//        newPresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
+//            switch result {
+//            case .success(let response):
+//                do {
+//                    // Decode server's response as `NewPresentation`
+//                    let createdPresentation = try JSONDecoder().decode(NewPresentation.self, from: response.data)
+//                    completion(.success(createdPresentation))
+//                } catch {
+//                    completion(.failure(error))
+//                }
+//            case .failure(let error):
+//                completion(.failure(error))
+//            }
+//        }
+//    }
+    
+    func uploadPresentation(
         newPresentation: NewPresentation,
-        completion: @escaping (Result<NewPresentation, Error>) -> Void
+        completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        newRresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
+        newPresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
             switch result {
             case .success(let response):
-                do {
-                    // Decode the response as Presentation (adjust based on your server's response)
-                    let created = try JSONDecoder().decode(NewPresentation.self, from: response.data)
-                    completion(.success(created))
-                } catch {
+                if (200...299).contains(response.statusCode) {
+                    // Status code indicates success
+                    completion(.success(()))
+                } else {
+                    // Status code indicates an error
+                    let error = NSError(
+                        domain: "AESPArd_FE.NetworkManager",
+                        code: response.statusCode,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Server returned status code: \(response.statusCode)."
+                        ]
+                    )
                     completion(.failure(error))
                 }
             case .failure(let error):
-                // Handle network request failure
+                // Handle request failure
                 completion(.failure(error))
             }
         }
     }
     
     // MARK: - 새로운 연습 생성
-    func createNewPractice(
+    func uploadNewPractice(
         newPractice: NewPractice,
         completion: @escaping (Result<NewPractice, Error>) -> Void
     ) {
-        newRresentationProvider.request(.postNewPractice(newPractice: newPractice)) { result in
+        newPresentationProvider.request(.postNewPractice(newPractice: newPractice)) { result in
             switch result {
             case .success(let response):
                 do {
@@ -219,7 +246,7 @@ final class NetworkManager {
         wavData: Data,
         completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
     ) {
-        newRresentationProvider.request(.postAudio(wavData: wavData)) { result in
+        newPresentationProvider.request(.postAudio(wavData: wavData)) { result in
             switch result {
             case .success(let response):
                 do {
@@ -230,6 +257,67 @@ final class NetworkManager {
                     completion(.failure(error))
                 }
             case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - 새로운 발표 연습과 오디오 한번에 같이 보내는 함수
+    func uploadPracticeAndAudio(
+        presentationId: String,
+        videoKey: String,
+        eyePercentage: Int,
+        wavData: Data,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ){
+        newPresentationProvider.request(.postPracticeAndAudio(presentationId: presentationId, videoKey: videoKey, eyePercentage: eyePercentage, wavData: wavData)) { result in
+            switch result {
+            case .success(let response):
+                if (200...299).contains(response.statusCode) {
+                    completion(.success(()))
+                } else {
+                    let error = NSError(
+                        domain: "AESPArd_FE.NetworkManager",
+                        code: response.statusCode,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Server returned status code: \(response.statusCode)."
+                        ]
+                    )
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+   // MARK: - 발표 새로 생성 후에 만든 연습 보내는 함수
+    
+    func uploadNewPracticeAfterPresentationCreated(
+        userId: String,
+        newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation,
+        wavData: Data,
+        completion: @escaping (Result<Void, Error>) -> Void
+    ) {
+        newPresentationProvider.request(.postNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData)) { result in
+            switch result {
+            case .success(let response):
+                if (200...299).contains(response.statusCode) {
+                    // Status code indicates success
+                    completion(.success(()))
+                } else {
+                    // Status code indicates an error
+                    let error = NSError(
+                        domain: "AESPArd_FE.NetworkManager",
+                        code: response.statusCode,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Server returned status code: \(response.statusCode)."
+                        ]
+                    )
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                // Handle request failure
                 completion(.failure(error))
             }
         }
