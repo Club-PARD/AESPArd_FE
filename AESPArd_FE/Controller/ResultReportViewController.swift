@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Photos
+import AVKit
 
 class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
@@ -91,6 +93,17 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //비디오 플레이어
+        PHPhotoLibrary.requestAuthorization { status in
+            DispatchQueue.main.async {
+                if status == .authorized {
+                    self.fetchPHAssetFromIdentifier(identifier: self.practiceData.videoKey)
+                } else {
+                    print("사진 라이브러리 접근 권한이 필요합니다.")
+                }
+            }
+        }
         
         //총 점수
         practiceTotalScoreView.totalScoreLabel.text = "\(practiceData.totalScore)점"
@@ -263,6 +276,71 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         transparentOverlay.isHidden = true // 투명 뷰 숨기기
     }
     
+    //MARK: - 비디오 플레이어 관련 함수
+    
+    //비디오 관련 함수
+    // videoKey로 PHAsset 찾기
+    func fetchPHAssetFromIdentifier(identifier: String) {
+        if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil).firstObject {
+            // PHAsset을 찾았다면 비디오를 가져와서 재생
+            fetchVideoFromPHAsset(asset: asset)
+        } else {
+            print("해당 identifier에 대한 PHAsset을 찾을 수 없습니다.")
+        }
+    }
+
+    // PHAsset에서 비디오 URL을 가져오는 함수
+    func fetchVideoFromPHAsset(asset: PHAsset) {
+        let options = PHVideoRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        
+        PHImageManager.default().requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, info in
+            guard let self = self else { return }
+            
+            if let urlAsset = avAsset as? AVURLAsset {
+                let videoURL = urlAsset.url
+                print("찾은 비디오 URL: \(videoURL)")
+                
+                DispatchQueue.main.async {
+                    // 기존 플레이어 제거
+                    self.removeCurrentVideoPlayer()
+                    
+                    // 새 비디오 로드 및 재생
+                    self.setupVideoPlayer(with: videoURL)
+                }
+            }
+        }
+    }
+
+    // AVPlayerViewController로 비디오를 재생
+    private func setupVideoPlayer(with url: URL) {
+        let player = AVPlayer(url: url)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        
+        // 비디오를 띄울 UIView에 AVPlayerViewController의 view를 추가
+        self.addChild(playerViewController)
+        playerViewController.view.frame = self.videoPlayerView.customView.bounds
+        self.videoPlayerView.customView.addSubview(playerViewController.view)
+        playerViewController.didMove(toParent: self)
+        
+        // 비디오 재생 시작
+        player.play()
+    }
+
+    // 기존 비디오 플레이어 제거
+    private func removeCurrentVideoPlayer() {
+        // 현재 화면에 있는 AVPlayerViewController를 찾아서 제거
+        for child in children {
+            if let playerViewController = child as? AVPlayerViewController {
+                playerViewController.player?.pause() // 비디오 정지
+                playerViewController.view.removeFromSuperview() // 화면에서 제거
+                playerViewController.removeFromParent() // 자식 뷰컨트롤러에서 제거
+            }
+        }
+    }
+    
+    //MARK: - alert 함수
     
     // 이름 수정하기 Alert
     @objc func editNameAlert() {
