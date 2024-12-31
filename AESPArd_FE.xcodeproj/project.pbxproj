@@ -343,6 +343,7 @@
 				DEVELOPMENT_TEAM = 4JXC27SJKM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = pree;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record audio during video recording.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need to save recorded videos to your photo library.";
@@ -376,6 +377,7 @@
 				DEVELOPMENT_TEAM = 4JXC27SJKM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AESPArd_FE/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = pree;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record video and track eyes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record audio during video recording.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need to save recorded videos to your photo library.";
