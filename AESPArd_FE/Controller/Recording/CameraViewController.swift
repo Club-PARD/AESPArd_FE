@@ -16,6 +16,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // MARK: - 이전 뷰컨에서 받아오는 데이터 값들
     private var newPresentation: NewPresentation?
+    private var newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation?
     private var newPractice: NewPractice?
     private var isShowingTimeSelected: Bool?
     private var isShowingMeSelected: Bool?
@@ -29,6 +30,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // 새로운 발표 생성자
     init(newPresentation: NewPresentation, isShowingTimeSelected: Bool, isShowingMeSelected: Bool){
         self.newPresentation = newPresentation
+        self.newPracticeAfterNewPresentation = NewPracticeAfterNewPresentation()
+        self.newPracticeAfterNewPresentation!.userId = newPresentation.userId
         self.isShowingTimeSelected = isShowingTimeSelected
         self.isShowingMeSelected = isShowingMeSelected
         self.newPresentation!.showMeOnScreen = isShowingMeSelected
@@ -124,6 +127,10 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTapped), name: .backButtonTapped, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleStartStopRecordingTapped), name: .startStopRecordingButtonTapped, object: nil)
         
+        if isCreatingNewPresentation! {
+            uploadNewPresentation()
+        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -148,6 +155,21 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         lookTimer?.invalidate()
         recordingTimer?.invalidate()
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    
+    
+    // MARK: - 서버에 발표 보내는 함수
+    
+    private func uploadNewPresentation(){
+        NetworkManager.shared.uploadPresentation(newPresentation: newPresentation!) { result in
+            switch result {
+            case .success:
+                print("Presentation uploaded successfully!")
+            case .failure(let error):
+                print("Failed to upload presentation: \(error.localizedDescription)")
+            }
+        }
     }
     
     
@@ -451,7 +473,11 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 return
             }
             
-            newPresentation!.eyeTrackingPercentage = calculateEyeTrackingTime()
+            if isCreatingNewPresentation! {
+                newPracticeAfterNewPresentation!.eyePercentage = calculateEyeTrackingTime()
+            } else {
+                newPractice?.eyePercentage = calculateEyeTrackingTime()
+            }
             self.isRecording = false
             stopAllTimers()
             NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": false])
@@ -578,14 +604,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             
             let analyzingVC: AnalyzingViewController
             if isCreatingNewPresentation! {
-                newPresentation!.videoKey = identifier
-//                debugPrint("새로운 발표 생성 페이지로 가기")
-                analyzingVC = AnalyzingViewController(newPresentation: newPresentation!)
+                newPracticeAfterNewPresentation!.videoKey = identifier
+                analyzingVC = AnalyzingViewController(newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!)
             } else {
-//                debugPrint("새로운 연습 생성 페이지로 가기")
-                analyzingVC = AnalyzingViewController(newPractice: newPractice!, assetIdentifier: identifier)
+                newPractice!.videoKey = identifier
+                analyzingVC = AnalyzingViewController(newPractice: newPractice!)
             }
-
+           
+            
             if let navigationController = self.navigationController {
                 navigationController.pushViewController(analyzingVC, animated: true)
             } else {
