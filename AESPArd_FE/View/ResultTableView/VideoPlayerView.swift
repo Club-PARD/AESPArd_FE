@@ -5,9 +5,16 @@
 //  Created by 이유현 on 12/24/24.
 //
 
+import AVKit
+import AVFoundation
+
 import UIKit
+import Photos
 
 class VideoPlayerView: UIView {
+    
+    private var player: AVPlayer?
+    private var playerLayer: AVPlayerLayer?
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -19,7 +26,7 @@ class VideoPlayerView: UIView {
     }
     
     
-    private let customView: UIView = {
+    let customView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .black
