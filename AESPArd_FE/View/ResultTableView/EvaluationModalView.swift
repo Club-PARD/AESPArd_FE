@@ -35,7 +35,7 @@ class EvaluationModalView: UIViewController {
         label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
         label.textColor = UIColor(red: 0, green: 0.125, blue: 0.42, alpha: 1)
         label.textAlignment = .left
-        label.text = "Pree 평가 항목 및 감점 기준"
+        label.text = "pree 평가 항목 및 감점 기준"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -137,9 +137,6 @@ class EvaluationModalView: UIViewController {
         setupUI()
 
         
-        // 배경 터치 시 닫기
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(exit))
-        view.addGestureRecognizer(tapGesture)
     }
     
     // MARK: - UI 설정
