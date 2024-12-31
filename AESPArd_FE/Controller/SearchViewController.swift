@@ -85,19 +85,31 @@ class SearchViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // 애니메이션 시작
-        UIView.animate(withDuration: 0.4, animations: {
+        // 스프링 효과를 위한 타이밍 파라미터 설정 (더 많이 튕기도록 dampingRatio를 낮춤)
+        let timingParameters = UISpringTimingParameters(dampingRatio: 1, initialVelocity: .zero)
+        let animator = UIViewPropertyAnimator(duration: 0.5, timingParameters: timingParameters)
+        
+        animator.addAnimations {
+            // 애니메이션 중 검색바 너비 변경
             if let searchBarWidthConstraint = self.searchBar.constraints.first(where: { $0.firstAttribute == .width }) {
                 searchBarWidthConstraint.constant = self.view.frame.width - 32
             }
             
+            // 뷰의 Y 위치 변경
             self.view.frame.origin.y = 0
             self.view.layoutIfNeeded()
-        }, completion: { _ in
+        }
+        
+        // 애니메이션이 끝난 후 closeButton을 보여주고 검색바에 포커스를 맞추기
+        animator.addCompletion { _ in
             self.closeButton.isHidden = false
             self.searchBar.becomeFirstResponder()
-        })
+        }
+        
+        // 애니메이션 시작
+        animator.startAnimation()
     }
+
     
     
     
@@ -209,24 +221,37 @@ class SearchViewController: UIViewController {
         searchBar.resignFirstResponder() // 키보드 숨기기
         tableView.reloadData()
         
-        // 모달이 사라지면서 검색바 너비 줄이기
-        UIView.animate(withDuration: 0.4, animations: {
+        // 스프링 애니메이션 설정
+        let timingParameters = UISpringTimingParameters(dampingRatio: 1, initialVelocity: .zero)
+        let animator = UIViewPropertyAnimator(duration: 0.5, timingParameters: timingParameters)
+        
+        animator.addAnimations {
             // 검색바 너비 줄이기
             if let searchBarWidthConstraint = self.searchBar.constraints.first(where: { $0.firstAttribute == .width }) {
-                searchBarWidthConstraint.constant = 0 // 검색바 너비를 0으로 줄임
+                searchBarWidthConstraint.constant = 40 // 검색바 너비를 0으로 줄임
+                self.searchBar.placeholder = ""
             }
-            
-            // 모달 뷰 위치 변경
-            self.view.frame.origin.y = self.finalYPosition + 48
             
             // 레이아웃 업데이트
             self.view.layoutIfNeeded()
-        }, completion: { _ in
-            self.closeButton.isHidden = true
-            // 애니메이션 완료 후 모달 닫기
+        }
+        
+        // 애니메이션 시작
+        animator.startAnimation()
+        
+        // 모달 닫기 지연
+        UIView.animate(withDuration: 0.3,
+                       delay: 0.5,
+                       options: [.curveEaseInOut],
+                       animations: {
+            self.view.alpha = 0
+        }) { _ in
             self.dismiss(animated: false, completion: nil)
-        })
+        }
+
     }
+
+
     
     //MARK: - API
     // 토글 patch
@@ -307,9 +332,8 @@ extension SearchViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder() // 키보드 숨기기
         
         // 입력된 텍스트 가져오기
-        if let searchTerm = searchBar.text, !searchTerm.isEmpty {
-            // 입력된 텍스트가 있을 때 searchPresentationsAPI 호출
-            searchPresentationsAPI(searchTerm: searchTerm)
-        }
+        let searchTerm = searchBar.text ?? ""
+        searchPresentationsAPI(searchTerm: searchTerm)
+        
     }
 }

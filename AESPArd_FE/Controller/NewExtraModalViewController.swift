@@ -39,6 +39,7 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
     var modalViewBottomConstraint: NSLayoutConstraint!
     private var timeSettingButtonConstraints: [NSLayoutConstraint] = []
     private var textFieldConstraints: [NSLayoutConstraint] = []
+    var textLength: Int = 0
     
     
     // MARK: - 1. 각종 변수 선언 및 정의
@@ -346,6 +347,11 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             timeErrorLabel.isHidden = false
             return
         }
+        else if textLength > 15 {
+            timeErrorLabel.text = "최대 글자는 15자에요"
+            timeErrorLabel.isHidden = false
+            return
+        }
 
         // 발표제목 추가
         newPresentation.presentationName = ptName.text!
@@ -446,6 +452,17 @@ class NewExtraModalViewController: UIViewController, UITextFieldDelegate {
             }
         }
     }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+            // 현재 텍스트와 새로 입력된 텍스트 결합
+            let currentText = textField.text ?? ""
+            guard let stringRange = Range(range, in: currentText) else { return false }
+            let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+            textLength = updatedText.count
+            
+            // 15자 초과하면 입력 불가
+            return updatedText.count <= 16
+        }
 
 }
 
