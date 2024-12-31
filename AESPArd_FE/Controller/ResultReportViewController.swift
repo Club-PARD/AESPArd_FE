@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Photos
+import AVKit
 
 class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
@@ -42,7 +44,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
     
     //hep 버튼 텍스트
-    var helpText : [String] = ["설정한 발표시간보다 부족하거나\n초과되었는지를 측정합니다","WPM은 말의 속도를 측정하는 단위에요\n사람이 알아듣기 가장 적절한 WPM을\n기준으로 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 화면을\n바라본 비율을 측정해요 "]
+    var helpText : [String] = ["설정한 발표시간보다 부족하거나\n초과되었는지를 측정해요","WPM은 말의 속도를 나타내는 \n단위에요. 가장 이해하기 쉬운 \n속도를 기준으로 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 화면을\n바라본 비율을 측정해요 "]
     
     // 드롭다운 상태 저장
     var dropDownStates: [Bool] = Array(repeating: false, count: 6)
@@ -92,6 +94,17 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 투명한 뷰에 터치 이벤트 추가
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOverlayTap))
         transparentOverlay.addGestureRecognizer(tapGesture)
+        
+        //비디오 플레이어
+        PHPhotoLibrary.requestAuthorization { status in
+            DispatchQueue.main.async {
+                if status == .authorized {
+                    self.fetchPHAssetFromIdentifier(identifier: self.practiceData.videoKey)
+                } else {
+                    print("사진 라이브러리 접근 권한이 필요합니다.")
+                }
+            }
+        }
         
         //총 점수
         practiceTotalScoreView.totalScoreLabel.text = "\(practiceData.totalScore)점"
@@ -264,6 +277,71 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         transparentOverlay.isHidden = true // 투명 뷰 숨기기
     }
     
+    //MARK: - 비디오 플레이어 관련 함수
+    
+    //비디오 관련 함수
+    // videoKey로 PHAsset 찾기
+    func fetchPHAssetFromIdentifier(identifier: String) {
+        if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil).firstObject {
+            // PHAsset을 찾았다면 비디오를 가져와서 재생
+            fetchVideoFromPHAsset(asset: asset)
+        } else {
+            print("해당 identifier에 대한 PHAsset을 찾을 수 없습니다.")
+        }
+    }
+
+    // PHAsset에서 비디오 URL을 가져오는 함수
+    func fetchVideoFromPHAsset(asset: PHAsset) {
+        let options = PHVideoRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        
+        PHImageManager.default().requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, info in
+            guard let self = self else { return }
+            
+            if let urlAsset = avAsset as? AVURLAsset {
+                let videoURL = urlAsset.url
+                print("찾은 비디오 URL: \(videoURL)")
+                
+                DispatchQueue.main.async {
+                    // 기존 플레이어 제거
+                    self.removeCurrentVideoPlayer()
+                    
+                    // 새 비디오 로드 및 재생
+                    self.setupVideoPlayer(with: videoURL)
+                }
+            }
+        }
+    }
+
+    // AVPlayerViewController로 비디오를 재생
+    private func setupVideoPlayer(with url: URL) {
+        let player = AVPlayer(url: url)
+        let playerViewController = AVPlayerViewController()
+        playerViewController.player = player
+        
+        // 비디오를 띄울 UIView에 AVPlayerViewController의 view를 추가
+        self.addChild(playerViewController)
+        playerViewController.view.frame = self.videoPlayerView.customView.bounds
+        self.videoPlayerView.customView.addSubview(playerViewController.view)
+        playerViewController.didMove(toParent: self)
+        
+        // 비디오 재생 시작
+        player.play()
+    }
+
+    // 기존 비디오 플레이어 제거
+    private func removeCurrentVideoPlayer() {
+        // 현재 화면에 있는 AVPlayerViewController를 찾아서 제거
+        for child in children {
+            if let playerViewController = child as? AVPlayerViewController {
+                playerViewController.player?.pause() // 비디오 정지
+                playerViewController.view.removeFromSuperview() // 화면에서 제거
+                playerViewController.removeFromParent() // 자식 뷰컨트롤러에서 제거
+            }
+        }
+    }
+    
+    //MARK: - alert 함수
     
     // 이름 수정하기 Alert
     @objc func editNameAlert() {
