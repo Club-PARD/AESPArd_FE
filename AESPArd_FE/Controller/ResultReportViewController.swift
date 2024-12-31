@@ -41,7 +41,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
     
     //hep 버튼 텍스트
-    var helpText : [String] = ["설정한 발표시간보다 부족하거나\n초과되었는지를 측정합니다","WPM은 말의 속도를 측정하는 단위에요\n사람이 알아듣기 가장 적절한 WPM을\n기준으로 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 화면을\n바라본 비율을 측정해요 "]
+    var helpText : [String] = ["설정한 발표시간보다 부족하거나\n초과되었는지를 측정해요","WPM은 말의 속도를 나타내는 \n단위에요. 가장 이해하기 쉬운 \n속도를 기준으로 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 화면을\n바라본 비율을 측정해요 "]
     
     // 드롭다운 상태 저장
     var dropDownStates: [Bool] = Array(repeating: false, count: 6)
