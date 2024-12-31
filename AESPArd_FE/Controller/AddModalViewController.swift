@@ -109,6 +109,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         setupTapGestureForOverlay()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.allowsMultipleSelection = false
     }
     // MARK: - 2. 제약조건 생성 및 애니메이션 설정
     func setUI() {
@@ -312,16 +313,30 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: AddModalTableViewCell.identifier, for: indexPath) as? AddModalTableViewCell else {return UITableViewCell()}
-//        cell.backgroundColor = .white
-//        cell.selectionStyle = .none 
-//        cell.layoutMargins = UIEdgeInsets.zero
-//        cell.preservesSuperviewLayoutMargins = false
+        
+        if indexPath != previouslySelectedIndexPath {
+               cell.backgroundColor = .white  // 초기화
+               cell.selectionStyle = .none   // 선택 해제
+               cell.layoutMargins = UIEdgeInsets.zero
+               cell.preservesSuperviewLayoutMargins = false
+           } else {
+               // 선택된 셀은 색상을 변경하여 선택 상태 유지
+               cell.backgroundColor = UIColor(red: 0.9, green: 0.93, blue: 1, alpha: 1)  // 연한 파란색
+               cell.selectionStyle = .none // 선택 스타일을 설정
+           }
         let presentation = presentationList[indexPath.section]
         presentationName = presentation.presentationName
         updatedAtText = presentation.updatedAtText
         totalPractices = presentation.totalPractices
         
         cell.configure(presentationName: presentationName!, updatedAtText: updatedAtText!, totalPractices: totalPractices!)
+        
+        if indexPath == previouslySelectedIndexPath {
+               cell.isSelectedCell = true
+           } else {
+               cell.isSelectedCell = false
+           }
+        
         return cell
     }
     

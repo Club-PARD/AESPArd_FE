@@ -17,7 +17,7 @@ class AddModalTableViewCell: UITableViewCell {
     var presentationName: String?
     var updatedAtText: String?
     var totalPractices: Int?
-    
+    var isSelectedCell: Bool = false
 
     static let identifier = "AddModalTableViewCell"
     
