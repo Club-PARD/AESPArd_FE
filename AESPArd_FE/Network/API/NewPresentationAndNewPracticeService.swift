@@ -14,7 +14,8 @@ enum NewPresentationAndNewPracticeService {
     case postNewPresentation(newPresentation: NewPresentation)
     case postNewPractice(newPractice: NewPractice)
     case postAudio(wavData: Data)
-    case postPracticeAndAudio(practice: NewPractice, wavData: Data)
+    case postPracticeAndAudio(presentationId: String, videoKey: String, eyePercentage: Int, wavData: Data)
+    case postNewPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data)
 }
 
 extension NewPresentationAndNewPracticeService: TargetType {
@@ -26,19 +27,21 @@ extension NewPresentationAndNewPracticeService: TargetType {
     var path: String {
         switch self {
         case .postNewPresentation:
-            return "/presentations/new-presentation-with-practice"
+            return "/presentations/create-presentation"
         case .postNewPractice:
             return "/practices"
         case .postAudio:
             return  "/audio/upload"
-        case .postPracticeAndAudio:
-            return ""
+        case .postPracticeAndAudio(let presentationId, _, _, _):
+            return "/practices/\(presentationId)/add-practice"
+        case .postNewPracticeAfterPresentationCreated(let userId, _, _):
+            return "/practices/\(userId)/recent-presentation/add-practice"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .postNewPresentation, .postNewPractice , .postAudio, .postPracticeAndAudio:
+        case .postNewPresentation, .postNewPractice , .postAudio, .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
             return .post
         }
     }
@@ -48,7 +51,7 @@ extension NewPresentationAndNewPracticeService: TargetType {
         case .postNewPresentation(let newPresentation):
             // Encode Presentation struct to JSON
             return .requestJSONEncodable(newPresentation)
-        
+            
         case .postNewPractice(let newPractice):
             return .requestJSONEncodable(newPractice)
             
@@ -61,25 +64,90 @@ extension NewPresentationAndNewPracticeService: TargetType {
                 mimeType: "audio/wav"
             )
             return .uploadMultipart([formData])
-        case .postPracticeAndAudio(let newPractice, let wavData):
+            
+        case .postPracticeAndAudio(_, let videoKey, let eyePercentage, let wavData):
             var multipartData: [MultipartFormData] = []
             
-            // Convert the `NewPractice` model to JSON data
-            if let jsonData = try? JSONEncoder().encode(newPractice) {
-                let jsonMultipart = MultipartFormData(
-                    provider: .data(jsonData),
-                    name: "practice",
-                    mimeType: "application/json"
+            if let videoKeyData = videoKey.data(using: .utf8) {
+                let videoKeyMultipart = MultipartFormData(
+                    provider: .data(videoKeyData),
+                    name: "videoKey",
+                    mimeType: "text/plain"
                 )
-                multipartData.append(jsonMultipart)
+                multipartData.append(videoKeyMultipart)
+            } else {
+                print("Failed to encode videoKey to data.")
+            }
+            
+            // Add eyeTrackingPercentage as a separate text field
+            let eyePercentageString = String(eyePercentage)
+            if let eyePercentageData = eyePercentageString.data(using: .utf8) {
+                let eyePercentageMultipart = MultipartFormData(
+                    provider: .data(eyePercentageData),
+                    name: "eyePercentage",
+                    mimeType: "text/plain"
+                )
+                multipartData.append(eyePercentageMultipart)
+            } else {
+                print("Failed to encode eyeTrackingPercentage to data.")
             }
             
             // Add the audio file
             let audioMultipart = MultipartFormData(
                 provider: .data(wavData),
-                name: "audio",
-                fileName: "audio.m4a",
-                mimeType: "audio/m4a"
+                name: "audioFile",
+                fileName: "audio.wav",
+                mimeType: "audio/wav"
+            )
+            multipartData.append(audioMultipart)
+            
+            return .uploadMultipart(multipartData)
+        case .postNewPracticeAfterPresentationCreated(let userId, let newPracticeAfterNewPresentation, let wavData):
+            var multipartData: [MultipartFormData] = []
+            
+//            let userId = newPracticeAfterNewPresentation.userId
+            let videoKey = newPracticeAfterNewPresentation.videoKey
+            let eyePercentage = newPracticeAfterNewPresentation.eyePercentage
+            
+            if let userIdData = userId.data(using: .utf8) {
+                let userIdMultipart = MultipartFormData(
+                    provider: .data(userIdData),
+                    name: "userId",
+                    mimeType: "text/plain"
+                )
+                multipartData.append(userIdMultipart)
+            }
+            
+            if let videoKeyData = videoKey!.data(using: .utf8) {
+                let videoKeyMultipart = MultipartFormData(
+                    provider: .data(videoKeyData),
+                    name: "videoKey",
+                    mimeType: "text/plain"
+                )
+                multipartData.append(videoKeyMultipart)
+            } else {
+                print("Failed to encode videoKey to data.")
+            }
+            
+            // Add eyeTrackingPercentage as a separate text field
+            let eyePercentageString = String(eyePercentage!)
+            if let eyePercentageData = eyePercentageString.data(using: .utf8) {
+                let eyePercentageMultipart = MultipartFormData(
+                    provider: .data(eyePercentageData),
+                    name: "eyePercentage",
+                    mimeType: "text/plain"
+                )
+                multipartData.append(eyePercentageMultipart)
+            } else {
+                print("Failed to encode eyeTrackingPercentage to data.")
+            }
+            
+            // Add the audio file
+            let audioMultipart = MultipartFormData(
+                provider: .data(wavData),
+                name: "audioFile",
+                fileName: "audio.wav",
+                mimeType: "audio/wav"
             )
             multipartData.append(audioMultipart)
             
@@ -87,9 +155,10 @@ extension NewPresentationAndNewPracticeService: TargetType {
         }
     }
     
+    
     var headers: [String : String]? {
-        switch self{
-        case .postAudio, .postPracticeAndAudio:
+        switch self {
+        case .postAudio, .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
             return ["Content-Type": "multipart/form-data"]
         default:
             return ["Content-Type": "application/json"]
@@ -101,23 +170,24 @@ extension NewPresentationAndNewPracticeService: TargetType {
     
     
     // Mock or example data for testing in the simulator or with unit tests
-//    var sampleData: Data {
-//        switch self {
-//        case .postNewPresentation:
-//            return """
-//                {
-//                  "userId": "1234",
-//                  "presentationName": "My Sample",
-//                  "idealMinTime": 5.0,
-//                  "idealMaxTime": 8.0,
-//                  "eyeTrackingPercentage": 80,
-//                  "videoKey": "myVideoKey",
-//                  "showTimeOnScreen": true,
-//                  "showMeOnScreen": false
-//                }
-//                """.data(using: .utf8)!
-//        case .postAudio:
-//            return "".data(using: .utf8)!
-//        }
-//    }
+    //    var sampleData: Data {
+    //        switch self {
+    //        case .postNewPresentation:
+    //            return """
+    //                {
+    //                  "userId": "1234",
+    //                  "presentationName": "My Sample",
+    //                  "idealMinTime": 5.0,
+    //                  "idealMaxTime": 8.0,
+    //                  "eyeTrackingPercentage": 80,
+    //                  "videoKey": "myVideoKey",
+    //                  "showTimeOnScreen": true,
+    //                  "showMeOnScreen": false
+    //                }
+    //                """.data(using: .utf8)!
+    //        case .postAudio:
+    //            return "".data(using: .utf8)!
+    //        }
+    //    }
 }
+

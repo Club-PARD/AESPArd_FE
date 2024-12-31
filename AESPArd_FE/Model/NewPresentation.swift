@@ -8,12 +8,10 @@
 import Foundation
 
 struct NewPresentation: Codable {
-    var userId: String
-    var presentationName: String
-    var idealMinTime: Double
-    var idealMaxTime: Double
-    var eyeTrackingPercentage: Int
-    var videoKey: String
-    var showTimeOnScreen: Bool
-    var showMeOnScreen: Bool
+    var userId: String?
+    var presentationName: String?
+    var idealMinTime: Double?
+    var idealMaxTime: Double?
+    var showTimeOnScreen: Bool?
+    var showMeOnScreen: Bool?
 }

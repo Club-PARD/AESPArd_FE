@@ -21,11 +21,12 @@ extension FixedWidthInteger {
 }
 
 class AnalyzingViewController: UIViewController {
-   
+    
     
     // MARK: - 이전 뷰컨에서 받아오는 변수값들
-    private var newPresentation: NewPresentation?
+//    private var newPresentation: NewPresentation?
     private var newPractice: NewPractice?
+    private var newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation?
     private var assetIdentifier: String?
     private var audioData: Data? // Stores the extracted audio data
     
@@ -35,23 +36,23 @@ class AnalyzingViewController: UIViewController {
     // MARK: - 생성자
     
     // 새발표용
-    init(newPresentation: NewPresentation){
+    init(newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation){
         super.init(nibName: nil, bundle: nil)
-        self.newPresentation = newPresentation
-        self.assetIdentifier = newPresentation.videoKey
+        self.newPracticeAfterNewPresentation = newPracticeAfterNewPresentation
+        self.assetIdentifier = newPracticeAfterNewPresentation.videoKey
         isCreatingNewPresentation = true
         isCreatingNewPractice = false
-        debugPrint(newPresentation)
+        debugPrint(newPracticeAfterNewPresentation)
     }
     
     // 기존 발표의 새 연습용
-    init(newPractice: NewPractice, assetIdentifier: String){
+    init(newPractice: NewPractice){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
-        self.assetIdentifier = assetIdentifier
+        self.assetIdentifier = newPractice.videoKey
         isCreatingNewPresentation = false
         isCreatingNewPractice = true
-        debugPrint(newPresentation)
+        debugPrint(newPractice)
     }
     
     required init?(coder: NSCoder) {
@@ -96,10 +97,10 @@ class AnalyzingViewController: UIViewController {
         
         view.addSubview(waitingLabel)
         view.addSubview(indicator)
-
+        
         // Layout Extract & Upload Button
         NSLayoutConstraint.activate([
-    
+            
             indicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             indicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
@@ -140,7 +141,7 @@ class AnalyzingViewController: UIViewController {
         }
     }
     
-
+    
     
     // 비디오에서 오디오로 변한하는 함수를 실행하고 결과값에 따라 서버로 전송 혹은 에러 처리하는 함수
     private func extractAndUpload() {
@@ -165,6 +166,17 @@ class AnalyzingViewController: UIViewController {
             } else {
                 //self.uploadAudioViaMoya(wavData)
                 //uploadOnlyAudio(wavData)
+//                if isCreatingNewPresentation! {
+//                   
+//                } else {
+//                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
+//                }
+                if isCreatingNewPresentation! {
+                    let userId = newPracticeAfterNewPresentation!.userId
+                    uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
+                } else {
+                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
+                }
             }
         }
     }
@@ -180,7 +192,7 @@ class AnalyzingViewController: UIViewController {
             guard let self = self, let avAsset = avAsset else {
                 
                 DispatchQueue.main.async {
-                            self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
+                    self?.showAlert(title: "Error", message: "Unable to retrieve AVAsset.")
                 }
                 completion(nil, true)
                 return
@@ -200,7 +212,7 @@ class AnalyzingViewController: UIViewController {
                     completion(wavData, isSilent)
                 }
             }
-
+            
         }
     }
     
@@ -252,7 +264,7 @@ class AnalyzingViewController: UIViewController {
             
             while let sampleBuffer = trackOutput.copyNextSampleBuffer(), // 다음 샘플 버퍼를 가져옴
                   // 버퍼 있음
-                  let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) { // 버퍼 가져와서 넣음
+                    let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) { // 버퍼 가져와서 넣음
                 let length = CMBlockBufferGetDataLength(blockBuffer)
                 var data = Data(count: length) //This allocates memory to hold the incoming audio bytes.
                 
@@ -262,9 +274,9 @@ class AnalyzingViewController: UIViewController {
                     CMBlockBufferCopyDataBytes(blockBuffer, atOffset: 0, dataLength: length, destination: bytes.baseAddress!)
                 }
                 
-//                 2) Check the amplitude in this chunk
-//                    We'll interpret the chunk as an array of 16-bit samples
-//                 오디오 파일에 진짜 사운드가 들어이있는지 확인
+                //                 2) Check the amplitude in this chunk
+                //                    We'll interpret the chunk as an array of 16-bit samples
+                //                 오디오 파일에 진짜 사운드가 들어이있는지 확인
                 let sampleCount = length / MemoryLayout<Int16>.size
                 data.withUnsafeBytes { (samples: UnsafeRawBufferPointer) in
                     let int16Pointer = samples.bindMemory(to: Int16.self)
@@ -352,19 +364,68 @@ class AnalyzingViewController: UIViewController {
     
     
     // 오디오만 따로 전달
-    private func uploadAudio(_ wavData: Data) {
-        // Create the upload
-        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
+//    private func uploadAudio(_ wavData: Data) {
+//        // Create the upload
+//        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
+//            guard let self = self else { return }
+//            
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let response):
+//                    if response.success {
+//                        self.showAlert(title: "Success", message: response.message)
+//                    } else {
+//                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
+//                    }
+//                    
+//                case .failure(let error):
+//                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
+    
+    private func uploadPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data) {
+        NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
+            switch result {
+            case .success:
+                print("New practice after presentation created successfully!")
+            case .failure(let error):
+                print("Failed to upload new practice: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data) {
+        // Safely unwrap the required fields from NewPractice
+        guard let presentationId = newPractice.presentationId, !presentationId.isEmpty else {
+            showAlert(title: "Error", message: "No presentation ID available.")
+            return
+        }
+        
+        guard let videoKey = newPractice.videoKey, !videoKey.isEmpty else {
+            showAlert(title: "Error", message: "Video Key is missing.")
+            return
+        }
+        
+        guard let eyePercentage = newPractice.eyePercentage else {
+            showAlert(title: "Error", message: "Eye Tracking Percentage is missing.")
+            return
+        }
+        
+        // Proceed with uploading if all required fields are present
+        NetworkManager.shared.uploadPracticeAndAudio(
+            presentationId: presentationId,
+            videoKey: videoKey,
+            eyePercentage: eyePercentage,
+            wavData: wavData
+        ) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 switch result {
-                case .success(let response):
-                    if response.success {
-                        self.showAlert(title: "Success", message: response.message)
-                    } else {
-                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
-                    }
+                case .success:
+                    self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
                     
                 case .failure(let error):
                     self.showAlert(title: "Upload Error", message: error.localizedDescription)
@@ -373,9 +434,6 @@ class AnalyzingViewController: UIViewController {
         }
     }
     
-//    private func uploadPracticeAndAudio(_ newPractice: NewPractice, _ wavData: Data){
-//        NetworkManager.shared.uploadPracticeAndAudio(newPractice: newPractice, wavData: wavData, completion: <#T##(Result<UploadAudioResponse, any Error>) -> Void#>)
-//    }
     
     
     // MARK: - 기타 함수
@@ -391,23 +449,23 @@ class AnalyzingViewController: UIViewController {
     
     
     // MARK: - 수정 필요
-//    private func goBackToHome() {
-//        // 1) Dismiss self
-//        self.dismiss(animated: true) { [weak self] in
-//            // 2) Switch to the Home tab
-//            guard let self = self else { return }
-//
-//            // Access the window's rootViewController (UITabBarController)
-//            if let tabBar = UIApplication.shared.windows.first?.rootViewController as? UITabBarController {
-//                // Home is presumably at index 0
-//                tabBar.selectedIndex = 0
-//
-//                // 3) If HomeViewController is in a navigation stack, pop it to root
-//                if let nav = tabBar.viewControllers?.first as? UINavigationController {
-//                    nav.popToRootViewController(animated: false)
-//                }
-//            }
-//        }
-//    }
+    //    private func goBackToHome() {
+    //        // 1) Dismiss self
+    //        self.dismiss(animated: true) { [weak self] in
+    //            // 2) Switch to the Home tab
+    //            guard let self = self else { return }
+    //
+    //            // Access the window's rootViewController (UITabBarController)
+    //            if let tabBar = UIApplication.shared.windows.first?.rootViewController as? UITabBarController {
+    //                // Home is presumably at index 0
+    //                tabBar.selectedIndex = 0
+    //
+    //                // 3) If HomeViewController is in a navigation stack, pop it to root
+    //                if let nav = tabBar.viewControllers?.first as? UINavigationController {
+    //                    nav.popToRootViewController(animated: false)
+    //                }
+    //            }
+    //        }
+    //    }
     
 }
