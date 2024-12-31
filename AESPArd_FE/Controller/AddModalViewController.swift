@@ -198,7 +198,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
         })
     }
     
-    // MARK: - 여기 수정해야 함
+    // MARK: - 다음 페이지로 넘어가는 함수
     @objc func moveTocameraViewController() {
         
         let cameraVC = CameraViewController(newPractice: newPractice, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!)
@@ -208,6 +208,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     
     @objc func moveToNewExtraModal() {
         let excludedView = backgroundOverlay // 제외할 뷰를 참조
+        // MARK: - 유저 아이디 수정 해야함
         let extraVC = NewExtraModalViewController(userId: URLClass().testID)
 
         // 기존 뷰 제거 처리
@@ -342,13 +343,22 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         previouslySelectedIndexPath = indexPath
         
         let selectedPresentation = presentationList[indexPath.section]
+        debugPrint("index: \(selectedPresentation)")
         newPractice.presentationId = selectedPresentation.presentationId
         self.isShowingMeSelected = selectedPresentation.showMeOnScreen
         self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
         self.minTime = selectedPresentation.idealMinTime
         self.maxTime = selectedPresentation.idealMaxTime
-        
-        
+       
+        debugPrint("                                                ")
+        debugPrint("selectedPresentation.showMeOnScreen: \(selectedPresentation.showMeOnScreen)")
+        debugPrint("selectedPresentation.showTimeOnScreen: \(selectedPresentation.showTimeOnScreen)")
+        debugPrint("                                                ")
+        debugPrint("isShowingMeSelected: \(isShowingMeSelected)")
+        debugPrint("isShowingTimeSelected: \(isShowingTimeSelected)")
+        debugPrint("minTime: \(minTime)")
+        debugPrint("maxTime: \(maxTime)")
+        debugPrint("                                                ")
         // 버튼 활성화
         addButton.isEnabled = true
     }
