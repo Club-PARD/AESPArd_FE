@@ -20,6 +20,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var newPractice: NewPractice?
     private var isShowingTimeSelected: Bool?
     private var isShowingMeSelected: Bool?
+    private var userId: String?
     
     // 새로운 발표를 만드는지 혹은 연습을 만드는지에 따라 다음 페이지에 전달하는 값이 달라짐
     private var isCreatingNewPresentation: Bool?
@@ -38,19 +39,21 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         self.newPresentation!.showTimeOnScreen = isShowingTimeSelected
         self.minTime = newPresentation.idealMinTime
         self.maxTime = newPresentation.idealMaxTime
+        self.userId = newPresentation.userId
         isCreatingNewPresentation = true
         isCreatingNewPractice = false
         super.init(nibName: nil, bundle: nil)
     }
     
     // 기존 발표에 새로운 연습 생성자
-    init(newPractice: NewPractice, isShowingTimeSelected: Bool, isShowingMeSelected: Bool, minTime: Double, maxTime: Double){
+    init(newPractice: NewPractice, isShowingTimeSelected: Bool, isShowingMeSelected: Bool, minTime: Double, maxTime: Double, userId: String){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
         self.isShowingTimeSelected = isShowingTimeSelected
         self.isShowingMeSelected = isShowingMeSelected
         self.minTime = minTime
         self.maxTime = maxTime
+        self.userId = userId
         isCreatingNewPresentation = false
         isCreatingNewPractice = true
     }
@@ -625,7 +628,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 analyzingVC = AnalyzingViewController(newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!)
             } else {
                 newPractice!.videoKey = identifier
-                analyzingVC = AnalyzingViewController(newPractice: newPractice!)
+                analyzingVC = AnalyzingViewController(newPractice: newPractice!, userId: userId!)
             }
            
             

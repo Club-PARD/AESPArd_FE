@@ -17,7 +17,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     //Analysis get
     var reportsData : [GetReport] = []
     var mode: Bool = false
-    
+   
+    // MARK: - 생성자
     // 셀 선택했을 때 분기
     init(practiceData: GetPractice) {
         self.practiceData = practiceData

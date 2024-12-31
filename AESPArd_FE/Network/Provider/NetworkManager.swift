@@ -418,6 +418,16 @@ final class NetworkManager {
                 do {
                     let getPractice = try JSONDecoder().decode(GetPractice.self, from: response.data)
                     completion(.success(getPractice))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    
     // MARK: - reports by analysisId
     func getReportsByAnalysis(analysisId: String, completion: @escaping (Result<[GetReport], Error>) -> Void) {
         ReportsServiceProvider.request(.getReportsByAnalysisId(analysisId: analysisId)) { result in

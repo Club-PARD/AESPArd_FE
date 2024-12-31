@@ -25,10 +25,16 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     private var minTime: Double?
     private var maxTime: Double?
     
+    // 다음 페이지에 전달해야 할 변수
+    private var userId: String?
+    
     // 서버에 전달할 새로운 연습의 인스턴스
     private var newPractice: NewPractice = NewPractice()
     
     private var previouslySelectedIndexPath: IndexPath?
+    
+    
+    // MARK: - 생성자 만들어야 함 userId 포함해서
 
     
     // 발표 영상 촬영하기 버튼
@@ -201,7 +207,7 @@ class AddModalViewController: UIViewController, UIViewControllerTransitioningDel
     // MARK: - 다음 페이지로 넘어가는 함수
     @objc func moveTocameraViewController() {
         
-        let cameraVC = CameraViewController(newPractice: newPractice, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!)
+        let cameraVC = CameraViewController(newPractice: newPractice, isShowingTimeSelected: isShowingTimeSelected!, isShowingMeSelected: isShowingMeSelected!, minTime: minTime!, maxTime: maxTime!, userId: testId)
         cameraVC.modalPresentationStyle = .custom
         present(cameraVC, animated: true, completion: nil)
     }

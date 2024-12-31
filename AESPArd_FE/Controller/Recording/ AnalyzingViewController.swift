@@ -29,6 +29,7 @@ class AnalyzingViewController: UIViewController {
     private var newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation?
     private var assetIdentifier: String?
     private var audioData: Data? // Stores the extracted audio data
+    private var userId: String?
     
     private var isCreatingNewPresentation: Bool?
     private var isCreatingNewPractice: Bool?
@@ -36,6 +37,7 @@ class AnalyzingViewController: UIViewController {
     
     // MARK: - 다음 화면에 전달할 값
     private var analysisId: String?
+    private var reportsData : [GetReport] = []
     
     // MARK: - 생성자
     
@@ -44,16 +46,18 @@ class AnalyzingViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         self.newPracticeAfterNewPresentation = newPracticeAfterNewPresentation
         self.assetIdentifier = newPracticeAfterNewPresentation.videoKey
+        self.userId = newPracticeAfterNewPresentation.userId
         isCreatingNewPresentation = true
         isCreatingNewPractice = false
         debugPrint(newPracticeAfterNewPresentation)
     }
     
     // 기존 발표의 새 연습용
-    init(newPractice: NewPractice){
+    init(newPractice: NewPractice, userId: String){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
         self.assetIdentifier = newPractice.videoKey
+        self.userId = userId
         isCreatingNewPresentation = false
         isCreatingNewPractice = true
         debugPrint(newPractice)
@@ -161,21 +165,14 @@ class AnalyzingViewController: UIViewController {
             }
             
             if isSilent {
-                let alert = UIAlertController(title: "소리 없음", message: "발표가 녹음되지 않았습니다. 스크린 녹화와 마이크 녹음 모두 허용해주세요", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {action in
-                    // 다시 홈화면의 모달창으로 돌아감
-                    // 현재 화면의 전화면에서 (CameraViewController)에서 dismiss 호출
-                    self.presentingViewController?.presentingViewController?.dismiss(animated: true)
-                }))
-                self.present(alert, animated: true)
+                goBackHome(title: "소리 없음", message: "발표가 녹음되지 않았어요. 스크린 녹화와 마이크 녹음 모두 허용해주세요.")
             } else {
                 if isCreatingNewPresentation! {
                     // 새로운 발표와 첫 연습 생성시
-                    let userId = newPracticeAfterNewPresentation!.userId
                     uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
                 } else {
                     // 기존 발표에 추가 연습 생성시
-                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
+                    uploadPracticeAndAudio(newPractice: newPractice!, userId: userId!, wavData: wavData)
                 }
             }
         }
@@ -391,13 +388,14 @@ class AnalyzingViewController: UIViewController {
             case .success:
                 print("새발표와 새연습 생성 성공")
                 // MARK: 여기에 분석 아이디 겟
+                self.getAnalysisId(userId: userId)
             case .failure(let error):
                 print("Failed to upload new practice: \(error.localizedDescription)")
             }
         }
     }
     
-    private func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data) {
+    private func uploadPracticeAndAudio(newPractice: NewPractice, userId: String, wavData: Data) {
         // Safely unwrap the required fields from NewPractice
         guard let presentationId = newPractice.presentationId, !presentationId.isEmpty else {
 //            showAlert(title: "Error", message: "No presentation ID available.")
@@ -429,6 +427,7 @@ class AnalyzingViewController: UIViewController {
                     //self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
                     print("새로운 연습 영상 업로드 성공")
                     // MARK: 여기에 분석 아이디 겟
+                    self.getAnalysisId(userId: userId)
                 case .failure(let error):
 //                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
                     debugPrint(error.localizedDescription)
@@ -437,19 +436,103 @@ class AnalyzingViewController: UIViewController {
         }
     }
    
-    private func getAnalysisId(userId: String){
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3 ){
+//    private func getAnalysisId(userId: String){
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 3 ){
+//            NetworkManager.shared.getAnalysisIdInLoadingScreen(userId: userId) { [weak self] result in
+//                switch result {
+//                case .success(let getPractice):
+//                    self?.analysisId = getPractice.analysisId
+//                    debugPrint(self?.analysisId)
+//                case .failure(let error):
+//                    print("아직 안오거나 에러거나")
+//                }
+//            }
+//        }
+//    }
+    
+    // MARK: - 3초마다 리포트있는지 get 부름
+    
+    private var timer: Timer?
+    private var elapsedTime: TimeInterval = 0 // Tracks the total elapsed time
+    private let interval: TimeInterval = 3.0 // 3초마다 실행
+    private let maxDuration: TimeInterval = 120.0 // 2분 지나면 그냥 리포트 안생긴걸로 간주하고 종료함
+    
+    
+    private func getAnalysisId(userId: String) {
+        // Invalidate any existing timer before starting a new one
+        timer?.invalidate()
+        timer = nil
+        elapsedTime = 0
+        
+        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] timer in
+            guard let self = self else { return }
+            
+            // Fetch the report
             NetworkManager.shared.getAnalysisIdInLoadingScreen(userId: userId) { [weak self] result in
                 switch result {
                 case .success(let getPractice):
                     self?.analysisId = getPractice.analysisId
                     debugPrint(self?.analysisId)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        
+                    }
                 case .failure(let error):
                     print("아직 안오거나 에러거나")
                 }
             }
+            
+            // 3초간격으로 총 타이머 업데이트
+            self.elapsedTime += self.interval
+            
+            // 지정한 시간 넘어서면 타이머 멈춤
+            if self.elapsedTime >= self.maxDuration {
+                timer.invalidate()
+                self.timer = nil
+                goBackHome(title: "분석 중단", message: "분석이 중단되었어요")
+            }
         }
     }
+
+//    private func getReport(analysisId: String) {
+//        // Invalidate any existing timer before starting a new one
+//        timer?.invalidate()
+//        timer = nil
+//        elapsedTime = 0
+//        
+//        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] timer in
+//            guard let self = self else { return }
+//            
+//            // Fetch the report
+//            NetworkManager.shared.getReportsByAnalysis(analysisId: analysisId) { [weak self] result in
+//                guard let self = self else { return }
+//                
+//                switch result {
+//                case .success(let reports):
+//                    self.reportsData = reports
+//                    debugPrint(self.reportsData)
+//                    
+//                    // 데이터 들어오면 타이머 멈춤
+//                    if !reports.isEmpty {
+//                        timer.invalidate()
+//                        self.timer = nil
+//                        return
+//                    }
+//                case .failure(let error):
+//                    goBackHome(title: "리포트 생성 안됨", message: "리포트가 생성되지 못했어요")
+//                }
+//            }
+//            
+//            // 3초간격으로 총 타이머 업데이트
+//            self.elapsedTime += self.interval
+//            
+//            // 지정한 시간 넘어서면 타이머 멈춤
+//            if self.elapsedTime >= self.maxDuration {
+//                timer.invalidate()
+//                self.timer = nil
+//                goBackHome(title: "리포트 생성 안됨", message: "리포트가 생성되지 못했어요")
+//            }
+//        }
+//    }
     
     
     // MARK: - 기타 함수
@@ -463,6 +546,18 @@ class AnalyzingViewController: UIViewController {
         }
     }
     
+    private func goBackHome(title: String, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {return}
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "확인", style: .default, handler: {action in
+                // 다시 홈화면의 모달창으로 돌아감
+                // 현재 화면의 전화면에서 (CameraViewController)에서 dismiss 호출
+                self.presentingViewController?.presentingViewController?.dismiss(animated: true)
+            }))
+            self.present(alert, animated: true)
+        }
+    }
     
     // MARK: - 수정 필요
     //    private func goBackToHome() {
