@@ -332,9 +332,8 @@ extension SearchViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder() // 키보드 숨기기
         
         // 입력된 텍스트 가져오기
-        if let searchTerm = searchBar.text, !searchTerm.isEmpty {
-            // 입력된 텍스트가 있을 때 searchPresentationsAPI 호출
-            searchPresentationsAPI(searchTerm: searchTerm)
-        }
+        let searchTerm = searchBar.text ?? ""
+        searchPresentationsAPI(searchTerm: searchTerm)
+        
     }
 }

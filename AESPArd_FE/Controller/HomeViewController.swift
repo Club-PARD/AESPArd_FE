@@ -121,6 +121,14 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .didResetService, object: nil)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        getUserNameAPI()
+        getRecordsAverageAPI()
+        reloadDataBasedOnFilterMode()
+    }
+    
     //MARK: -  API
     
     //user
@@ -150,7 +158,7 @@ class HomeViewController: UIViewController {
                 self?.tableView.reloadData()
             case .failure(let error):
                 // Handle error
-                print("Error fetching users: \(error)")
+                print("Error fetching graph: \(error)")
             }
         }
     }
@@ -167,7 +175,7 @@ class HomeViewController: UIViewController {
                 self?.filterMode = "recent"
             case .failure(let error):
                 // 실패 시 에러 처리
-                print("Error fetching presentations: \(error)")
+                print("Error fetching recent presentations: \(error)")
             }
         }
     }
@@ -184,7 +192,7 @@ class HomeViewController: UIViewController {
                 self?.filterMode = "favorite"
             case .failure(let error):
                 // 실패 시 에러 처리
-                print("Error fetching presentations: \(error)")
+                print("Error fetching favorite presentations: \(error)")
             }
         }
     }
