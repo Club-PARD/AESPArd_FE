@@ -411,8 +411,8 @@ final class NetworkManager {
     
     
     //MARK: - 로딩창에서 analysisId 불러오는 함수
-    func getAnalysisIdInLoadingScreen(userId: String, completion: @escaping (Result<GetPractice, Error>) -> Void) {
-        practiceServiceProvider.request(.getAnalysisIdInLoadingScreen(userId: userId)) { result in
+    func getSinglePracticeInLoadingScreen(userId: String, completion: @escaping (Result<GetPractice, Error>) -> Void) {
+        practiceServiceProvider.request(.getSinglePracticeInLoadingScreen(userId: userId)) { result in
             switch result {
             case .success(let response):
                 do {

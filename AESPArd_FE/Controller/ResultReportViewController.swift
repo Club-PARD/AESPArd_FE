@@ -18,14 +18,24 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var practiceData: GetPractice
     //Analysis get
     var reportsData : [GetReport] = []
-    var mode: Bool = false
+    var isFromHome: Bool = true
+    private var analysisId: String?
    
     // MARK: - 생성자
     // 셀 선택했을 때 분기
     init(practiceData: GetPractice) {
         self.practiceData = practiceData
+        self.analysisId = practiceData.analysisId
+        self.isFromHome = true
         super.init(nibName: nil, bundle: nil)
-        self.mode = false
+    }
+   
+    // 로딩창에서 쓰이는 생성자
+    init(practiceData: GetPractice, isFromHome: Bool) {
+        self.practiceData = practiceData
+        self.analysisId = practiceData.analysisId
+        self.isFromHome = false
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -59,10 +69,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         tableView.dataSource = self
         practiceHeaderView.delegate =  self
         
-        //API
-        if(!mode){
-            getPracticeData()
-        }
+        getPracticeData(analysisId: analysisId!)
         
         setUI()
         
@@ -179,25 +186,22 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     }()
     
     // MARK: - API
-    @objc func getPracticeData() {
-        networkManager.getReportsByAnalysis(analysisId: practiceData.analysisId) { [weak self] result in
+    @objc func getPracticeData(analysisId: String) {
+        networkManager.getReportsByAnalysis(analysisId: analysisId) { [weak self] result in
             switch result {
             case .success(let response):
-                do {
-                    let desiredOrder = ["duration", "speechSpeed", "decibel", "fillers", "blanks", "eyeTracking"]
-                    let sortedData = desiredOrder.compactMap { name in
-                        return response.first { $0.name == name }
-                    }
-                    self?.reportsData = sortedData
-                    self?.tableView.reloadData()
-                } catch {
-                    print("Error decoding practices: \(error)")
+                let desiredOrder = ["duration", "speechSpeed", "decibel", "fillers", "blanks", "eyeTracking"]
+                let sortedData = desiredOrder.compactMap { name in
+                    return response.first { $0.name == name }
                 }
+                self?.reportsData = sortedData
+                self?.tableView.reloadData()
             case .failure(let error):
                 print("Error fetching practices: \(error)")
             }
         }
     }
+
     
     
     //MARK: - 제약조건
@@ -255,7 +259,12 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     
     // PracticeHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissPracticeViewController() {
-        self.dismiss(animated: true, completion: nil)
+        if isFromHome {
+            self.dismiss(animated: true, completion: nil)
+        } else {
+            self.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
+        }
+        
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글

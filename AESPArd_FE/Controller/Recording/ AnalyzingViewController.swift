@@ -37,7 +37,7 @@ class AnalyzingViewController: UIViewController {
     
     // MARK: - 다음 화면에 전달할 값
     private var analysisId: String?
-    private var reportsData : [GetReport] = []
+    private var practiceData: GetPractice?
     
     // MARK: - 생성자
     
@@ -388,7 +388,7 @@ class AnalyzingViewController: UIViewController {
             case .success:
                 print("새발표와 새연습 생성 성공")
                 // MARK: 여기에 분석 아이디 겟
-                self.getAnalysisId(userId: userId)
+                self.getPractice(userId: userId)
             case .failure(let error):
                 print("Failed to upload new practice: \(error.localizedDescription)")
             }
@@ -427,7 +427,7 @@ class AnalyzingViewController: UIViewController {
                     //self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
                     print("새로운 연습 영상 업로드 성공")
                     // MARK: 여기에 분석 아이디 겟
-                    self.getAnalysisId(userId: userId)
+                    self.getPractice(userId: userId)
                 case .failure(let error):
 //                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
                     debugPrint(error.localizedDescription)
@@ -455,10 +455,10 @@ class AnalyzingViewController: UIViewController {
     private var timer: Timer?
     private var elapsedTime: TimeInterval = 0 // Tracks the total elapsed time
     private let interval: TimeInterval = 3.0 // 3초마다 실행
-    private let maxDuration: TimeInterval = 120.0 // 2분 지나면 그냥 리포트 안생긴걸로 간주하고 종료함
+    private let maxDuration: TimeInterval = 60.0 // 1분 지나면 그냥 리포트 안생긴걸로 간주하고 종료함
     
     
-    private func getAnalysisId(userId: String) {
+    private func getPractice(userId: String) {
         // Invalidate any existing timer before starting a new one
         timer?.invalidate()
         timer = nil
@@ -468,16 +468,18 @@ class AnalyzingViewController: UIViewController {
             guard let self = self else { return }
             
             // Fetch the report
-            NetworkManager.shared.getAnalysisIdInLoadingScreen(userId: userId) { [weak self] result in
+            NetworkManager.shared.getSinglePracticeInLoadingScreen(userId: userId) { [weak self] result in
                 switch result {
                 case .success(let getPractice):
-                    self?.analysisId = getPractice.analysisId
-                    debugPrint(self?.analysisId)
+                    self?.practiceData = getPractice
+                    debugPrint(self?.practiceData)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        
+                        let reportVC = ResultReportViewController(practiceData: (self?.practiceData)!, isFromHome: false)
+                        reportVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+                        self?.present(reportVC, animated: true, completion: nil)
                     }
                 case .failure(let error):
-                    print("아직 안오거나 에러거나")
+                    self?.goBackHome(title: "분석 중단", message: "분석이 중단되었어요")
                 }
             }
             
