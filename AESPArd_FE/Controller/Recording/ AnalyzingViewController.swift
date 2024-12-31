@@ -159,22 +159,18 @@ class AnalyzingViewController: UIViewController {
             if isSilent {
                 let alert = UIAlertController(title: "소리 없음", message: "발표가 녹음되지 않았습니다. 스크린 녹화와 마이크 녹음 모두 허용해주세요", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {action in
-                    //self.goBackToHome()
-                    // 여기서 홈뷰컨으로 돌아가게 해야함
+                    // 다시 홈화면의 모달창으로 돌아감
+                    // 현재 화면의 전화면에서 (CameraViewController)에서 dismiss 호출
+                    self.presentingViewController?.presentingViewController?.dismiss(animated: true)
                 }))
                 self.present(alert, animated: true)
             } else {
-                //self.uploadAudioViaMoya(wavData)
-                //uploadOnlyAudio(wavData)
-//                if isCreatingNewPresentation! {
-//                   
-//                } else {
-//                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
-//                }
                 if isCreatingNewPresentation! {
+                    // 새로운 발표와 첫 연습 생성시
                     let userId = newPracticeAfterNewPresentation!.userId
                     uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
                 } else {
+                    // 기존 발표에 추가 연습 생성시
                     uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
                 }
             }
