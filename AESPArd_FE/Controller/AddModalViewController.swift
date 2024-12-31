@@ -343,22 +343,22 @@ extension AddModalViewController: UITableViewDelegate, UITableViewDataSource {
         previouslySelectedIndexPath = indexPath
         
         let selectedPresentation = presentationList[indexPath.section]
-        debugPrint("index: \(selectedPresentation)")
+//        debugPrint("index: \(selectedPresentation)")
         newPractice.presentationId = selectedPresentation.presentationId
         self.isShowingMeSelected = selectedPresentation.showMeOnScreen
         self.isShowingTimeSelected = selectedPresentation.showTimeOnScreen
         self.minTime = selectedPresentation.idealMinTime
         self.maxTime = selectedPresentation.idealMaxTime
        
-        debugPrint("                                                ")
-        debugPrint("selectedPresentation.showMeOnScreen: \(selectedPresentation.showMeOnScreen)")
-        debugPrint("selectedPresentation.showTimeOnScreen: \(selectedPresentation.showTimeOnScreen)")
-        debugPrint("                                                ")
-        debugPrint("isShowingMeSelected: \(isShowingMeSelected)")
-        debugPrint("isShowingTimeSelected: \(isShowingTimeSelected)")
-        debugPrint("minTime: \(minTime)")
-        debugPrint("maxTime: \(maxTime)")
-        debugPrint("                                                ")
+//        debugPrint("                                                ")
+//        debugPrint("selectedPresentation.showMeOnScreen: \(selectedPresentation.showMeOnScreen)")
+//        debugPrint("selectedPresentation.showTimeOnScreen: \(selectedPresentation.showTimeOnScreen)")
+//        debugPrint("                                                ")
+//        debugPrint("isShowingMeSelected: \(isShowingMeSelected)")
+//        debugPrint("isShowingTimeSelected: \(isShowingTimeSelected)")
+//        debugPrint("minTime: \(minTime)")
+//        debugPrint("maxTime: \(maxTime)")
+//        debugPrint("                                                ")
         // 버튼 활성화
         addButton.isEnabled = true
     }

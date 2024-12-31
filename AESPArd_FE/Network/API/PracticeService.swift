@@ -6,6 +6,7 @@ import Foundation
 enum PracticeService {
     case getPractice(presentationId: String)
     case getRecentScores(presentationId: String)
+    case getAnalysisIdInLoadingScreen(userId: String)
 }
 
 extension PracticeService: TargetType {
@@ -19,6 +20,8 @@ extension PracticeService: TargetType {
             return "/practices"
         case .getRecentScores:
             return "/practices/recent-scores"
+        case .getAnalysisIdInLoadingScreen:
+            return "/practices/recent"
         }
     }
     
@@ -27,6 +30,8 @@ extension PracticeService: TargetType {
         case .getPractice:
             return .get
         case .getRecentScores:
+            return .get
+        case .getAnalysisIdInLoadingScreen:
             return .get
         }
     }
@@ -43,6 +48,10 @@ extension PracticeService: TargetType {
                 parameters: ["presentationId": presentationId],
                 encoding: URLEncoding.default
             )
+        case .getAnalysisIdInLoadingScreen(let userId):
+            return .requestParameters(
+                parameters: ["userId": userId],
+                encoding: URLEncoding.default)
         }
     }
     

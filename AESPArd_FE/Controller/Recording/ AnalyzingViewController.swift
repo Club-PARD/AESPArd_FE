@@ -33,6 +33,10 @@ class AnalyzingViewController: UIViewController {
     private var isCreatingNewPresentation: Bool?
     private var isCreatingNewPractice: Bool?
     
+    
+    // MARK: - 다음 화면에 전달할 값
+    private var analysisId: String?
+    
     // MARK: - 생성자
     
     // 새발표용
@@ -385,7 +389,8 @@ class AnalyzingViewController: UIViewController {
         NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
             switch result {
             case .success:
-                print("New practice after presentation created successfully!")
+                print("새발표와 새연습 생성 성공")
+                // MARK: 여기에 분석 아이디 겟
             case .failure(let error):
                 print("Failed to upload new practice: \(error.localizedDescription)")
             }
@@ -395,17 +400,17 @@ class AnalyzingViewController: UIViewController {
     private func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data) {
         // Safely unwrap the required fields from NewPractice
         guard let presentationId = newPractice.presentationId, !presentationId.isEmpty else {
-            showAlert(title: "Error", message: "No presentation ID available.")
+//            showAlert(title: "Error", message: "No presentation ID available.")
             return
         }
         
         guard let videoKey = newPractice.videoKey, !videoKey.isEmpty else {
-            showAlert(title: "Error", message: "Video Key is missing.")
+//            showAlert(title: "Error", message: "Video Key is missing.")
             return
         }
         
         guard let eyePercentage = newPractice.eyePercentage else {
-            showAlert(title: "Error", message: "Eye Tracking Percentage is missing.")
+//            showAlert(title: "Error", message: "Eye Tracking Percentage is missing.")
             return
         }
         
@@ -421,15 +426,30 @@ class AnalyzingViewController: UIViewController {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
-                    
+                    //self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
+                    print("새로운 연습 영상 업로드 성공")
+                    // MARK: 여기에 분석 아이디 겟
                 case .failure(let error):
-                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
+//                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
+                    debugPrint(error.localizedDescription)
                 }
             }
         }
     }
-    
+   
+    private func getAnalysisId(userId: String){
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3 ){
+            NetworkManager.shared.getAnalysisIdInLoadingScreen(userId: userId) { [weak self] result in
+                switch result {
+                case .success(let getPractice):
+                    self?.analysisId = getPractice.analysisId
+                    debugPrint(self?.analysisId)
+                case .failure(let error):
+                    print("아직 안오거나 에러거나")
+                }
+            }
+        }
+    }
     
     
     // MARK: - 기타 함수
