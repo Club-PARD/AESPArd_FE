@@ -55,7 +55,7 @@ class MyViewController : UIViewController {
         button.titleLabel?.textAlignment = .left
         button.layer.cornerRadius = 20
         button.titleLabel?.numberOfLines = 2 // 여러 줄로 표시
-        button.contentEdgeInsets = UIEdgeInsets(top: 17, left: 16, bottom: 18, right: 190)
+        button.contentEdgeInsets = UIEdgeInsets(top: 17, left: 0, bottom: 18, right: 190)
         button.titleLabel?.lineBreakMode = .byWordWrapping
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

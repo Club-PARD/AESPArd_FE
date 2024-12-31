@@ -208,7 +208,7 @@ class PresentationListTableCell: UITableViewCell {
         
         ptName.text = presentationName
         ptCount.text = "\(ptDetailCount)개"
-        ptDate.text = "발표세부정보설명 · \(presentationDate)"
+        ptDate.text = "\(presentationDate)"
         circularProgressBar.value = barVaue
         ptId = presentationId
         ptToggle = toggleFavorite
