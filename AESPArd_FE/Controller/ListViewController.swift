@@ -132,6 +132,13 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         NotificationCenter.default.removeObserver(self, name: .selectedDeletePracticeNotification, object: nil)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        getRecentScores()
+        getPracticeData()
+    }
+    
     private func setUI() {
         
         view.addSubview(header)
@@ -266,6 +273,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
+                self.header.headerLabel.text = newName
             }
         }
         
@@ -419,7 +427,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         // 섹션 2의 셀이 클릭되었을 때
         if indexPath.section == 2 {
             
-            let modalViewController = ResultReportViewController()
+            let modalViewController = ResultReportViewController(practiceData: practiceList[indexPath.row])
             modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
             self.definesPresentationContext = true // 현재 컨텍스트를 정의
             self.present(modalViewController, animated: true)
