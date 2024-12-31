@@ -12,5 +12,6 @@ struct GetPractice: Codable {
     var practiceName: String
     var createdAt: String
     var totalScore: Int
-    var videoKey: String?
+    var analysisId: String
+    var videoKey: String
 }

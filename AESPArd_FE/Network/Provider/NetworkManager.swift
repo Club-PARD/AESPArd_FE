@@ -50,6 +50,11 @@ final class NetworkManager {
         plugins: [
         ]
     )
+    
+    private let ReportsServiceProvider = MoyaProvider<ReportsService>(
+        plugins: [
+        ]
+    )
 
     
     // MARK: - User 정보 불러오는 메소드
@@ -395,6 +400,23 @@ final class NetworkManager {
                 do {
                     let scores = try JSONDecoder().decode([Int].self, from: response.data)
                     completion(.success(scores))
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - reports by analysisId
+    func getReportsByAnalysis(analysisId: String, completion: @escaping (Result<[GetReport], Error>) -> Void) {
+        ReportsServiceProvider.request(.getReportsByAnalysisId(analysisId: analysisId)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let practice = try JSONDecoder().decode([GetReport].self, from: response.data)
+                    completion(.success(practice))
                 } catch {
                     completion(.failure(error))
                 }
