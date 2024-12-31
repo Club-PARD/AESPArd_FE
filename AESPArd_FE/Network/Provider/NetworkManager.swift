@@ -359,8 +359,8 @@ final class NetworkManager {
     }
     
     //MARK: - 발표리스트 검색
-    func searchPresentations(searchTerm: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
-        presentationServiceProvider.request(.searchPresentations(searchTerm: searchTerm)) { result in
+    func searchPresentations(userId: String,searchTerm: String, completion: @escaping (Result<[PresentationList], Error>) -> Void) {
+        presentationServiceProvider.request(.searchPresentations(userId:userId, searchTerm: searchTerm)) { result in
             switch result {
             case .success(let response):
                 do {

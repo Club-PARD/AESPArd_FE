@@ -19,6 +19,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     //Analysis get
     var reportsData : [GetReport] = []
     var mode: Bool = false
+    
+    //비디오 플레이어
+    private var player: AVPlayer?
    
     // MARK: - 생성자
     // 셀 선택했을 때 분기
@@ -33,15 +36,10 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     }
     
     var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리"]
-    var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84]
-    var itemDetailList : [String] = ["7초 초과되었어요.", "조금 느린 편이에요. 조금만 빠르게 말해볼까요?", "발표에 딱 맞는 목소리 크기였어요!", "의식적으로 발화 지연 표현을 고치려고 노력해보세요!", "너무 많아요. 발표 내용을 더 숙지해보세요.", "훌륭해요! 실전에서도 관객과의 소통이 중요해요."]
     
     //드롭다운 열렸을 경우 보여주는 값
     var evaluationList : [String] = ["내가 입력한 발표 시간", "발표에 적절한 WPM", "발표에 적절한 목소리 데시벨", "나의 발화 지연 횟수", "나의 불필요한 공백 횟수", "관객을 바라본 시선의 비율"]
     var myEvaluationlList : [String] = ["영상 발표 시간", "나의 WPM", "나의 목소리 데시벨"]
-    
-    var evaluationValuelList : [String] = ["05:30~07:30", "???WPM", "???dB", "9회", "5회", "???%"]
-    var myEvaluationValuelList : [String] = ["07:44", "???WPM", "???dB"]
     
     //hep 버튼 텍스트
     var helpText : [String] = ["설정한 발표시간보다 부족하거나\n초과되었는지를 측정해요","WPM은 말의 속도를 나타내는 \n단위에요. 가장 이해하기 쉬운 \n속도를 기준으로 설정했어요", "마이크를 사용하거나\n작은공간에서의 발표를\n기준으로 측정한 점수에요", "“음..”, “어..”와 같은 표현을\n발화 지연 표현이라고 해요", "3초 이상의 불필요한\n공백을 감지해요", "전체 영상 중 화면을\n바라본 비율을 측정해요 "]
@@ -58,6 +56,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         tableView.delegate = self
         tableView.dataSource = self
         practiceHeaderView.delegate =  self
+        // 탭 바 컨트롤러의 delegate 설정
+        //탭바 중앙 버튼 클릭 감지
+        NotificationCenter.default.addObserver(self, selector: #selector(stopVideoPlayback), name: .pauseVideoPlayerNotificaion, object: nil)
         
         //API
         if(!mode){
@@ -300,7 +301,6 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             
             if let urlAsset = avAsset as? AVURLAsset {
                 let videoURL = urlAsset.url
-                print("찾은 비디오 URL: \(videoURL)")
                 
                 DispatchQueue.main.async {
                     // 기존 플레이어 제거
@@ -315,7 +315,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
 
     // AVPlayerViewController로 비디오를 재생
     private func setupVideoPlayer(with url: URL) {
-        let player = AVPlayer(url: url)
+        player = AVPlayer(url: url)
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
         
@@ -326,8 +326,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         playerViewController.didMove(toParent: self)
         
         // 비디오 재생 시작
-        player.play()
+        player?.play()
     }
+
 
     // 기존 비디오 플레이어 제거
     private func removeCurrentVideoPlayer() {
@@ -513,4 +514,13 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
         
         return String(format: "%02d:%02d", minutes, remainingSeconds)
     }
+    
+    @objc func stopVideoPlayback() {
+        if var player = self.player, player.timeControlStatus == .playing {
+            player.pause()
+        }
+    }
 }
+
+
+
