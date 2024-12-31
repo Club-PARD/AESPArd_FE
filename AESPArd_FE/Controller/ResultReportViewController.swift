@@ -9,9 +9,25 @@ import UIKit
 
 class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
-    var practiceName: String = "1번째 테이크" //발표 연습 이름
-    var practiceTotalScore: Int = 88
-    var itembarVaue : Double =  0.84 //원형 프로그레스바
+    // 클백 연결을 위한 NesworkManager 연결
+    private let networkManager = NetworkManager.shared
+    let testId : String = URLClass().testID
+    
+    var practiceData: GetPractice
+    //Analysis get
+    var reportsData : [GetReport] = []
+    var mode: Bool = false
+    
+    // 셀 선택했을 때 분기
+    init(practiceData: GetPractice) {
+        self.practiceData = practiceData
+        super.init(nibName: nil, bundle: nil)
+        self.mode = false
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     var itemNameList : [String] = ["발표 시간", "말의 빠르기", "목소리 크기", "발화 지연 표현 횟수", "불필요한 공백 횟수", "시선 처리"]
     var itemTotalScore : [Double] = [0.84, 0.44, 0.84, 0.84, 0.84, 0.84]
@@ -40,6 +56,11 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         tableView.dataSource = self
         practiceHeaderView.delegate =  self
         
+        //API
+        if(!mode){
+            getPracticeData()
+        }
+        
         setUI()
         
         // 섹션 구분선 숨기기
@@ -54,10 +75,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
-        setUI()
         
         //데이터 전달
-        practiceHeaderView.configure(practiceName: practiceName)
+        practiceHeaderView.configure(practiceName: practiceData.practiceName)
         
         //edit 창 토글
         NotificationCenter.default.addObserver(self, selector: #selector(handleEditViewToggleNotification), name: .editPracticeNotification, object: nil)
@@ -73,7 +93,15 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         transparentOverlay.addGestureRecognizer(tapGesture)
         
         //총 점수
-        practiceTotalScoreView.totalScoreLabel.text = "\(practiceTotalScore)점"
+        practiceTotalScoreView.totalScoreLabel.text = "\(practiceData.totalScore)점"
+        
+        if Double(practiceData.totalScore)/100.0 <= 0.6 {
+            practiceTotalScoreView.totalScoreView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1) // 빨간색
+        } else if Double(practiceData.totalScore)/100.0 <= 0.8 {
+            practiceTotalScoreView.totalScoreView.backgroundColor = UIColor(red: 1, green: 0.717, blue: 0, alpha: 1) // 주황색
+        } else {
+            practiceTotalScoreView.totalScoreView.backgroundColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 초록색
+        }
         
     }
     
@@ -135,6 +163,28 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         view.isHidden = true // 기본적으로 숨김
         return view
     }()
+    
+    // MARK: - API
+    @objc func getPracticeData() {
+        networkManager.getReportsByAnalysis(analysisId: practiceData.analysisId) { [weak self] result in
+            switch result {
+            case .success(let response):
+                do {
+                    let desiredOrder = ["duration", "speechSpeed", "decibel", "fillers", "blanks", "eyeTracking"]
+                    let sortedData = desiredOrder.compactMap { name in
+                        return response.first { $0.name == name }
+                    }
+                    self?.reportsData = sortedData
+                    self?.tableView.reloadData()
+                } catch {
+                    print("Error decoding practices: \(error)")
+                }
+            case .failure(let error):
+                print("Error fetching practices: \(error)")
+            }
+        }
+    }
+    
     
     //MARK: - 제약조건
     func setUI(){
@@ -222,7 +272,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 텍스트 필드 추가
         alertController.addTextField { textField in
             //            textField.placeholder = "새로운 이름"
-            textField.text = self.practiceName // 기존 이름을 텍스트 필드에 설정
+            textField.text = self.practiceData.practiceName // 기존 이름을 텍스트 필드에 설정
             //            textField.autocorrectionType = .no
             //            textField.spellCheckingType = .no
         }
@@ -234,9 +284,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         let confirmAction = UIAlertAction(title: "확인", style: .default) { _ in
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
-                // 새로운 이름을 presentationFolderName에 반영
-                //                self.presentationFolderName = newName
-                //                print("새로운 이름: \(self.presentationFolderName)")
+                self.practiceHeaderView.headerLabel.text = newName
             }
         }
         
@@ -280,7 +328,7 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
-            return 6 // 마지막 섹션은 행은 평가 항목 갯수
+            return reportsData.count // 마지막 섹션은 행은 평가 항목 갯수
         } else {
             return 1 // 나머지 섹션은 각 1개 행
         }
@@ -295,7 +343,7 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
-            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: itemTotalScore[indexPath.row], itemDetailList: itemDetailList[indexPath.row] , rowIndex: indexPath.row)
+            cell.configure(itemNameList: itemNameList[indexPath.row], itemTotalScore: Double(reportsData[indexPath.row].score)/100.0, itemDetailList: reportsData[indexPath.row].feedbackMessage, rowIndex: indexPath.row)
             
             // 드롭다운 버튼 클릭 시 상태 변경
             cell.dropDownButton.addTarget(self, action: #selector(dropDownButtonTapped(_:)), for: .touchUpInside)
@@ -303,15 +351,31 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
             
             //드롭다운 열렸을 경우 보여줄 값 지정
             cell.evaluationLabel.text = evaluationList[indexPath.row]
+            
             if(indexPath.row<3){
                 cell.myEvaluationLabel.text = myEvaluationlList[indexPath.row]
             }else{
                 cell.myEvaluationLabel.text = ""
             }
-            cell.evaluationValueLabel.text = evaluationValuelList[indexPath.row]
-            if(indexPath.row<3){
-                cell.myValueLabel.text = myEvaluationValuelList[indexPath.row]
-            }else{
+            //수정 필요
+            switch indexPath.row {
+            case 0:
+                cell.evaluationValueLabel.text = "???"
+                cell.myValueLabel.text = formatTime(seconds: reportsData[indexPath.row].counter)
+            case 1:
+                cell.evaluationValueLabel.text = "???WPM"
+                cell.myValueLabel.text = "\(reportsData[indexPath.row].counter)WPM"
+            case 2:
+                cell.evaluationValueLabel.text = "???dB"
+                cell.myValueLabel.text = "\(reportsData[indexPath.row].counter)dB"
+            case 3:
+                cell.evaluationValueLabel.text = "\(reportsData[indexPath.row].counter)회"
+                cell.myValueLabel.text = ""
+            case 4:
+                cell.evaluationValueLabel.text = "\(reportsData[indexPath.row].counter)회"
+                cell.myValueLabel.text = ""
+            default:
+                cell.evaluationValueLabel.text = "\(reportsData[indexPath.row].counter)%"
                 cell.myValueLabel.text = ""
             }
             
@@ -361,5 +425,13 @@ extension ResultReportViewController: UITableViewDelegate, UITableViewDataSource
         dropDownStates[rowIndex].toggle() // 상태 토글
         tableView.beginUpdates()
         tableView.endUpdates()
+    }
+    
+    // 초를 MM:SS 형태로 변환 메서드
+    func formatTime(seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
     }
 }

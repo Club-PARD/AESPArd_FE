@@ -27,7 +27,7 @@ class PracticeTotalScoreView: UIView {
         return label
     }()
     
-    private let totalScoreView: UIView = {
+    let totalScoreView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1)
