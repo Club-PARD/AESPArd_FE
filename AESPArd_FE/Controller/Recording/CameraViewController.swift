@@ -86,9 +86,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private let recorder = RPScreenRecorder.shared()
     
     // 촬영 시간 타이머
-    private var recordingStartTime: Date?
     private var recordingTimer: Timer?
-    private var totalRecordingTime: Double?
+    private var totalRecordingTime: Double = 0
     
     private var isRecording = false
     
@@ -111,7 +110,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 if granted {
                     self?.setupSceneView()
                     self?.setupARConfiguration()
-                    
                 } else {
                     self?.showAlert(title: "카메라 사용 제한", message: "카메라 사용 권한이 필요합니다.")
                 }
@@ -236,7 +234,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         lookTimer = nil
         recordingTimer?.invalidate()
         recordingTimer = nil
-        recordingStartTime = nil
+        //recordingStartTime = nil
         totalLookTime = 0
     }
     
@@ -390,6 +388,18 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     }
     
     // Timer Logic
+//    private func startEyeTrackTimer() {
+//        if lookTimer == nil { // Start only if not already running
+//            lookTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+//                guard let self = self else { return }
+//                self.totalLookTime += 0.1
+//                let eyeTimeString = String(format: "Time: %.1fs", self.totalLookTime)
+//                NotificationCenter.default.post(name: .updateEyeTrackingTime, object: nil, userInfo: ["time": eyeTimeString])
+//            }
+//        }
+//    }
+    
+    // MARK: - 시선추적 타이머
     private func startEyeTrackTimer() {
         if lookTimer == nil { // Start only if not already running
             lookTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
@@ -400,6 +410,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             }
         }
     }
+
     
     
     // ARSCNViewDelegate Methods
@@ -414,7 +425,13 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     // 얼마나 화면을 바라봤는지 비율 계산하는 함수
     private func calculateEyeTrackingTime() -> Int {
-        var result = (totalLookTime / totalRecordingTime!) * 100
+        var result = (totalLookTime / totalRecordingTime) * 100
+//        debugPrint("totalLookTime: \(totalLookTime)")
+//        debugPrint("totalRecordingTime: \(totalRecordingTime)")
+//        debugPrint("result: \(result)")
+        if result > 100 {
+            result = 100.0
+        }
         return Int(result.rounded())
     }
     
@@ -452,9 +469,10 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 )
                 self?.present(alert, animated: true)
             } else {
-                self?.isRecording = true
-                self?.recordingStartTime = Date()
+                // MARK: - 타이머 시작
+                //self?.recordingStartTime = Date()
                 self?.startRecordingTimer()
+                self?.isRecording = true
                 if self?.isShowingMeSelected == false {
                     NotificationCenter.default.post(name: .coverScreenSelected, object: nil)
                 }
@@ -498,23 +516,22 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
+    // MARK: - 화면 녹화 타이머
     // 화면 녹화 타이머
     private func startRecordingTimer() {
-        
+        totalRecordingTime = 0
         recordingTimer?.invalidate() // Cancel existing timer if any
-        recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self, let startTime = self.recordingStartTime else { return }
+        recordingTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self else { return }
             
-            let elapsed = Date().timeIntervalSince(startTime)
-            let minutes = Int(elapsed) / 60
-            let seconds = Int(elapsed) % 60
-            
-            totalRecordingTime = elapsed
+            totalRecordingTime += 0.1
+            let minutes = Int(totalRecordingTime) / 60
+            let seconds = Int(totalRecordingTime) % 60
             
             let timeString = String(format: "%02d:%02d", minutes, seconds)
             NotificationCenter.default.post(name: .updateRecordingTime, object: nil, userInfo: ["time": timeString])
             
-            if(elapsed < minTime! || elapsed > maxTime!){
+            if(totalRecordingTime < minTime! || totalRecordingTime > maxTime!){
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
             } else {
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
