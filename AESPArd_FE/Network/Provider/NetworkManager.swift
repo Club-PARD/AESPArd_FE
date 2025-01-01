@@ -200,27 +200,22 @@ final class NetworkManager {
     
     func uploadPresentation(
         newPresentation: NewPresentation,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<ResponseForNewPresentation, Error>) -> Void
     ) {
         newPresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
             switch result {
             case .success(let response):
-                if (200...299).contains(response.statusCode) {
-                    // Status code indicates success
-                    completion(.success(()))
-                } else {
-                    // Status code indicates an error
-                    let error = NSError(
-                        domain: "AESPArd_FE.NetworkManager",
-                        code: response.statusCode,
-                        userInfo: [
-                            NSLocalizedDescriptionKey: "Server returned status code: \(response.statusCode)."
-                        ]
-                    )
+                print("Status Code: \(response.statusCode)")
+                print("Raw Response Data: \(String(data: response.data, encoding: .utf8) ?? "No Data")")
+                do {
+                    let created = try JSONDecoder().decode(ResponseForNewPresentation.self, from: response.data)
+                    completion(.success(created))
+                } catch {
+                    print("Decoding Error: \(error)")
                     completion(.failure(error))
                 }
             case .failure(let error):
-                // Handle request failure
+                print("Request Error: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
@@ -411,17 +406,21 @@ final class NetworkManager {
     
     
     //MARK: - 로딩창에서 analysisId 불러오는 함수
-    func getSinglePracticeInLoadingScreen(userId: String, completion: @escaping (Result<GetPractice, Error>) -> Void) {
-        practiceServiceProvider.request(.getSinglePracticeInLoadingScreen(userId: userId)) { result in
+    func getSinglePracticeInLoadingScreen(presentationId: String, completion: @escaping (Result<[GetPractice], Error>) -> Void) {
+        practiceServiceProvider.request(.getSinglePracticeInLoadingScreen(presentationId: presentationId)) { result in
             switch result {
             case .success(let response):
                 do {
-                    let getPractice = try JSONDecoder().decode(GetPractice.self, from: response.data)
+                    print("Status Code: \(response.statusCode)")
+                    print("Raw Response Data: \(String(data: response.data, encoding: .utf8) ?? "No Data")")
+                    let getPractice = try JSONDecoder().decode([GetPractice].self, from: response.data)
                     completion(.success(getPractice))
                 } catch {
+                    print("Decoding Error: \(error)")
                     completion(.failure(error))
                 }
             case .failure(let error):
+                print("Request Error: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }

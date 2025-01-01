@@ -42,24 +42,23 @@ class AnalyzingViewController: UIViewController {
     // MARK: - 생성자
     
     // 새발표용
-    init(newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation){
-        super.init(nibName: nil, bundle: nil)
-        self.newPracticeAfterNewPresentation = newPracticeAfterNewPresentation
-        self.assetIdentifier = newPracticeAfterNewPresentation.videoKey
-        self.userId = newPracticeAfterNewPresentation.userId
-        isCreatingNewPresentation = true
-        isCreatingNewPractice = false
-        debugPrint(newPracticeAfterNewPresentation)
-    }
+//    init(newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation){
+//        super.init(nibName: nil, bundle: nil)
+//        self.newPracticeAfterNewPresentation = newPracticeAfterNewPresentation
+//        self.assetIdentifier = newPracticeAfterNewPresentation.videoKey
+//        self.userId = newPracticeAfterNewPresentation.userId
+//        isCreatingNewPresentation = true
+//        isCreatingNewPractice = false
+//        debugPrint(newPracticeAfterNewPresentation)
+//    }
     
     // 기존 발표의 새 연습용
-    init(newPractice: NewPractice, userId: String){
+    init(newPractice: NewPractice){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
         self.assetIdentifier = newPractice.videoKey
-        self.userId = userId
-        isCreatingNewPresentation = false
-        isCreatingNewPractice = true
+//        isCreatingNewPresentation = false
+//        isCreatingNewPractice = true
         debugPrint(newPractice)
     }
     
@@ -167,13 +166,14 @@ class AnalyzingViewController: UIViewController {
             if isSilent {
                 goBackHome(title: "소리 없음", message: "발표가 녹음되지 않았어요. 스크린 녹화와 마이크 녹음 모두 허용해주세요.")
             } else {
-                if isCreatingNewPresentation! {
-                    // 새로운 발표와 첫 연습 생성시
-                    uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
-                } else {
-                    // 기존 발표에 추가 연습 생성시
-                    uploadPracticeAndAudio(newPractice: newPractice!, userId: userId!, wavData: wavData)
-                }
+//                if isCreatingNewPresentation! {
+//                    // 새로운 발표와 첫 연습 생성시
+//                    uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
+//                } else {
+//                    // 기존 발표에 추가 연습 생성시
+//                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
+//                }
+                uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
             }
         }
     }
@@ -382,20 +382,20 @@ class AnalyzingViewController: UIViewController {
 //        }
 //    }
     
-    private func uploadPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data) {
-        NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
-            switch result {
-            case .success:
-                print("새발표와 새연습 생성 성공")
-                // MARK: 여기에 분석 아이디 겟
-                self.getPractice(userId: userId)
-            case .failure(let error):
-                print("Failed to upload new practice: \(error.localizedDescription)")
-            }
-        }
-    }
+//    private func uploadPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data) {
+//        NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
+//            switch result {
+//            case .success:
+//                print("새발표와 새연습 생성 성공")
+//                // MARK: 여기에 분석 아이디 겟
+//                self.getPractice(presentationId: newPractice)
+//            case .failure(let error):
+//                print("Failed to upload new practice: \(error.localizedDescription)")
+//            }
+//        }
+//    }
     
-    private func uploadPracticeAndAudio(newPractice: NewPractice, userId: String, wavData: Data) {
+    private func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data) {
         // Safely unwrap the required fields from NewPractice
         guard let presentationId = newPractice.presentationId, !presentationId.isEmpty else {
 //            showAlert(title: "Error", message: "No presentation ID available.")
@@ -426,8 +426,9 @@ class AnalyzingViewController: UIViewController {
                 case .success:
                     //self.showAlert(title: "Success", message: "Practice and Audio uploaded successfully!")
                     print("새로운 연습 영상 업로드 성공")
+                    debugPrint("presentationId: \(presentationId)")
                     // MARK: 여기에 분석 아이디 겟
-                    self.getPractice(userId: userId)
+                    self.getPractice(presentationId: presentationId)
                 case .failure(let error):
 //                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
                     debugPrint(error.localizedDescription)
@@ -458,7 +459,7 @@ class AnalyzingViewController: UIViewController {
     private let maxDuration: TimeInterval = 60.0 // 1분 지나면 그냥 리포트 안생긴걸로 간주하고 종료함
     
     
-    private func getPractice(userId: String) {
+    private func getPractice(presentationId: String) {
         // Invalidate any existing timer before starting a new one
         timer?.invalidate()
         timer = nil
@@ -468,18 +469,21 @@ class AnalyzingViewController: UIViewController {
             guard let self = self else { return }
             
             // Fetch the report
-            NetworkManager.shared.getSinglePracticeInLoadingScreen(userId: userId) { [weak self] result in
+            NetworkManager.shared.getSinglePracticeInLoadingScreen(presentationId: presentationId) { [weak self] result in
                 switch result {
-                case .success(let getPractice):
-                    self?.practiceData = getPractice
+                case .success(let getPracticeList):
+                    self?.practiceData = getPracticeList.first
                     debugPrint(self?.practiceData)
+                    timer.invalidate()
+                    self?.timer = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                         let reportVC = ResultReportViewController(practiceData: (self?.practiceData)!, isFromHome: false)
                         reportVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                         self?.present(reportVC, animated: true, completion: nil)
                     }
                 case .failure(let error):
-                    self?.goBackHome(title: "분석 중단", message: "분석이 중단되었어요")
+//                    self?.goBackHome(title: "분석 중단", message: "분석이 중단되었어요")
+                    debugPrint("분석 아직 안가져 와짐")
                 }
             }
             
