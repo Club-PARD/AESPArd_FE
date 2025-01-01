@@ -476,7 +476,7 @@ class AnalyzingViewController: UIViewController {
                     debugPrint(self?.practiceData)
                     timer.invalidate()
                     self?.timer = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         let reportVC = ResultReportViewController(practiceData: (self?.practiceData)!, isFromHome: false)
                         reportVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
                         self?.present(reportVC, animated: true, completion: nil)

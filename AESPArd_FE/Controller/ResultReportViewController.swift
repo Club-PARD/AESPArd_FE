@@ -264,7 +264,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         if isFromHome {
             self.dismiss(animated: true, completion: nil)
         } else {
-            self.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
+            self.presentingViewController?.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
         }
         
     }
