@@ -15,3 +15,9 @@ struct NewPresentation: Codable {
     var showTimeOnScreen: Bool?
     var showMeOnScreen: Bool?
 }
+
+struct ResponseForNewPresentation: Codable {
+    var presentationId: String?
+    var presentationName: String?
+    var createdAt: String?
+}

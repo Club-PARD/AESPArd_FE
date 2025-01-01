@@ -20,6 +20,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     private var newPractice: NewPractice?
     private var isShowingTimeSelected: Bool?
     private var isShowingMeSelected: Bool?
+    // userId 안씀 그래서 나중에 userId 쓰는 라인들 지워주면 됨 혹시 몰라서 남김
     private var userId: String?
     
     // 새로운 발표를 만드는지 혹은 연습을 만드는지에 따라 다음 페이지에 전달하는 값이 달라짐
@@ -40,6 +41,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         self.minTime = newPresentation.idealMinTime
         self.maxTime = newPresentation.idealMaxTime
         self.userId = newPresentation.userId
+        self.newPractice = NewPractice()
         isCreatingNewPresentation = true
         isCreatingNewPractice = false
         super.init(nibName: nil, bundle: nil)
@@ -164,9 +166,15 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     private func uploadNewPresentation(){
         NetworkManager.shared.uploadPresentation(newPresentation: newPresentation!) { result in
+            guard let newPresentation = self.newPresentation else {
+                print("Error: newPresentation is nil.")
+                return
+            }
+            
             switch result {
-            case .success:
+            case .success(let createdPresentation):
                 print("Presentation uploaded successfully!")
+                self.newPractice!.presentationId = createdPresentation.presentationId
             case .failure(let error):
                 print("Failed to upload presentation: \(error.localizedDescription)")
             }
@@ -494,11 +502,13 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 return
             }
             
-            if isCreatingNewPresentation! {
-                newPracticeAfterNewPresentation!.eyePercentage = calculateEyeTrackingTime()
-            } else {
-                newPractice?.eyePercentage = calculateEyeTrackingTime()
-            }
+            // MARK: 분기 없앰
+//            if isCreatingNewPresentation! {
+//                newPracticeAfterNewPresentation!.eyePercentage = calculateEyeTrackingTime()
+//            } else {
+//                newPractice?.eyePercentage = calculateEyeTrackingTime()
+//            }
+            newPractice?.eyePercentage = calculateEyeTrackingTime()
             self.isRecording = false
             stopAllTimers()
             NotificationCenter.default.post(name: .updateUIAfterRecording, object: nil, userInfo: ["isRecording": false])
@@ -623,13 +633,17 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             guard let self = self else { return }
             
             let analyzingVC: AnalyzingViewController
-            if isCreatingNewPresentation! {
-                newPracticeAfterNewPresentation!.videoKey = identifier
-                analyzingVC = AnalyzingViewController(newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!)
-            } else {
-                newPractice!.videoKey = identifier
-                analyzingVC = AnalyzingViewController(newPractice: newPractice!, userId: userId!)
-            }
+            
+            // MARK: 분기 없앰
+//            if isCreatingNewPresentation! {
+//                newPracticeAfterNewPresentation!.videoKey = identifier
+//                analyzingVC = AnalyzingViewController(newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!)
+//            } else {
+//                analyzingVC = AnalyzingViewController(newPractice: newPractice!)
+//            }
+            
+            newPractice!.videoKey = identifier
+            analyzingVC = AnalyzingViewController(newPractice: newPractice!)
            
             
             if let navigationController = self.navigationController {
