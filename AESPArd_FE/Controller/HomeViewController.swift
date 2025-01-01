@@ -59,7 +59,6 @@ class HomeViewController: UIViewController {
         getRecordsAverageAPI()
         fetchPresentationList()
         
-        
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self
         

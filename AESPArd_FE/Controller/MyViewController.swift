@@ -11,6 +11,10 @@ extension Notification.Name {
     static let didResetService = Notification.Name("didResetService")
 }
 
+extension Notification.Name {
+    static let stopVideonPlayerNotification = Notification.Name("stopVideonPlayerNotification")
+}
+
 class MyViewController : UIViewController {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -99,7 +103,6 @@ class MyViewController : UIViewController {
         return button
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -110,6 +113,8 @@ class MyViewController : UIViewController {
         
         setUI()
         setupNameButtonTitle()
+        
+        NotificationCenter.default.post(name:.stopVideonPlayerNotification, object: nil)
 
         centerButton.addTarget(self, action: #selector(centerButtonTapped), for: .touchUpInside)
         appResetButton.addTarget(self, action: #selector(appResetButtonTapped), for: .touchUpInside)
@@ -275,3 +280,4 @@ class MyViewController : UIViewController {
     }
     
 }
+
