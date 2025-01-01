@@ -56,9 +56,10 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         tableView.delegate = self
         tableView.dataSource = self
         practiceHeaderView.delegate =  self
-        // 탭 바 컨트롤러의 delegate 설정
+        
         //탭바 중앙 버튼 클릭 감지
         NotificationCenter.default.addObserver(self, selector: #selector(stopVideoPlayback), name: .pauseVideoPlayerNotificaion, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(stopVideoPlayback), name: .        stopVideonPlayerNotification, object: nil)
         
         //API
         if(!mode){
