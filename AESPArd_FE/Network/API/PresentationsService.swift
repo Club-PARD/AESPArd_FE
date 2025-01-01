@@ -14,7 +14,7 @@ enum PresentationsService {
     case deleteSelectedPresentations(presentationIds: [String])
     case getAllPresentations(userId: String)
     case deleteAllDeletePresentation(userId: String)
-    case searchPresentations(searchTerm: String)
+    case searchPresentations(userId: String, searchTerm: String)
 }
 
 extension PresentationsService: TargetType {
@@ -36,8 +36,8 @@ extension PresentationsService: TargetType {
             return "/presentations/user/\(userId)/modal-list"
         case .deleteAllDeletePresentation(let userId):
             return "/presentations/\(userId)/all-delete"
-        case .searchPresentations:
-            return "/presentations/search"
+        case .searchPresentations(let userId, _):
+            return "/presentations/search/\(userId)"
             
         }
     }
@@ -80,7 +80,7 @@ extension PresentationsService: TargetType {
         case .deleteAllDeletePresentation:
             return .requestPlain
             
-        case .searchPresentations(let searchTerm):
+        case .searchPresentations(_, let searchTerm):
             return .requestParameters(parameters: ["searchTerm": searchTerm], encoding: URLEncoding.default)
         }
         

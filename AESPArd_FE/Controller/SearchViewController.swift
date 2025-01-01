@@ -270,7 +270,7 @@ class SearchViewController: UIViewController {
     }
     
     func searchPresentationsAPI(searchTerm: String) {
-        networkManager.searchPresentations(searchTerm: searchTerm) { [weak self] result in
+        networkManager.searchPresentations(userId: testId,searchTerm: searchTerm) { [weak self] result in
             switch result {
             case .success(let presentations):
                 self?.ptList = presentations

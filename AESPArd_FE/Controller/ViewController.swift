@@ -9,6 +9,10 @@ import UIKit
 import AVFoundation
 import Photos
 
+extension Notification.Name {
+    static let pauseVideoPlayerNotificaion = Notification.Name("pauseVideoPlayerNotificaion")
+}
+
 class ViewController: UITabBarController {
     
     // 중앙 버튼
@@ -54,7 +58,6 @@ class ViewController: UITabBarController {
             }
         }
 
-        
         
     }
     
@@ -267,8 +270,10 @@ class ViewController: UITabBarController {
     
     // MARK: - 중앙 버튼 동작
     @objc private func centralButtonTapped() {
-        // 중앙 버튼 탭 시 두 번째 탭으로 이동
-        //        self.selectedIndex = 1
+
+        //비디오 멈춤
+        NotificationCenter.default.post(name: .pauseVideoPlayerNotificaion, object: nil)
+        
         let modalVC = AddModalViewController()
         modalVC.modalPresentationStyle = .overCurrentContext // 전체 화면 모달로 설정
         present(modalVC, animated: false, completion: nil)
