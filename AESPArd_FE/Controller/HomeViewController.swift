@@ -54,10 +54,12 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        UIApplication.shared.isIdleTimerDisabled = false
         
-        getUserNameAPI()
-        getRecordsAverageAPI()
-        fetchPresentationList()
+        // 홈뷰에서 아래 함수들 없어도 되는지 확인하고 삭제할 것
+//        getUserNameAPI()
+//        getRecordsAverageAPI()
+//        fetchPresentationList()
         
         // 탭 바 컨트롤러의 delegate 설정
         self.tabBarController?.delegate = self

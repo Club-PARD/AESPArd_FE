@@ -108,6 +108,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        UIApplication.shared.isIdleTimerDisabled = true
         
         // 카메라 권한 확인
         checkCameraPermission { [weak self] granted in

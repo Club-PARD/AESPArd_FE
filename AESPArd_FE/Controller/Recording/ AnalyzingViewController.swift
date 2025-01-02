@@ -122,6 +122,7 @@ class AnalyzingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        UIApplication.shared.isIdleTimerDisabled = true
         setupUI()
         fetchVideoAsset()
     }
