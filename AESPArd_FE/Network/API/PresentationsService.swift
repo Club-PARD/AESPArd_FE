@@ -15,6 +15,9 @@ enum PresentationsService {
     case getAllPresentations(userId: String)
     case deleteAllDeletePresentation(userId: String)
     case searchPresentations(userId: String, searchTerm: String)
+    
+    case deleteOnePresentation(presentationId: String)
+    case pathPresentationNameByPresentaion(presentationId: String, name: String)
 }
 
 extension PresentationsService: TargetType {
@@ -38,7 +41,11 @@ extension PresentationsService: TargetType {
             return "/presentations/\(userId)/all-delete"
         case .searchPresentations(let userId, _):
             return "/presentations/search/\(userId)"
-            
+        
+        case .deleteOnePresentation(let presentationId):
+            return "/presentations/\(presentationId)/one-delete"
+        case .pathPresentationNameByPresentaion(let presentationId, _):
+            return "/presentations/\(presentationId)/update-name"
         }
     }
     
@@ -58,6 +65,10 @@ extension PresentationsService: TargetType {
             return .delete
         case .searchPresentations:
             return .get
+        case .deleteOnePresentation:
+            return .delete
+        case .pathPresentationNameByPresentaion :
+            return .patch
         }
     }
     
@@ -82,6 +93,12 @@ extension PresentationsService: TargetType {
             
         case .searchPresentations(_, let searchTerm):
             return .requestParameters(parameters: ["searchTerm": searchTerm], encoding: URLEncoding.default)
+            
+        case .deleteOnePresentation(let presentationId):
+            return .requestPlain
+            
+        case .pathPresentationNameByPresentaion(let presentationId, let name):
+            return .requestCustomJSONEncodable(name, encoder: JSONEncoder())
         }
         
     }

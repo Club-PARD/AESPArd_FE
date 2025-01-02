@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let listbackHomeNotification = Notification.Name("listbackHomeNotification")
+}
+
 class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -15,6 +19,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     var presentationData: PresentationList
     var practiceList : [GetPractice] = []
+    
+    var editNmae: String = ""
     
     // 초기화 메서드 정의
     init(presentationData: PresentationList) {
@@ -122,6 +128,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         //삭제할꺼 리스트 추가 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeletePracticeNotification, object: nil)
+        
+        //report에서 delete/patch 반영
+        NotificationCenter.default.addObserver(self, selector: #selector(renderingList), name: .reportbackHomeNotification, object: nil)
     }
     
     deinit {
@@ -200,6 +209,39 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             }
         }
     }
+    
+    @objc func deleteOnePresentationAPI() {
+        networkManager.deleteOnePresentation(presentationId: presentationData.presentationId) { [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("히힛 삭제 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
+    @objc func patchPresentationNameAPI() {
+        networkManager.patchPresentationName(presentationId: presentationData.presentationId , name: editNmae){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("히힛 이름 수정 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
+    @objc func deleteSelectedPracticeAPI() {
+        networkManager.deleteSelectedPractice(practiceIds: selectedDeleteId){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("연습 선택 삭제 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
 
     
     
@@ -208,6 +250,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     // ListHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissViewController() {
         self.dismiss(animated: true, completion: nil)
+        NotificationCenter.default.post(name:.listbackHomeNotification, object: nil)
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
@@ -235,6 +278,10 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         if !isDeleteMode {
             //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            if(selectedDeleteId.count>0){
+                deleteSelectedPracticeAPI()
+                renderingList()
+            }
             selectedDeleteId.removeAll()
         }
         
@@ -252,6 +299,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         }
         tableView.reloadData()
 
+    }
+    
+    @objc func renderingList(){
+        getRecentScores()
+        getPracticeData()
     }
  
     //MARK: -Alert 함수
@@ -274,6 +326,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
                 self.header.headerLabel.text = newName
+                self.editNmae = newName
+                
+                self.patchPresentationNameAPI()
             }
         }
         
@@ -298,6 +353,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 삭제 버튼 추가
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
             print("삭제됨")
+            self.deleteOnePresentationAPI()
+            self.dismissViewController() //화면 벗어나기
         }
         
         alertController.addAction(cancelAction)
@@ -364,6 +421,12 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
+            if(selectedDeleteId.count == 0){
+                cell.deleteButton.setTitle("삭제하기", for: .normal)
+            }
+            else{
+                cell.deleteButton.setTitle("\(selectedDeleteId.count)개 삭제하기", for: .normal)
+            }
             cell.configure(practiceCount: practiceList.count)
         
             return cell

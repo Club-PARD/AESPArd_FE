@@ -57,7 +57,7 @@ class HomeViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
         
         // 홈뷰에서 아래 함수들 없어도 되는지 확인하고 삭제할 것
-//        getUserNameAPI()
+        getUserNameAPI()
 //        getRecordsAverageAPI()
 //        fetchPresentationList()
         
@@ -104,6 +104,13 @@ class HomeViewController: UIViewController {
         
         //my에서 서비스 초기화
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDataBasedOnFilterMode), name: .didResetService, object: nil)
+        
+        //list에서 delete/patch 반영
+        NotificationCenter.default.addObserver(self, selector: #selector(renderingHome), name: .listbackHomeNotification, object: nil)
+        
+        //report에서 delete/patch 반영
+        NotificationCenter.default.addObserver(self, selector: #selector(renderingHome), name: .reportbackHomeNotification, object: nil)
+        
     }
     
     deinit {
@@ -120,12 +127,16 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .updateFavoriteNotification, object: nil)
         
         NotificationCenter.default.removeObserver(self, name: .didResetService, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .listbackHomeNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: .reportbackHomeNotification, object: nil)
+    
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        getUserNameAPI()
         getRecordsAverageAPI()
         reloadDataBasedOnFilterMode()
     }
@@ -242,6 +253,8 @@ class HomeViewController: UIViewController {
         
     }
     
+    //MARK: - 관련 메서드(api 함수 하나 끼어있음)
+    
     // 삭제 버튼 상태를 토글하는 메서드
     @objc func handleButtonToggleNotification() {
         isDeleteMode.toggle()
@@ -303,6 +316,11 @@ class HomeViewController: UIViewController {
         self.definesPresentationContext = true // 현재 컨텍스트를 정의
         
         self.present(modalViewController, animated: true)
+    }
+    
+    @objc func renderingHome(){
+        getRecordsAverageAPI()
+        reloadDataBasedOnFilterMode()
     }
     
 }
@@ -421,6 +439,10 @@ extension HomeViewController: UITabBarControllerDelegate {
             
             // 모든 모달 창 닫기
             dismissModalsRecursively(from: homeVC, isLastModal: true)
+            
+            //API
+            getRecordsAverageAPI()
+            reloadDataBasedOnFilterMode()
         }
         
         return true

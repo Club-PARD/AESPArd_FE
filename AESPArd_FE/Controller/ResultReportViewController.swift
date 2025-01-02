@@ -9,6 +9,10 @@ import UIKit
 import Photos
 import AVKit
 
+extension Notification.Name {
+    static let reportbackHomeNotification = Notification.Name("reportbackHomeNotification")
+}
+
 class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -20,6 +24,9 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     var reportsData : [GetReport] = []
     var isFromHome: Bool = true
     private var analysisId: String?
+    
+    //이름 변경
+    var editName: String = ""
     
     //비디오 플레이어
     private var player: AVPlayer?
@@ -203,6 +210,29 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             }
         }
     }
+    
+    @objc func deleteOnePracticeAPI() {
+        networkManager.deleteOnePractice(practiceId: practiceData.id){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("연습 삭제 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
+    @objc func patchPracticeNameAPI() {
+        networkManager.patchPracticeName(practiceId: practiceData.id, name: editName){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("연습 이름 수정 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
 
     
     
@@ -266,6 +296,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         } else {
             self.presentingViewController?.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
         }
+        
+        NotificationCenter.default.post(name:.reportbackHomeNotification, object: nil)
         
     }
     
@@ -375,6 +407,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
                 self.practiceHeaderView.headerLabel.text = newName
+                self.editName = newName
+                self.patchPracticeNameAPI()
             }
         }
         
@@ -399,6 +433,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         // 삭제 버튼 추가
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
             print("삭제됨")
+            self.deleteOnePracticeAPI()
+            self.dismiss(animated: true, completion: nil)
         }
         
         alertController.addAction(cancelAction)

@@ -470,6 +470,66 @@ final class NetworkManager {
             }
         }
     }
-
+    
+    //MARK: - 발표 이름 수정
+    func patchPresentationName(presentationId: String, name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.pathPresentationNameByPresentaion(presentationId: presentationId, name: name)){ result in
+            switch result {
+            case .success(_):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    //MARK: - 발표 하나 삭제
+    func deleteOnePresentation(presentationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        presentationServiceProvider.request(.deleteOnePresentation(presentationId: presentationId)){ result in
+            switch result {
+            case .success(_):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    //MARK: - 연습 하나 삭제
+    func deleteOnePractice(practiceId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        practiceServiceProvider.request(.deleteOnePracticeByPracticeId(practiceId: practiceId)){ result in
+            switch result {
+            case .success(_):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    //MARK: - 연습 선택 삭제
+    func deleteSelectedPractice(practiceIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+        practiceServiceProvider.request(.deleteSelectedPractice(practiceIds: practiceIds)){ result in
+            switch result {
+            case .success(_):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    //MARK: - 연습 이름 수정
+    func patchPracticeName(practiceId: String, name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        practiceServiceProvider.request(.patchPracticeNameByPracticeId(practiceId: practiceId, name: name)){ result in
+            switch result {
+            case .success(_):
+                    completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
 }
 
