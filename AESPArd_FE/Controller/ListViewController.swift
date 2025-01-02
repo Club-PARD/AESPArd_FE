@@ -213,7 +213,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     @objc func deleteOnePresentationAPI() {
         networkManager.deleteOnePresentation(presentationId: presentationData.presentationId) { [weak self] result in
             switch result {
-            case .success(let scores):
+            case .success(_):
                 print("히힛 삭제 성공")
             case .failure(let error):
                 print("Error fetching scores: \(error)")
@@ -224,7 +224,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     @objc func patchPresentationNameAPI() {
         networkManager.patchPresentationName(presentationId: presentationData.presentationId , name: editNmae){ [weak self] result in
             switch result {
-            case .success(let scores):
+            case .success(_):
                 print("히힛 이름 수정 성공")
             case .failure(let error):
                 print("Error fetching scores: \(error)")
@@ -235,8 +235,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     @objc func deleteSelectedPracticeAPI() {
         networkManager.deleteSelectedPractice(practiceIds: selectedDeleteId){ [weak self] result in
             switch result {
-            case .success(let scores):
+            case .success(_):
                 print("연습 선택 삭제 성공")
+                self?.renderingList()
             case .failure(let error):
                 print("Error fetching scores: \(error)")
             }
@@ -280,7 +281,6 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             //삭제 모드가 아니면 selectedDeleteId 배열 초기화
             if(selectedDeleteId.count>0){
                 deleteSelectedPracticeAPI()
-                renderingList()
             }
             selectedDeleteId.removeAll()
         }
