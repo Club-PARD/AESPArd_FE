@@ -7,6 +7,10 @@
 
 import UIKit
 
+extension Notification.Name {
+    static let listbackHomeNotification = Notification.Name("listbackHomeNotification")
+}
+
 class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -124,6 +128,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         //삭제할꺼 리스트 추가 감지
         NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteSelection(_:)), name: .selectedDeletePracticeNotification, object: nil)
+        
+        //report에서 delete/patch 반영
+        NotificationCenter.default.addObserver(self, selector: #selector(renderingList), name: .reportbackHomeNotification, object: nil)
     }
     
     deinit {
@@ -243,6 +250,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     // ListHeaderTableCellDelegate 메소드 - 뒤로가기 버튼
     func dismissViewController() {
         self.dismiss(animated: true, completion: nil)
+        NotificationCenter.default.post(name:.listbackHomeNotification, object: nil)
     }
     
     //edit 버튼 클릭시 UIview 등장/숨기기 토글
@@ -290,6 +298,11 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         }
         tableView.reloadData()
 
+    }
+    
+    @objc func renderingList(){
+        getRecentScores()
+        getPracticeData()
     }
  
     //MARK: -Alert 함수

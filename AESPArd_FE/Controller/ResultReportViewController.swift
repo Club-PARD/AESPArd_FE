@@ -9,6 +9,10 @@ import UIKit
 import Photos
 import AVKit
 
+extension Notification.Name {
+    static let reportbackHomeNotification = Notification.Name("reportbackHomeNotification")
+}
+
 class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelegate {
     
     // 클백 연결을 위한 NesworkManager 연결
@@ -292,6 +296,8 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
         } else {
             self.presentingViewController?.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
         }
+        
+        NotificationCenter.default.post(name:.reportbackHomeNotification, object: nil)
         
     }
     
