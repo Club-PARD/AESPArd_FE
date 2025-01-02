@@ -1,8 +1,7 @@
 
-# Pree_FE
+# pree_FE
 
-![pree](https://github.com/user-attachments/assets/64792e18-9301-48ca-9b5a-c6788b4148cc)
-
+<img src="https://github.com/user-attachments/assets/64792e18-9301-48ca-9b5a-c6788b4148cc"/>
 
 > **_영상 분석을 통한 발표 피드백 iOS 서비스_** <br/><br/>
 > **Development Period: 2024.12.16 ~ 2025.01.03**
@@ -27,19 +26,34 @@
 
 ## Function
 
+### **1. 최근 연습에 대한 항목별 평균 지표 제공 📊**
+
+1. 최근 5개의 연습 영상을 통해 분석한 데이터를 바탕으로 pree에서 제공하는 항목별 평균 지표를 그래프로 제공합니다. 
+
+### **2. 발표영상 촬영 및 분석 💡**
+
+1. 탭바의 + 버튼 클릭시, 새로운 발표를 추가하거나, 기존 발표에서 연습 영상을 추가할 수 있습니다.
+2. 사용자가 설정한 최소 시간/최대 시간, 아이트래킹, 음성 데이터 등을 이용하여 발표 영상을 분석합니다.
+   
+### **3. 분석 데이터에 대한 레포트 제공 💬**
+
+1. 영상 촬영 후 분석이 끝나면 해당 발표에 대한 레포트를 제공합니다.
+2. 발표시간, 목소리 크기, 발화 지연 표현 횟수, 불필요한 공백 횟수, 시선처리에 대한 점수 및 측정 결과를 제공합니다.
+
+## 페이지별 소개
 
 <br/>
 
 ##  팀 에스파드 
 
 ------
-|                                                   김도경                                              |                          이유현                           |                          김도원                           |     
+|                                                   이지환                                              |                          김규희                           |                          김나임                           |     
 |:-----------------------------------------------------------------------------------------------------:|:---------------------------------------------------------:|:---------------------------------------------------------:|
-|                                                  프론트엔드                                                   |                            프론트엔드                             |                           프론트엔드                            |
-|  <img >  |  <img >   | <img > |  <img >  |
-|                                                이지환                                                 |                                 김규희                    |                          김나임                           |
-|                                                  PM                                                  |                           디자인                           |                           백엔드                           |
-| <img> | <img> | <img > | <img > |
+|                                                  PM                                                   |                            디자인                             |                           백엔드                            |
+|  <img src="https://github.com/user-attachments/assets/89ae3179-887d-4757-a57a-9240ae799cd5" style="width: 150px; height: 150px; object-fit: cover;">  |  <img src="https://github.com/user-attachments/assets/68044f05-55e8-4646-9d20-3da1ea2b6216" style="width: 150px; height: 150px; object-fit: cover;">   | <img src="https://github.com/user-attachments/assets/bb256ed1-94f6-43a4-9f73-dd632eddbb0a" style="width: 150px; height: 150px; object-fit: cover;"> |
+|                                                김도경                                                 |                                 이유현                    |                          김도원                           |
+|                                                  프론트엔드                                                  |                           프론트엔드                           |                           프론트엔드                           |
+| <img src="https://github.com/user-attachments/assets/02c6f9b5-9bc4-4e3a-8641-5c7f5a0f5705" style="width: 150px; height: 150px; object-fit: cover;"> | <img src="https://github.com/user-attachments/assets/6e1de975-56c0-4463-b01a-4eef3db65a0d" style="width: 150px; height: 150px; object-fit: cover;"> | <img src="https://github.com/user-attachments/assets/25f4675a-f52a-4647-99bd-fb16980ad1ba" style="width: 150px; height: 150px; object-fit: cover;"> |
 
 
 
@@ -58,17 +72,9 @@
 ![bedge](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white)
 ![bedge](https://img.shields.io/badge/JAVA-ED8B00?style=flat&logo=Openjdk&logoColor=white)
 
-### 사이트 배포
-![bedge](https://img.shields.io/badge/AWS-232F3E.svg?style=flat&logo=amazonwebservices&logoColor=white)
-![bedge](https://img.shields.io/badge/AmazonRoute53-8C4FFF?style=flat&logo=AmazonRoute53&logoColor=white)
-![bedge](https://img.shields.io/badge/AmazonEC2-FF9900?style=flat&logo=amazonec2&logoColor=white)<br />
-![bedge](https://img.shields.io/badge/AmazonS3-569A31?style=flat&logo=amazonS3&logoColor=white)
-![bedge](https://img.shields.io/badge/AmazonRDS-527FFF?style=flat&logo=amazonrds&logoColor=white)
-
 ### 협업도구
 ![bedge](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=Figma&logoColor=white)
 ![bedge](https://img.shields.io/badge/Notion-FFFFFF?style=flat&logo=notion&logoColor=black)
-![bedge](https://img.shields.io/badge/Discord-blue?style=flat&logo=discord&logoColor=white)
 ![bedge](https://img.shields.io/badge/slack-FFFFFF?style=flat&logo=slack&logoColor=skyblue)<br />
 ![bedge](https://img.shields.io/badge/git-black?style=flat&logo=git&logoColor=red)
 ![bedge](https://img.shields.io/badge/github-black?style=flat&logo=github&logoColor=white)
