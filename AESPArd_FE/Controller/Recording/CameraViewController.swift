@@ -72,7 +72,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // MARK: - 시선추적 변수 선언
     
     // 시선추적 변수들
-    private var sceneView: ARSCNView!
+    private var sceneView: ARSCNView! // AR 렌더링 & 페이스 트래킹
+    // faceNode: A root node for attaching the left and right eyes.
     private let faceNode = SCNNode() // SCNNode: 3D 공간에서의 위치 정보를 가지는 클래스
     private let leftEye = EyeNode(color: .clear)
     private let rightEye = EyeNode(color: .clear)
@@ -333,14 +334,14 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         // Configure AR session with face tracking
         let configuration = ARFaceTrackingConfiguration()
         configuration.isLightEstimationEnabled = true // Optional, for better visuals
-        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors]) // 기존 트랙킹과 앵커 초기화후 실행
     }
     
     
     // 눈위치 잡는 함수
     func eyeTracking(using anchor: ARFaceAnchor) {
-        leftEye.simdTransform = anchor.leftEyeTransform
-        rightEye.simdTransform = anchor.rightEyeTransform
+        leftEye.simdTransform = anchor.leftEyeTransform // 왼쪽눈 3D 위치 정보들 전달
+        rightEye.simdTransform = anchor.rightEyeTransform // 오른쪽눈 3D 위치 정보들 전달
         
         let intersectPoints = [leftEye, rightEye].compactMap { eye -> CGPoint? in
             let hitTest = viewPlane.hitTestWithSegment(from: eye.target.worldPosition, to: eye.worldPosition)
@@ -426,11 +427,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     
     // ARSCNViewDelegate Methods
+    // ARKit calls this method when it detects updates to the face anchor.
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let faceAnchor = anchor as? ARFaceAnchor else { return }
         DispatchQueue.main.async {
-            self.faceNode.simdTransform = node.simdTransform
-            self.eyeTracking(using: faceAnchor)
+            self.faceNode.simdTransform = node.simdTransform // simdTransform: 3D의 여러 위치 정보를 가지는 4x4 matrix
+            self.eyeTracking(using: faceAnchor) // 시선 포인트 계산을 위해 호출
         }
     }
     

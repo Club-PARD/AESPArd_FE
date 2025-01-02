@@ -295,6 +295,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
             self.dismiss(animated: true, completion: nil)
         } else {
             self.presentingViewController?.presentingViewController?.presentingViewController?.presentingViewController?.dismiss(animated: true)
+            
         }
         
         NotificationCenter.default.post(name:.reportbackHomeNotification, object: nil)
