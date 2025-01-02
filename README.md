@@ -44,43 +44,94 @@
 
 <table align="center">
 <tr>
-<th>스플래시</th>
-<th>메인 화면</th>
-<th>무제</th>
-<th>무제</th>
+<th>Splash</th>
+<th>Home</th>
+<th>Search</th>
+<th>My</th>
 </tr>
 <tr>
 <td align="center">
 
 <img src="" height="400" />
-
-
 스플래시 화면
 
 </td>
 <td align="center">
 
 <img src="" height="400" />
-
 메인 화면
 
 </td>
 <td align="center">
 
 <img src="" height="400" />
-
-
-일정 선택 화면  
+검색 화면 
 
 </td>
 <td align="center">
 
 <img src="" height="400" />
+내정보
 
 </td>
 </tr>
 </table>
 
+<table align="center">
+<tr>
+<th>Record1</th>
+<th>Record2</th>
+<th>Record3</th>
+<th>Record4</th>
+</tr>
+<tr>
+<td align="center">
+
+<img src="" height="400" />
+record1
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+record2
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+record3 
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+record4
+
+</td>
+</tr>
+</table>
+
+<table align="center">
+<tr>
+<th>Practices</th>
+<th>Report</th>
+</tr>
+<tr>
+<td align="center">
+
+<img src="" height="400" />
+Practices
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+Report
+
+</td>
+</tr>
+</table>
 <br/>
 
 ##  팀 에스파드 
