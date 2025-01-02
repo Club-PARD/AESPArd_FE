@@ -102,6 +102,6 @@ class ScoreGraphTableCell: UITableViewCell {
     // 라벨 유저 이름 텍스트 설정 메서드
     func configure(with userName: String) {
         greetingLabel.text = "\(userName)님, 오늘도\n프리와 함께 발표준비해요!"
-        graphLabel.text = "최근 5개 연습의 항목 별 평균 점수 그래프"
+        graphLabel.text = "최근 5개 연습의 항목별 평균 점수 그래프"
     }
 }
