@@ -280,6 +280,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             //삭제 모드가 아니면 selectedDeleteId 배열 초기화
             if(selectedDeleteId.count>0){
                 deleteSelectedPracticeAPI()
+                renderingList()
             }
             selectedDeleteId.removeAll()
         }
