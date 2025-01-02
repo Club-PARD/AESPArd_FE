@@ -7,6 +7,8 @@
 
 import Foundation
 
+// CamaeraViewController 와 CameraOveralyViewController에서 쓰이는 노티피케이션들
+
 extension Notification.Name {
     static let backButtonTapped = Notification.Name("BackButtonTapped")
     static let startStopRecordingButtonTapped = Notification.Name("StartStopRecordingButtonTapped")
