@@ -1,7 +1,7 @@
 
 # pree_FE
 
-<img src="https://github.com/user-attachments/assets/64792e18-9301-48ca-9b5a-c6788b4148cc"/>
+<img src="https://github.com/user-attachments/assets/ac177a5b-5142-4d6b-bcd2-355723692f20"/>
 
 > **_영상 분석을 통한 발표 피드백 iOS 서비스_** <br/><br/>
 > **Development Period: 2024.12.16 ~ 2025.01.03**
