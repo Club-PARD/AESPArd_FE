@@ -42,6 +42,45 @@
 
 ## 페이지별 소개
 
+<table align="center">
+<tr>
+<th>스플래시</th>
+<th>메인 화면</th>
+<th>무제</th>
+<th>무제</th>
+</tr>
+<tr>
+<td align="center">
+
+<img src="" height="400" />
+
+
+스플래시 화면
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+
+메인 화면
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+
+
+일정 선택 화면  
+
+</td>
+<td align="center">
+
+<img src="" height="400" />
+
+</td>
+</tr>
+</table>
+
 <br/>
 
 ##  팀 에스파드 
