@@ -55,6 +55,12 @@ final class NetworkManager {
         plugins: [
         ]
     )
+    
+    private let provider = MoyaProvider<LoginService>(
+        plugins: [
+            
+        ]
+    )
 
     
     // MARK: - User 정보 불러오는 메소드
@@ -443,7 +449,27 @@ final class NetworkManager {
             }
         }
     }
-                               
+                       
+    
+    // MARK: - Apple Login 함수
+    func postAppleLogin(data: AppleLoginRequest, completion: @escaping (Result<Void, Error>) -> Void) {
+        provider.request(.postAppleLogin(data: data)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    // HTTP 응답 코드 체크 (200~299 범위)
+                    guard (200...299).contains(response.statusCode) else {
+                        throw NSError(domain: "", code: response.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed with status code: \(response.statusCode)"])
+                    }
+                    completion(.success(())) // 성공 처리
+                } catch {
+                    completion(.failure(error)) // 에러 처리
+                }
+            case .failure(let error):
+                completion(.failure(error)) // 네트워크 에러 처리
+            }
+        }
+    }
 
 }
 
