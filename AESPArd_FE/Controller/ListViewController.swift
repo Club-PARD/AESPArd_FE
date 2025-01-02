@@ -16,6 +16,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     var presentationData: PresentationList
     var practiceList : [GetPractice] = []
     
+    var editNmae: String = ""
+    
     // 초기화 메서드 정의
     init(presentationData: PresentationList) {
         self.presentationData = presentationData
@@ -200,6 +202,39 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             }
         }
     }
+    
+    @objc func deleteOnePresentationAPI() {
+        networkManager.deleteOnePresentation(presentationId: presentationData.presentationId) { [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("히힛 삭제 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
+    @objc func patchPresentationNameAPI() {
+        networkManager.patchPresentationName(presentationId: presentationData.presentationId , name: editNmae){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("히힛 이름 수정 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
+    
+    @objc func deleteSelectedPracticeAPI() {
+        networkManager.deleteSelectedPractice(practiceIds: selectedDeleteId){ [weak self] result in
+            switch result {
+            case .success(let scores):
+                print("연습 선택 삭제 성공")
+            case .failure(let error):
+                print("Error fetching scores: \(error)")
+            }
+        }
+    }
 
     
     
@@ -235,6 +270,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         
         if !isDeleteMode {
             //삭제 모드가 아니면 selectedDeleteId 배열 초기화
+            if(selectedDeleteId.count>0){
+                deleteSelectedPracticeAPI()
+            }
             selectedDeleteId.removeAll()
         }
         
@@ -274,6 +312,9 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
             // 텍스트 필드에서 입력된 이름을 가져옴
             if let newName = alertController.textFields?.first?.text, !newName.isEmpty {
                 self.header.headerLabel.text = newName
+                self.editNmae = newName
+                
+                self.patchPresentationNameAPI()
             }
         }
         
@@ -298,6 +339,8 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
         // 삭제 버튼 추가
         let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
             print("삭제됨")
+            self.deleteOnePresentationAPI()
+            self.dismissViewController() //화면 벗어나기
         }
         
         alertController.addAction(cancelAction)
@@ -364,6 +407,12 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
             cell.backgroundColor = .clear
             cell.selectionStyle = .none
             
+            if(selectedDeleteId.count == 0){
+                cell.deleteButton.setTitle("삭제하기", for: .normal)
+            }
+            else{
+                cell.deleteButton.setTitle("\(selectedDeleteId.count)개 삭제하기", for: .normal)
+            }
             cell.configure(practiceCount: practiceList.count)
         
             return cell

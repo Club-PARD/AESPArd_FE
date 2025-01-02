@@ -54,7 +54,7 @@ class EditPracticeView: UIView {
     let practiceDeleteButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("발표 파일 삭제하기", for: .normal)
+        button.setTitle("연습 파일 삭제하기", for: .normal)
         button.setTitleColor(UIColor(red: 0, green: 0, blue: 0, alpha: 1), for: .normal)
         button.backgroundColor = .white
         button.contentHorizontalAlignment = .left

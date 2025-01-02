@@ -57,7 +57,7 @@ class HomeViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = false
         
         // 홈뷰에서 아래 함수들 없어도 되는지 확인하고 삭제할 것
-//        getUserNameAPI()
+        getUserNameAPI()
 //        getRecordsAverageAPI()
 //        fetchPresentationList()
         
@@ -125,9 +125,9 @@ class HomeViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        getUserNameAPI()
         getRecordsAverageAPI()
         reloadDataBasedOnFilterMode()
+        tableView.reloadData()
     }
     
     //MARK: -  API

@@ -35,7 +35,7 @@ class DeleteSelectedListTableCell: UITableViewCell {
     let deleteButton: UIButton = {
         let button = UIButton(type: .custom)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("삭제하기", for: .normal)
+//        button.setTitle("삭제하기", for: .normal)
         button.setTitleColor(UIColor(red: 0.616, green: 0.624, blue: 0.647, alpha: 1), for: .normal)
         button.titleLabel?.font = UIFont(name: "Pretendard-Medium", size: 14)
         button.setImage(UIImage(named: "trash"), for: .normal)

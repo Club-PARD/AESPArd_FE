@@ -65,7 +65,7 @@ class LineChartCustomView: UIView {
         self.myLineChart.xAxis.avoidFirstLastClippingEnabled = true
         
         // X축 라벨 색상 및 폰트 설정
-        self.myLineChart.xAxis.labelTextColor = UIColor(red: 0.427, green: 0.439, blue: 0.471, alpha: 1)
+        self.myLineChart.xAxis.labelTextColor = .white
         self.myLineChart.xAxis.labelFont = UIFont(name: "Pretendard-Regular", size: 12) ?? UIFont.systemFont(ofSize: 12)
         self.myLineChart.xAxis.yOffset = 8
         
