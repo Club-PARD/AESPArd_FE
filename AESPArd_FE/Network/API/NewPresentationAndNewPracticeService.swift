@@ -12,9 +12,7 @@ import Foundation
 
 enum NewPresentationAndNewPracticeService {
     case postNewPresentation(newPresentation: NewPresentation)
-    case postNewPractice(newPractice: NewPractice)
     case postPracticeAndAudio(presentationId: String, videoKey: String, eyePercentage: Int, wavData: Data)
-    case postNewPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data)
 }
 
 extension NewPresentationAndNewPracticeService: TargetType {
@@ -27,18 +25,14 @@ extension NewPresentationAndNewPracticeService: TargetType {
         switch self {
         case .postNewPresentation:
             return "/presentations/create-presentation"
-        case .postNewPractice:
-            return "/practices"
         case .postPracticeAndAudio(let presentationId, _, _, _):
             return "/practices/\(presentationId)/add-practice"
-        case .postNewPracticeAfterPresentationCreated(let userId, _, _):
-            return "/practices/\(userId)/recent-presentation/add-practice"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .postNewPresentation, .postNewPractice , .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
+        case .postNewPresentation, .postPracticeAndAudio :
             return .post
         }
     }
@@ -48,9 +42,7 @@ extension NewPresentationAndNewPracticeService: TargetType {
         case .postNewPresentation(let newPresentation):
             // Encode Presentation struct to JSON
             return .requestJSONEncodable(newPresentation)
-            
-        case .postNewPractice(let newPractice):
-            return .requestJSONEncodable(newPractice)
+
         case .postPracticeAndAudio(_, let videoKey, let eyePercentage, let wavData):
             var multipartData: [MultipartFormData] = []
             
@@ -88,71 +80,18 @@ extension NewPresentationAndNewPracticeService: TargetType {
             multipartData.append(audioMultipart)
             
             return .uploadMultipart(multipartData)
-        case .postNewPracticeAfterPresentationCreated(let userId, let newPracticeAfterNewPresentation, let wavData):
-            var multipartData: [MultipartFormData] = []
-            
-//            let userId = newPracticeAfterNewPresentation.userId
-            let videoKey = newPracticeAfterNewPresentation.videoKey
-            let eyePercentage = newPracticeAfterNewPresentation.eyePercentage
-            
-            if let userIdData = userId.data(using: .utf8) {
-                let userIdMultipart = MultipartFormData(
-                    provider: .data(userIdData),
-                    name: "userId",
-                    mimeType: "text/plain"
-                )
-                multipartData.append(userIdMultipart)
-            }
-            
-            if let videoKeyData = videoKey!.data(using: .utf8) {
-                let videoKeyMultipart = MultipartFormData(
-                    provider: .data(videoKeyData),
-                    name: "videoKey",
-                    mimeType: "text/plain"
-                )
-                multipartData.append(videoKeyMultipart)
-            } else {
-                print("Failed to encode videoKey to data.")
-            }
-            
-            // Add eyeTrackingPercentage as a separate text field
-            let eyePercentageString = String(eyePercentage!)
-            if let eyePercentageData = eyePercentageString.data(using: .utf8) {
-                let eyePercentageMultipart = MultipartFormData(
-                    provider: .data(eyePercentageData),
-                    name: "eyePercentage",
-                    mimeType: "text/plain"
-                )
-                multipartData.append(eyePercentageMultipart)
-            } else {
-                print("Failed to encode eyeTrackingPercentage to data.")
-            }
-            
-            // Add the audio file
-            let audioMultipart = MultipartFormData(
-                provider: .data(wavData),
-                name: "audioFile",
-                fileName: "audio.wav",
-                mimeType: "audio/wav"
-            )
-            multipartData.append(audioMultipart)
-            
-            return .uploadMultipart(multipartData)
         }
     }
     
     
     var headers: [String : String]? {
         switch self {
-        case .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
+        case .postPracticeAndAudio :
             return ["Content-Type": "multipart/form-data"]
         default:
             return ["Content-Type": "application/json"]
         }
     }
-    
-    
-    
     
     
     // Mock or example data for testing in the simulator or with unit tests
@@ -175,5 +114,7 @@ extension NewPresentationAndNewPracticeService: TargetType {
     //            return "".data(using: .utf8)!
     //        }
     //    }
+    
+    
 }
 

@@ -336,20 +336,6 @@ class AnalyzingViewController: UIViewController {
     
     // MARK: - 서버 전달 함수들
     
-    
-//    private func uploadPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data) {
-//        NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
-//            switch result {
-//            case .success:
-//                print("새발표와 새연습 생성 성공")
-//                // MARK: 여기에 분석 아이디 겟
-//                self.getPractice(presentationId: newPractice)
-//            case .failure(let error):
-//                print("Failed to upload new practice: \(error.localizedDescription)")
-//            }
-//        }
-//    }
-    
     private func uploadPracticeAndAudio(newPractice: NewPractice, wavData: Data) {
         // Safely unwrap the required fields from NewPractice
         guard let presentationId = newPractice.presentationId, !presentationId.isEmpty else {
@@ -392,20 +378,6 @@ class AnalyzingViewController: UIViewController {
         }
     }
    
-//    private func getAnalysisId(userId: String){
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 3 ){
-//            NetworkManager.shared.getAnalysisIdInLoadingScreen(userId: userId) { [weak self] result in
-//                switch result {
-//                case .success(let getPractice):
-//                    self?.analysisId = getPractice.analysisId
-//                    debugPrint(self?.analysisId)
-//                case .failure(let error):
-//                    print("아직 안오거나 에러거나")
-//                }
-//            }
-//        }
-//    }
-    
     // MARK: - 3초마다 리포트있는지 get 부름
     
     private var timer: Timer?
