@@ -31,9 +31,6 @@ class AnalyzingViewController: UIViewController {
     private var audioData: Data? // Stores the extracted audio data
     private var userId: String?
     
-    private var isCreatingNewPresentation: Bool?
-    private var isCreatingNewPractice: Bool?
-    
     
     // MARK: - 다음 화면에 전달할 값
     private var analysisId: String?
@@ -41,24 +38,10 @@ class AnalyzingViewController: UIViewController {
     
     // MARK: - 생성자
     
-    // 새발표용
-//    init(newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation){
-//        super.init(nibName: nil, bundle: nil)
-//        self.newPracticeAfterNewPresentation = newPracticeAfterNewPresentation
-//        self.assetIdentifier = newPracticeAfterNewPresentation.videoKey
-//        self.userId = newPracticeAfterNewPresentation.userId
-//        isCreatingNewPresentation = true
-//        isCreatingNewPractice = false
-//        debugPrint(newPracticeAfterNewPresentation)
-//    }
-    
-    // 기존 발표의 새 연습용
     init(newPractice: NewPractice){
         super.init(nibName: nil, bundle: nil)
         self.newPractice = newPractice
         self.assetIdentifier = newPractice.videoKey
-//        isCreatingNewPresentation = false
-//        isCreatingNewPractice = true
         debugPrint(newPractice)
     }
     
@@ -167,13 +150,6 @@ class AnalyzingViewController: UIViewController {
             if isSilent {
                 goBackHome(title: "소리 없음", message: "발표가 녹음되지 않았어요. 스크린 녹화와 마이크 녹음 모두 허용해주세요.")
             } else {
-//                if isCreatingNewPresentation! {
-//                    // 새로운 발표와 첫 연습 생성시
-//                    uploadPracticeAfterPresentationCreated(userId: userId!, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!, wavData: wavData)
-//                } else {
-//                    // 기존 발표에 추가 연습 생성시
-//                    uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
-//                }
                 uploadPracticeAndAudio(newPractice: newPractice!, wavData: wavData)
             }
         }
@@ -361,28 +337,6 @@ class AnalyzingViewController: UIViewController {
     // MARK: - 서버 전달 함수들
     
     
-    // 오디오만 따로 전달
-//    private func uploadAudio(_ wavData: Data) {
-//        // Create the upload
-//        NetworkManager.shared.uploadAudio(wavData: wavData) { [weak self] result in
-//            guard let self = self else { return }
-//            
-//            DispatchQueue.main.async {
-//                switch result {
-//                case .success(let response):
-//                    if response.success {
-//                        self.showAlert(title: "Success", message: response.message)
-//                    } else {
-//                        self.showAlert(title: "Upload Failed", message: "Server responded with an error.")
-//                    }
-//                    
-//                case .failure(let error):
-//                    self.showAlert(title: "Upload Error", message: error.localizedDescription)
-//                }
-//            }
-//        }
-//    }
-    
 //    private func uploadPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data) {
 //        NetworkManager.shared.uploadNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData) { result in
 //            switch result {
@@ -499,47 +453,6 @@ class AnalyzingViewController: UIViewController {
             }
         }
     }
-
-//    private func getReport(analysisId: String) {
-//        // Invalidate any existing timer before starting a new one
-//        timer?.invalidate()
-//        timer = nil
-//        elapsedTime = 0
-//        
-//        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] timer in
-//            guard let self = self else { return }
-//            
-//            // Fetch the report
-//            NetworkManager.shared.getReportsByAnalysis(analysisId: analysisId) { [weak self] result in
-//                guard let self = self else { return }
-//                
-//                switch result {
-//                case .success(let reports):
-//                    self.reportsData = reports
-//                    debugPrint(self.reportsData)
-//                    
-//                    // 데이터 들어오면 타이머 멈춤
-//                    if !reports.isEmpty {
-//                        timer.invalidate()
-//                        self.timer = nil
-//                        return
-//                    }
-//                case .failure(let error):
-//                    goBackHome(title: "리포트 생성 안됨", message: "리포트가 생성되지 못했어요")
-//                }
-//            }
-//            
-//            // 3초간격으로 총 타이머 업데이트
-//            self.elapsedTime += self.interval
-//            
-//            // 지정한 시간 넘어서면 타이머 멈춤
-//            if self.elapsedTime >= self.maxDuration {
-//                timer.invalidate()
-//                self.timer = nil
-//                goBackHome(title: "리포트 생성 안됨", message: "리포트가 생성되지 못했어요")
-//            }
-//        }
-//    }
     
     
     // MARK: - 기타 함수
@@ -565,25 +478,5 @@ class AnalyzingViewController: UIViewController {
             self.present(alert, animated: true)
         }
     }
-    
-    // MARK: - 수정 필요
-    //    private func goBackToHome() {
-    //        // 1) Dismiss self
-    //        self.dismiss(animated: true) { [weak self] in
-    //            // 2) Switch to the Home tab
-    //            guard let self = self else { return }
-    //
-    //            // Access the window's rootViewController (UITabBarController)
-    //            if let tabBar = UIApplication.shared.windows.first?.rootViewController as? UITabBarController {
-    //                // Home is presumably at index 0
-    //                tabBar.selectedIndex = 0
-    //
-    //                // 3) If HomeViewController is in a navigation stack, pop it to root
-    //                if let nav = tabBar.viewControllers?.first as? UINavigationController {
-    //                    nav.popToRootViewController(animated: false)
-    //                }
-    //            }
-    //        }
-    //    }
     
 }

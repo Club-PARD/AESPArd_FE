@@ -23,7 +23,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     //Analysis get
     var reportsData : [GetReport] = []
     var isFromHome: Bool = true
-    private var analysisId: String?
+    private var analysisId: Int?
     
     //이름 변경
     var editName: String = ""
@@ -195,7 +195,7 @@ class ResultReportViewController: UIViewController,PracticeHeaderTableCellDelega
     }()
     
     // MARK: - API
-    @objc func getPracticeData(analysisId: String) {
+    @objc func getPracticeData(analysisId: Int) {
         networkManager.getReportsByAnalysis(analysisId: analysisId) { [weak self] result in
             switch result {
             case .success(let response):

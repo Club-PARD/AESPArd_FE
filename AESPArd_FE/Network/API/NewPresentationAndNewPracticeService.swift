@@ -13,7 +13,6 @@ import Foundation
 enum NewPresentationAndNewPracticeService {
     case postNewPresentation(newPresentation: NewPresentation)
     case postNewPractice(newPractice: NewPractice)
-    case postAudio(wavData: Data)
     case postPracticeAndAudio(presentationId: String, videoKey: String, eyePercentage: Int, wavData: Data)
     case postNewPracticeAfterPresentationCreated(userId: String, newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation, wavData: Data)
 }
@@ -30,8 +29,6 @@ extension NewPresentationAndNewPracticeService: TargetType {
             return "/presentations/create-presentation"
         case .postNewPractice:
             return "/practices"
-        case .postAudio:
-            return  "/audio/upload"
         case .postPracticeAndAudio(let presentationId, _, _, _):
             return "/practices/\(presentationId)/add-practice"
         case .postNewPracticeAfterPresentationCreated(let userId, _, _):
@@ -41,7 +38,7 @@ extension NewPresentationAndNewPracticeService: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postNewPresentation, .postNewPractice , .postAudio, .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
+        case .postNewPresentation, .postNewPractice , .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
             return .post
         }
     }
@@ -54,17 +51,6 @@ extension NewPresentationAndNewPracticeService: TargetType {
             
         case .postNewPractice(let newPractice):
             return .requestJSONEncodable(newPractice)
-            
-        case .postAudio(let wavData):
-            // Create MultipartFormData for audio file
-            let formData = MultipartFormData(
-                provider: .data(wavData),
-                name: "audioFile",             // Ensure this matches your server's expected field name
-                fileName: "audio.wav",         // Corrected filename
-                mimeType: "audio/wav"
-            )
-            return .uploadMultipart([formData])
-            
         case .postPracticeAndAudio(_, let videoKey, let eyePercentage, let wavData):
             var multipartData: [MultipartFormData] = []
             
@@ -158,7 +144,7 @@ extension NewPresentationAndNewPracticeService: TargetType {
     
     var headers: [String : String]? {
         switch self {
-        case .postAudio, .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
+        case .postPracticeAndAudio, .postNewPracticeAfterPresentationCreated:
             return ["Content-Type": "multipart/form-data"]
         default:
             return ["Content-Type": "application/json"]

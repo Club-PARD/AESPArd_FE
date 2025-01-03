@@ -4,7 +4,7 @@ import Moya
 import Foundation
 
 enum ReportsService {
-    case getReportsByAnalysisId(analysisId: String)
+    case getReportsByAnalysisId(analysisId: Int)
     
 }
 
