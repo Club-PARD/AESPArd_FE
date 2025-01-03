@@ -52,26 +52,22 @@
 <tr>
 <td align="center">
 
-<img src="" height="400" />
-스플래시 화면
+<img src="https://github.com/user-attachments/assets/ceadeac6-88e7-4433-9973-959223321c07" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-메인 화면
+<img src="https://github.com/user-attachments/assets/ded3a269-16ed-4959-ba8b-89eaa814ae2e" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-검색 화면 
+<img src="https://github.com/user-attachments/assets/c868577d-16b0-425d-b692-0af1fe76a7e2" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-내정보
+<img src="https://github.com/user-attachments/assets/97c1ae15-cab3-491f-843d-981a9735018c" height="400" />
 
 </td>
 </tr>
@@ -82,31 +78,21 @@
 <th>Record1</th>
 <th>Record2</th>
 <th>Record3</th>
-<th>Record4</th>
 </tr>
 <tr>
 <td align="center">
 
-<img src="" height="400" />
-record1
+<img src="https://github.com/user-attachments/assets/ada4e08d-d826-4c6d-9470-295a23d0c623" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-record2
+<img src="https://github.com/user-attachments/assets/ea97aca0-9074-43af-b977-96d6b69b695b" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-record3 
-
-</td>
-<td align="center">
-
-<img src="" height="400" />
-record4
+<img src="https://github.com/user-attachments/assets/87ff5bcb-deaf-4e80-8c62-8fc0e6da5da9" height="400" />
 
 </td>
 </tr>
@@ -114,20 +100,18 @@ record4
 
 <table align="center">
 <tr>
-<th>Practices</th>
+<th>Practice</th>
 <th>Report</th>
 </tr>
 <tr>
 <td align="center">
 
-<img src="" height="400" />
-Practices
+<img src="https://github.com/user-attachments/assets/266fafca-d4b4-4938-a870-2794a4aa153c" height="400" />
 
 </td>
 <td align="center">
 
-<img src="" height="400" />
-Report
+<img src="https://github.com/user-attachments/assets/e3ce5e56-9b92-4cdc-a0b9-165f661c5d02" height="400" />
 
 </td>
 </tr>
