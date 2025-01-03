@@ -11,7 +11,7 @@ import UIKit
 
 class CameraOverlayView: UIView {
     
-    var isDebugMode: Bool = true
+    var isDebugMode: Bool = false
     
     var isInTime: Bool = false {
         didSet {
