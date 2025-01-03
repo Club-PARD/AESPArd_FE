@@ -72,7 +72,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     // MARK: - 시선추적 변수 선언
     
     // 시선추적 변수들
-    private var sceneView: ARSCNView!
+    private var sceneView: ARSCNView! // AR 렌더링 & 페이스 트래킹
+    // faceNode: A root node for attaching the left and right eyes.
     private let faceNode = SCNNode() // SCNNode: 3D 공간에서의 위치 정보를 가지는 클래스
     private let leftEye = EyeNode(color: .clear)
     private let rightEye = EyeNode(color: .clear)
@@ -333,16 +334,24 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         // Configure AR session with face tracking
         let configuration = ARFaceTrackingConfiguration()
         configuration.isLightEstimationEnabled = true // Optional, for better visuals
-        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+        sceneView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors]) // 기존 트랙킹과 앵커 초기화후 실행
     }
     
     
-    // 눈위치 잡는 함수
+    // 눈 시선 위치 잡는 함수
     func eyeTracking(using anchor: ARFaceAnchor) {
-        leftEye.simdTransform = anchor.leftEyeTransform
-        rightEye.simdTransform = anchor.rightEyeTransform
+        leftEye.simdTransform = anchor.leftEyeTransform // 왼쪽눈 3D 위치 정보들 전달
+        rightEye.simdTransform = anchor.rightEyeTransform // 오른쪽눈 3D 위치 정보들 전달
         
+        // 눈에서부터 나오는 직선이 viewPlain(화면 크기와 똑같은 3D 오브젝트라고 생각하면 될 듯)에서 맞닫는 포인트를 측정 그리고 2D 포인트로 변환
+        // [leftEye, rightEye]: An array of the two eye nodes (leftEye and rightEye) is created. These nodes represent the user's left and right eyes in the AR scene.
+        // compactMap:  Iterates over each eye in the array and performs a hit test for its gaze ray. If a valid intersection is found, it is included in the resulting array. Otherwise, it is excluded (i.e., nil results are filtered out).
+        // 
         let intersectPoints = [leftEye, rightEye].compactMap { eye -> CGPoint? in
+            
+            // Casts a ray starting at eye.target.worldPosition (a point in the direction the eye is looking) and ending at eye.worldPosition (the eye's current position).
+            // Result: Returns an array of intersection points where the ray hits the viewPlane. Each intersection is represented as an SCNHitTestResult.
+
             let hitTest = viewPlane.hitTestWithSegment(from: eye.target.worldPosition, to: eye.worldPosition)
             return hitTest.first?.screenPosition
         }
@@ -352,7 +361,7 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         
         let currentGazePoint = CGPoint(
             x: (leftPoint.x + rightPoint.x) / 2,
-            y: -(leftPoint.y + rightPoint.y) / 2
+            y: -(leftPoint.y + rightPoint.y) / 2 // 스크린 y좌표는 top-left에서 시작 ARKit의 y 좌표는 bottom-left에서 시작
         )
         
         DispatchQueue.main.async {
@@ -399,17 +408,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
         }
     }
     
-    // Timer Logic
-//    private func startEyeTrackTimer() {
-//        if lookTimer == nil { // Start only if not already running
-//            lookTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-//                guard let self = self else { return }
-//                self.totalLookTime += 0.1
-//                let eyeTimeString = String(format: "Time: %.1fs", self.totalLookTime)
-//                NotificationCenter.default.post(name: .updateEyeTrackingTime, object: nil, userInfo: ["time": eyeTimeString])
-//            }
-//        }
-//    }
     
     // MARK: - 시선추적 타이머
     private func startEyeTrackTimer() {
@@ -426,11 +424,12 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
     
     
     // ARSCNViewDelegate Methods
+    // ARKit calls this method when it detects updates to the face anchor.
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let faceAnchor = anchor as? ARFaceAnchor else { return }
         DispatchQueue.main.async {
-            self.faceNode.simdTransform = node.simdTransform
-            self.eyeTracking(using: faceAnchor)
+            self.faceNode.simdTransform = node.simdTransform // simdTransform: 3D의 여러 위치 정보를 가지는 4x4 matrix
+            self.eyeTracking(using: faceAnchor) // 시선 포인트 계산을 위해 호출
         }
     }
     
@@ -635,13 +634,6 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             
             let analyzingVC: AnalyzingViewController
             
-            // MARK: 분기 없앰
-//            if isCreatingNewPresentation! {
-//                newPracticeAfterNewPresentation!.videoKey = identifier
-//                analyzingVC = AnalyzingViewController(newPracticeAfterNewPresentation: newPracticeAfterNewPresentation!)
-//            } else {
-//                analyzingVC = AnalyzingViewController(newPractice: newPractice!)
-//            }
             
             newPractice!.videoKey = identifier
             analyzingVC = AnalyzingViewController(newPractice: newPractice!)

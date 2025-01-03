@@ -39,7 +39,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     // 삭제모드 여부
     var isDeleteMode : Bool = false
     //삭제하려고 선택한 리스트 
-    var selectedDeleteId : [String] = []
+    var selectedDeleteId : [Int] = []
     
     let header: ListHeaderView = {
         let view = ListHeaderView()
@@ -290,7 +290,7 @@ class ListViewController : UIViewController, ListHeaderTableCellDelegate {
     
     @objc func handleDeleteSelection(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
-              let cellName = userInfo["cellName"] as? String else { return }
+              let cellName = userInfo["cellName"] as? Int else { return }
         
         if selectedDeleteId.contains(cellName) {
             selectedDeleteId.removeAll { $0 == cellName }
@@ -449,7 +449,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
                 cell.selectedDeleteButton.isHidden = false
                 
                 // 삭제 선택한 리스트 있는지 확인
-                if selectedDeleteId.contains("\(practiceList[indexPath.row].id)") {
+                if selectedDeleteId.contains(practiceList[indexPath.row].id) {
                     // 이미 선택된 경우 체크 표시
                     cell.selectedDeleteButton.setImage(UIImage(named: "check_O"), for: .normal)
                 } else {

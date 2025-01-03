@@ -8,10 +8,10 @@
 import Foundation
 
 struct GetPractice: Codable {
-    var id: String
+    var id: Int
     var practiceName: String
     var createdAt: String
     var totalScore: Int
-    var analysisId: String
+    var analysisId: Int
     var videoKey: String
 }

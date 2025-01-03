@@ -184,25 +184,6 @@ final class NetworkManager {
         }
 
    // MARK: - 새로운 발표 생성
-//    func uploadPresentation(
-//        newPresentation: NewPresentation,
-//        completion: @escaping (Result<NewPresentation, Error>) -> Void
-//    ) {
-//        newPresentationProvider.request(.postNewPresentation(newPresentation: newPresentation)) { result in
-//            switch result {
-//            case .success(let response):
-//                do {
-//                    // Decode server's response as `NewPresentation`
-//                    let createdPresentation = try JSONDecoder().decode(NewPresentation.self, from: response.data)
-//                    completion(.success(createdPresentation))
-//                } catch {
-//                    completion(.failure(error))
-//                }
-//            case .failure(let error):
-//                completion(.failure(error))
-//            }
-//        }
-//    }
     
     func uploadPresentation(
         newPresentation: NewPresentation,
@@ -227,46 +208,6 @@ final class NetworkManager {
         }
     }
     
-    // MARK: - 새로운 연습 생성
-    func uploadNewPractice(
-        newPractice: NewPractice,
-        completion: @escaping (Result<NewPractice, Error>) -> Void
-    ) {
-        newPresentationProvider.request(.postNewPractice(newPractice: newPractice)) { result in
-            switch result {
-            case .success(let response):
-                do {
-                    let created = try JSONDecoder().decode(NewPractice.self, from: response.data)
-                    completion(.success(created))
-                } catch {
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    // MARK: - 오디오 파일 전송
-    func uploadAudio(
-        wavData: Data,
-        completion: @escaping (Result<UploadAudioResponse, Error>) -> Void
-    ) {
-        newPresentationProvider.request(.postAudio(wavData: wavData)) { result in
-            switch result {
-            case .success(let response):
-                do {
-                    // Define UploadAudioResponse based on your server's response structure
-                    let uploadResponse = try JSONDecoder().decode(UploadAudioResponse.self, from: response.data)
-                    completion(.success(uploadResponse))
-                } catch {
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
     
     // MARK: - 새로운 발표 연습과 오디오 한번에 같이 보내는 함수
     func uploadPracticeAndAudio(
@@ -297,37 +238,6 @@ final class NetworkManager {
         }
     }
     
-   // MARK: - 발표 새로 생성 후에 만든 연습 보내는 함수
-    
-    func uploadNewPracticeAfterPresentationCreated(
-        userId: String,
-        newPracticeAfterNewPresentation: NewPracticeAfterNewPresentation,
-        wavData: Data,
-        completion: @escaping (Result<Void, Error>) -> Void
-    ) {
-        newPresentationProvider.request(.postNewPracticeAfterPresentationCreated(userId: userId, newPracticeAfterNewPresentation: newPracticeAfterNewPresentation, wavData: wavData)) { result in
-            switch result {
-            case .success(let response):
-                if (200...299).contains(response.statusCode) {
-                    // Status code indicates success
-                    completion(.success(()))
-                } else {
-                    // Status code indicates an error
-                    let error = NSError(
-                        domain: "AESPArd_FE.NetworkManager",
-                        code: response.statusCode,
-                        userInfo: [
-                            NSLocalizedDescriptionKey: "Server returned status code: \(response.statusCode)."
-                        ]
-                    )
-                    completion(.failure(error))
-                }
-            case .failure(let error):
-                // Handle request failure
-                completion(.failure(error))
-            }
-        }
-    }
     
     //MARK: - ID로 사용자 이름 및 이메일 조회 (My)
     func getUserNameNEmailById(userId: String, completion: @escaping (Result<User, Error>) -> Void) {
@@ -434,7 +344,7 @@ final class NetworkManager {
     
     
     // MARK: - reports by analysisId
-    func getReportsByAnalysis(analysisId: String, completion: @escaping (Result<[GetReport], Error>) -> Void) {
+    func getReportsByAnalysis(analysisId: Int, completion: @escaping (Result<[GetReport], Error>) -> Void) {
         ReportsServiceProvider.request(.getReportsByAnalysisId(analysisId: analysisId)) { result in
             switch result {
             case .success(let response):
@@ -496,7 +406,7 @@ final class NetworkManager {
     }
     
     //MARK: - 연습 하나 삭제
-    func deleteOnePractice(practiceId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func deleteOnePractice(practiceId: Int, completion: @escaping (Result<Void, Error>) -> Void) {
         practiceServiceProvider.request(.deleteOnePracticeByPracticeId(practiceId: practiceId)){ result in
             switch result {
             case .success(_):
@@ -508,7 +418,7 @@ final class NetworkManager {
     }
     
     //MARK: - 연습 선택 삭제
-    func deleteSelectedPractice(practiceIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
+    func deleteSelectedPractice(practiceIds: [Int], completion: @escaping (Result<Void, Error>) -> Void) {
         practiceServiceProvider.request(.deleteSelectedPractice(practiceIds: practiceIds)){ result in
             switch result {
             case .success(_):
@@ -520,7 +430,7 @@ final class NetworkManager {
     }
     
     //MARK: - 연습 이름 수정
-    func patchPracticeName(practiceId: String, name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func patchPracticeName(practiceId: Int, name: String, completion: @escaping (Result<Void, Error>) -> Void) {
         practiceServiceProvider.request(.patchPracticeNameByPracticeId(practiceId: practiceId, name: name)){ result in
             switch result {
             case .success(_):

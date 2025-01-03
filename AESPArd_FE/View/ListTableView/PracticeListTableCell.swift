@@ -13,7 +13,7 @@ extension Notification.Name {
 
 class PracticeListTableCell: UITableViewCell {
     
-    var Id : String = ""
+    var Id : Int?
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -155,7 +155,7 @@ class PracticeListTableCell: UITableViewCell {
     }
     
     // 발표 연습 갯수 텍스트 설정 메서드
-    func configure( practiceDate: String, practiceScore: Double, practiceId: String){
+    func configure( practiceDate: String, practiceScore: Double, practiceId: Int){
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS" 
         if let date = dateFormatter.date(from: practiceDate) {

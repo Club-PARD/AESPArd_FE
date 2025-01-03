@@ -8,9 +8,9 @@ enum PracticeService {
     case getRecentScores(presentationId: String)
     case getSinglePracticeInLoadingScreen(presentationId: String)
     
-    case deleteOnePracticeByPracticeId(practiceId: String)
-    case deleteSelectedPractice(practiceIds: [String])
-    case patchPracticeNameByPracticeId(practiceId: String, name: String)
+    case deleteOnePracticeByPracticeId(practiceId: Int)
+    case deleteSelectedPractice(practiceIds: [Int])
+    case patchPracticeNameByPracticeId(practiceId: Int, name: String)
 }
 
 extension PracticeService: TargetType {
