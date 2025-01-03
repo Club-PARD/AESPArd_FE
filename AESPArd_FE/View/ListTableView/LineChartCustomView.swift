@@ -189,7 +189,7 @@ class LineChartCustomView: UIView {
             scoreLabel.text = "\(Int(scoreData[i]))점"
             scoreLabel.font = UIFont(name: "Pretendard-Medium", size: 14)
             
-            if score >= 80 {
+            if score > 80 {
                 scoreLabel.textColor = UIColor(red: 0, green: 0.75, blue: 0.2, alpha: 1) // 녹색
             } else if score >= 60 {
                 scoreLabel.textColor = UIColor(red: 1, green: 0.717, blue: 0, alpha: 1) // 주황색
