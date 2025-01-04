@@ -42,6 +42,7 @@ class PresentationListTableCell: UITableViewCell {
         view.layer.cornerRadius = 10
         view.layer.masksToBounds = true
         view.layer.borderWidth = 1
+        view.isHidden = true
         view.layer.borderColor = UIColor(red: 0.541, green: 0.678, blue: 1, alpha: 1).cgColor
         return view
     }()
