@@ -57,6 +57,7 @@ class AddModalTableViewCell: UITableViewCell {
         countBackgroundView.layer.borderWidth = 1
         countBackgroundView.layer.borderColor = UIColor(red: 0.54, green: 0.68, blue: 1, alpha: 1).cgColor
         countBackgroundView.layer.cornerRadius = 11
+        countBackgroundView.isHidden = true
         countBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(countBackgroundView)
 
