@@ -550,6 +550,11 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
             }
             
+            // 20 분 보다 길면 녹화 종료
+            if(totalRecordingTime >= 1200){
+                stopRecording()
+            }
+            
         }
     }
 
