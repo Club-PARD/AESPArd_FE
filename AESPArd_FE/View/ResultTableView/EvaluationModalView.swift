@@ -77,9 +77,9 @@ class EvaluationModalView: UIViewController {
     let infoView2: InfoView = {
         let view = InfoView(
             title: "말의 속도 분석",
-            description: "적정 속도는 130~150 WPM(Words Per Minute) \n이 범위를 벗어나면, 5 WPM당 7점 감점",
+            description: "적정 속도는 130~180 SPM(Syllables per minute) \n이 범위를 벗어나면, 5 SPM당 7점 감점",
             score: "20점 ",
-            ex: "ex. 125 WPM은 7점 감점"
+            ex: "ex. 125 SPM은 7점 감점"
         )
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

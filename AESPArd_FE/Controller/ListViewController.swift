@@ -491,6 +491,8 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.section == 2 {
             
             let modalViewController = ResultReportViewController(practiceData: practiceList[indexPath.row])
+            
+            modalViewController.timedata = presentationData
             modalViewController.modalPresentationStyle = .overCurrentContext // 탭바를 보이게 설정
             self.definesPresentationContext = true // 현재 컨텍스트를 정의
             self.present(modalViewController, animated: true)

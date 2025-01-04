@@ -14,4 +14,6 @@ struct PresentationList: Codable {
     let totalScore: Int
     let totalPractices: Int
     let updatedAtText: String
+    let idealMinTime: Int
+    let idealMaxTime: Int
 }
