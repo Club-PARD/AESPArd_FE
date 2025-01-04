@@ -207,7 +207,8 @@ class PresentationListTableCell: UITableViewCell {
     func configure(presentationName: String, ptDetailCount: Int, presentationDate: String, ptDetailTotalScore: Int, barVaue: Double, toggleFavorite:Bool, presentationId: String, filterMode: String) {
         
         ptName.text = presentationName
-        ptCount.text = "\(ptDetailCount+1)개"
+//        ptCount.text = "\(ptDetailCount+1)개"
+        ptCount.text = ""
         ptDate.text = "\(presentationDate)"
         circularProgressBar.value = barVaue
         ptId = presentationId
