@@ -387,8 +387,8 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
             if isLookingAway {
                 // Start edgeTimer if not already started
                 if edgeTimer == nil {
-                    // 1초 이상 시야가 벗어나면 시선추적 타이머 멈춤
-                    edgeTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+                    // 0.5초 이상 시야가 벗어나면 시선추적 타이머 멈춤
+                    edgeTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
                         guard let self = self else { return }
                         self.stopEyeTrackingTimer()
                     }
@@ -548,6 +548,11 @@ class CameraViewController: UIViewController, RPScreenRecorderDelegate, RPPrevie
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": false])
             } else {
                 NotificationCenter.default.post(name: .timeoutOccurred, object: nil, userInfo: ["isInTime": true])
+            }
+            
+            // 20 분 보다 길면 녹화 종료
+            if(totalRecordingTime >= 1200){
+                stopRecording()
             }
             
         }
