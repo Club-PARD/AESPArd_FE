@@ -96,6 +96,6 @@ class AddModalTableViewCell: UITableViewCell {
     func configure(presentationName: String, updatedAtText: String, totalPractices: Int) {
           titleLabel.text = presentationName
           detailLabel.text = updatedAtText
-          countLabel.text = "\(totalPractices)개"
+          countLabel.text = "\(totalPractices+1)개"
       }
 }
